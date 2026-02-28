@@ -1,5 +1,3 @@
-#
-
 #include "player.h"
 
 #include <random>

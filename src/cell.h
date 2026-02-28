@@ -7,11 +7,12 @@
 #include <memory>
 
 class Cell {
-    char c;
+    cell_icon c;
     std::unique_ptr<Item> item;
 public:
     Cell();
-    Cell(Cells cc);
+    Cell(cell_icon ci);
+    Cell(cell_icon ci, std::unique_ptr<Item> it);
 };
 
 #endif
