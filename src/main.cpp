@@ -1,10 +1,6 @@
-#include <iostream>
+#include "constants.h"
 
-constexpr auto ROWS = 22;
-constexpr auto COLS = 44;
-constexpr auto WALL = "█";
-constexpr auto EMPTY = " ";
-constexpr auto PLAYER = "¶";
+#include <iostream>
 
 void clear_screen() {
     std::cout << "\033[2J\033[H";
@@ -22,6 +18,15 @@ int main() {
             }
         }
         std::cout << '\n';
+    }
+
+    while(1) {
+        std::cout << "Enter some: ";
+        char c;
+        std::cin >> c;
+        std::cout << c << "\n";
+
+        if(c == 'q') break;
     }
 
     return 0;
