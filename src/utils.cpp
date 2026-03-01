@@ -12,6 +12,18 @@ void clear_screen() {
     std::cout << "\033[2J\033[H";
 }
 
+void to_start_cursor() {
+    std::cout << "\033[H";
+}
+
+void hide_cursor() {
+    std::cout << "\033[?25l";
+}
+
+void unhide_cursor() {
+    std::cout << "\033[?25h";
+}
+
 char read_key() {
     struct termios new_t, old_t;
     tcgetattr(STDIN_FILENO, &old_t);

@@ -13,7 +13,12 @@ inline constexpr auto C_EMPTY = " ";
 inline constexpr auto C_PLAYER = "¶";
 
 int next_random(int l, int r);
+
 void clear_screen();
+void to_start_cursor();
+void hide_cursor();
+void unhide_cursor();
+
 char read_key();
 
 #endif

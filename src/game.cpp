@@ -18,7 +18,7 @@ Game::Game() : p(Player()), pos_r(1), pos_c(1) {
 }
 
 bool in_range(int r, int c) {
-    return r >= 0 || c >= 0 || r < ROWS || c < COLS;
+    return r >= 0 && c >= 0 && r < ROWS && c < COLS;
 }
 
 void Game::move_player(char c) {
