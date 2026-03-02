@@ -5,9 +5,17 @@
 #include "cell.h"
 #include "player.h"
 
+
+#include "sword.h"
+#include "coin.h"
+#include "gold.h"
+#include "old_book.h"
+#include "rock.h"
+
 #include <iostream>
 #include <format>
 #include <vector>
+#include <sstream>
 
 class Game {
     Player p;

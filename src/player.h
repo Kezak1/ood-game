@@ -14,12 +14,19 @@ class Player {
     std::unique_ptr<Item> left_hand, right_hand;  
 public:
     Player();
-    //GETTER for all stats
-    const std::vector<int> get_stats() const;
-    const std::vector<std::unique_ptr<Item>>& get_inventory() const;
+    const int& get_hp() const;
+    const int& get_str() const;
+    const int& get_dex() const;
+    const int& get_lck() const;
+    const int& get_agr() const;
+    const int& get_wis() const;
 
-    void add_coin();
-    void add_gold();
+    const int& get_gold() const;
+    void set_gold(int val);
+    const int& get_coins() const;
+    void set_coins(int val);
+
+    const std::vector<std::unique_ptr<Item>>& get_inventory() const;
 
     void add_item(std::unique_ptr<Item> item);
     std::unique_ptr<Item> take_item(int idx);

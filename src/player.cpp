@@ -13,20 +13,48 @@ Player::Player() :
     right_hand(nullptr) {
 }
 
-const std::vector<int> Player::get_stats() const {
-    return {hp, str, dex, lck, agr, wis, gold, coins};
+const int& Player::get_hp() const {
+    return hp;
+}
+
+const int& Player::get_str() const {
+    return str;
+}
+
+const int& Player::get_dex() const {
+    return dex;
+}
+
+const int& Player::get_lck() const {
+    return lck;
+}
+
+const int& Player::get_agr() const {
+    return agr;
+}
+
+const int& Player::get_wis() const {
+    return wis;
+}
+
+const int& Player::get_gold() const {
+    return gold;
+}
+
+void Player::set_gold(int val) {
+    gold = val;
+}
+
+const int& Player::get_coins() const {
+    return coins;
+}
+
+void Player::set_coins(int val) {
+    coins = val;
 }
 
 const std::vector<std::unique_ptr<Item>>& Player::get_inventory() const {
     return inventory;
-}
-
-void Player::add_coin() {
-    coins++;
-}
-
-void Player::add_gold() {
-    gold++;
 }
 
 void Player::add_item(std::unique_ptr<Item> item) {
@@ -38,7 +66,7 @@ std::unique_ptr<Item> Player::take_item(int idx) {
     if(idx < 1 || idx > (int)inventory.size()) {
         throw std::out_of_range("idx");
     }
-    auto res = std::move(inventory[idx]);
+    auto res = std::move(inventory[idx - 1]);
     inventory.erase(inventory.begin() + idx - 1);
     return res;
 }

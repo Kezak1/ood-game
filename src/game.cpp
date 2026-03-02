@@ -1,5 +1,6 @@
 #include "game.h"
 
+
 Game::Game() : p(Player()), pos_r(1), pos_c(1) {
     board.resize(ROWS);
     for(auto& row : board) {
@@ -16,10 +17,12 @@ Game::Game() : p(Player()), pos_r(1), pos_c(1) {
         }
     }
 
-    for(int i = 0; i < 5; i++) {
-        auto sth = std::make_unique<Item>("s" + std::to_string(i));
-        board[10][10].add_item(std::move(sth));
-    }
+    board[10][10].add_item(std::make_unique<Rock>());
+    board[10][10].add_item(std::make_unique<Sword>(10, "katana"));
+    board[10][10].add_item(std::make_unique<OldBook>());
+
+    board[15][11].add_item(std::make_unique<Gold>());
+    board[12][11].add_item(std::make_unique<Coin>());
 }
 
 void Game::main_loop() {
@@ -95,12 +98,11 @@ void Game::move_player(char c) {
 }
 
 void Game::render_state() {
-    auto stats = p.get_stats(); 
     auto& inventory = p.get_inventory();
 
     std::string st = std::format(
         "PLAYER: HP {:3}/100 | STR {:2} | DEX {:2} | LCK {:2} | AGR {:2} | WIS {:2}\n",
-        stats[0], stats[1], stats[2], stats[3], stats[4], stats[5], stats[6], stats[7]
+        p.get_hp(), p.get_str(), p.get_dex(), p.get_lck(), p.get_agr(), p.get_wis(), p.get_gold(), p.get_coins()
     );
     std::string inv = "INVENTORY: [ ";
     int idx = 1;
@@ -109,35 +111,41 @@ void Game::render_state() {
     }
     inv += "]\n";
 
+    std::string currency = std::format("COINS: {:<5} | GOLD: {:<5}\n", p.get_coins(), p.get_gold());
+
     clear_line_cursor();
     std::cout << st;
     clear_line_cursor();
     std::cout << inv;
+    clear_line_cursor();
+    std::cout << currency;
 
+    std::stringstream ss;
     for(int r = 0; r < ROWS; r++) {
         for(int c = 0; c < COLS; c++) {
             if(r == pos_r && c == pos_c) {
-                std::cout << C_PLAYER;
+                ss << C_PLAYER;
                 continue;
             }
             switch(board[r][c].get_c()) {
                 case WALL:
-                    std::cout << C_WALL;
+                    ss << C_WALL;
                     break;
                 case EMPTY:
                     if(board[r][c].empty()) {
-                        std::cout << C_EMPTY;
+                        ss << C_EMPTY;
                     } else {
-                        std::cout << C_ITEMS;
+                        ss << C_ITEMS;
                     }
                     break;
                 default:
                     break;
             }
         }
-        std::cout << '\n';
+        ss << '\n';
     }
-}
+    std::cout << ss.str();
+}  
 
 void Game::cur_action_info() {
     full_clear_from_cursor();
@@ -165,20 +173,44 @@ void Game::player_try_pick_up_item() {
     set_raw_mode(false);
     unhide_cursor();
 
-    std::cout << "Enter index which item to pick up (to cancel write 'cancel'): ";
-    std::string input;
-    int idx = -1;
-    std::cin >> input;
-    idx = std::atoi(input.c_str());
-    
-    if(input == "cancel") {
-        set_raw_mode(true);
-        return;
+    std::string input = "1";
+
+    if(cell.get_items().size() > 1) {
+        std::cout << "Enter index which item to pick up (to cancel write 'cancel'): ";
+        
+        std::cin >> input;
+        
+        if(input == "cancel") {
+            set_raw_mode(true);
+            hide_cursor();
+            return;
+        }
     }
     
-
     set_raw_mode(true);
     hide_cursor();
 
-    //TODO FINISH
+    try {
+        auto item = cell.take_item(std::stoi(input));
+        if(item->carryable(p)) {
+            p.add_item(std::move(item));
+        }
+    } catch(const std::exception& e) {
+        std::cout << "ERROR: " << e.what() << '\n' << "(to continue press any key)";
+        char _ = getchar();
+    }
 }
+
+/*
+void Game::player_try_drop_item() {
+    if(p.get_inventory().empty()) {
+        return;
+    } 
+
+    set_raw_mode(false);
+    unhide_cursor();
+
+    std::cout << "Enter index which item to drop from inventory (to cancel write 'cancel'): ";
+    // TOD0 FINISH
+}
+*/
