@@ -8,8 +8,16 @@ int next_random(int l, int r) {
     return dist(gen);
 }
 
-void clear_screen() {
+void full_clear() {
     std::cout << "\033[2J\033[H";
+}
+
+void full_clear_from_cursor() {
+    std::cout << "\033[J";
+}
+
+void clear_line_cursor() {
+    std::cout << "\033[2K";
 }
 
 void to_start_cursor() {
@@ -24,16 +32,17 @@ void unhide_cursor() {
     std::cout << "\033[?25h";
 }
 
-char read_key() {
-    struct termios new_t, old_t;
-    tcgetattr(STDIN_FILENO, &old_t);
+void set_raw_mode(bool enable) {
+    static termios old_t;
+    if(enable) {
+        termios new_t;
+        tcgetattr(STDIN_FILENO, &old_t);
     
-    new_t = old_t;
-    new_t.c_lflag &= ~(ECHO | ICANON);
+        new_t = old_t;
+        new_t.c_lflag &= ~(ECHO | ICANON);
 
-    tcsetattr(STDIN_FILENO, TCSANOW, &new_t);
-    char c = getchar();
-    tcsetattr(STDIN_FILENO, TCSANOW, &old_t);
-
-    return c;
+        tcsetattr(STDIN_FILENO, TCSANOW, &new_t);
+    } else {
+        tcsetattr(STDIN_FILENO, TCSANOW, &old_t);
+    }
 }

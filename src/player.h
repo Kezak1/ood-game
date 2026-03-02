@@ -14,19 +14,15 @@ class Player {
     std::unique_ptr<Item> left_hand, right_hand;  
 public:
     Player();
-    
-    /*
-    bool empty_left_hand() const;
-    bool empty_right_hand() const;
-    bool empty_both_hands() const;
 
-    void pick_to_left_hand(std::unique_ptr<Item> item);
-    void pick_to_right_hand(std::unique_ptr<Item> item);
-    void pick_to_both_hands(std::unique_ptr<Item> item);
+    const std::vector<int> get_stats() const;
+    const std::vector<std::unique_ptr<Item>>& get_inventory() const;
 
-    void add_elem(std::unique_ptr<Item> item);
-    void remove_elem();
-    */
+    void add_coin();
+    void add_gold();
+
+    void add_item(std::unique_ptr<Item> item);
+    std::unique_ptr<Item> take_item(int idx);
 };
 
 #endif

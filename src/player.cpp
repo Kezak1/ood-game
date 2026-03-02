@@ -10,19 +10,35 @@ Player::Player() :
     gold(0),
     coins(0),
     left_hand(nullptr), 
-    right_hand(nullptr)
-    {}
-
-/*
-bool Player::empty_left_hand() const {
-    return left_hand == nullptr;
+    right_hand(nullptr) {
 }
 
-bool Player::empty_right_hand() const {
-    return right_hand == nullptr;
+const std::vector<int> Player::get_stats() const {
+    return {hp, str, dex, lck, agr, wis, gold, coins};
 }
 
-bool Player::empty_both_hands() const {
-    return empty_left_hand() && empty_right_hand();
+const std::vector<std::unique_ptr<Item>>& Player::get_inventory() const {
+    return inventory;
 }
-*/
+
+void Player::add_coin() {
+    coins++;
+}
+
+void Player::add_gold() {
+    gold++;
+}
+
+void Player::add_item(std::unique_ptr<Item> item) {
+    inventory.push_back(std::move(item));
+}
+
+
+std::unique_ptr<Item> Player::take_item(int idx) {
+    if(idx >= 1 && idx <= (int)inventory.size()) {
+        throw std::out_of_range("idx");
+    }
+    auto res = std::move(inventory[idx]);
+    inventory.erase(inventory.begin() + idx - 1);
+    return res;
+}
