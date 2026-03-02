@@ -35,7 +35,7 @@ void Player::add_item(std::unique_ptr<Item> item) {
 
 
 std::unique_ptr<Item> Player::take_item(int idx) {
-    if(idx >= 1 && idx <= (int)inventory.size()) {
+    if(idx < 1 || idx > (int)inventory.size()) {
         throw std::out_of_range("idx");
     }
     auto res = std::move(inventory[idx]);

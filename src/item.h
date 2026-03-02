@@ -3,12 +3,18 @@
 
 #include <string>
 
+class Player;
+
 class Item {
-public:
     std::string name;
-    // virtual ~Item() = default;
+public:
     Item() : name("item") {}
     Item(std::string s) : name(s) {}
+
+    const std::string& get_name();
+
+    virtual ~Item() = default;
+    virtual void player_pick_up(Player& p);
 };
 
 #endif

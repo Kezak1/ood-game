@@ -85,7 +85,7 @@ void Game::move_player(char c) {
             new_c++;
             break;
         default:
-            return;
+            return;   std::vector<std::unique_ptr<Item>> items;
     }
 
     if(in_range(new_r, new_c) && board[new_r][new_c].get_c() == EMPTY) {
@@ -105,7 +105,7 @@ void Game::render_state() {
     std::string inv = "INVENTORY: [ ";
     int idx = 1;
     for(auto& i : inventory) {
-        inv += std::format("{}.({}) ", idx++, i->name);
+        inv += std::format("{}.({}) ", idx++, i->get_name());
     }
     inv += "]\n";
 
@@ -150,26 +150,35 @@ void Game::cur_action_info() {
         int idx = 1;
         std::cout << "[ ";
         for(auto& i : items) {
-            std::cout << std::format("{}.({}) ", idx++, i->name);
+            std::cout << std::format("{}.({}) ", idx++, i->get_name());
         }
         std::cout << "]\n";
     }
 }
 
 void Game::player_try_pick_up_item() {
-    if(board[pos_r][pos_c].empty()) {
+    auto& cell = board[pos_r][pos_c];
+    if(cell.empty()) {
         return;
     }
 
     set_raw_mode(false);
     unhide_cursor();
 
-    std::cout << "which item you want to pick up: ";
-    int idx;
-    std::cin >> idx;
+    std::cout << "Enter index which item to pick up (to cancel write 'cancel'): ";
+    std::string input;
+    int idx = -1;
+    std::cin >> input;
+    idx = std::atoi(input.c_str());
+    
+    if(input == "cancel") {
+        set_raw_mode(true);
+        return;
+    }
+    
 
     set_raw_mode(true);
     hide_cursor();
 
-    //TODO finish
+    //TODO FINISH
 }

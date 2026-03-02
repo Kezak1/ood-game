@@ -33,7 +33,7 @@ const std::vector<std::unique_ptr<Item>>& Cell::get_items() const {
 }
 
 const std::unique_ptr<Item>& Cell::get_item(int idx) const {
-    if(idx >= 1 && idx <= (int)items.size()) {
+    if(idx < 1 || idx > (int)items.size()) {
         throw std::out_of_range("idx");
     }
     return items[idx - 1];
@@ -48,7 +48,7 @@ void Cell::add_item(std::unique_ptr<Item> item) {
 }
 
 std::unique_ptr<Item> Cell::take_item(int idx) {
-    if(idx >= 1 && idx <= (int)items.size()) {
+    if(idx < 1 || idx > (int)items.size()) {
         throw std::out_of_range("idx");
     }
     auto res = std::move(items[idx]);

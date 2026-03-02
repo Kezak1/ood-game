@@ -14,7 +14,7 @@ class Player {
     std::unique_ptr<Item> left_hand, right_hand;  
 public:
     Player();
-
+    //GETTER for all stats
     const std::vector<int> get_stats() const;
     const std::vector<std::unique_ptr<Item>>& get_inventory() const;
 
