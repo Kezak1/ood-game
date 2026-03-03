@@ -5,12 +5,14 @@
 #include "cell.h"
 #include "player.h"
 
-
 #include "sword.h"
-#include "coin.h"
-#include "gold.h"
+#include "bow.h"
+#include "axe.h"
+#include "strange_idol.h"
 #include "old_book.h"
 #include "rock.h"
+#include "coin.h"
+#include "gold.h"
 
 #include <iostream>
 #include <format>
@@ -23,15 +25,19 @@ class Game {
     std::vector<std::vector<Cell>> board;
 public:
     Game();
-    
     void main_loop();
-
+private:
     void move_player(char c);
     void render_state();
     void cur_action_info();
+
+    void print_player_stats();
+    void print_player_wallet();
+    void print_player_inventory();
+    void print_player_hands();
     
     void player_try_pick_up_item();
-    // void player_try_drop_item();
+    void player_try_drop_item();
     // void player_try_equip_weapon();
 };
 

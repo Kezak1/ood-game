@@ -1,4 +1,6 @@
 #include "game.h"
+#include "utils.h"
+#include <memory>
 
 
 Game::Game() : p(Player()), pos_r(1), pos_c(1) {
@@ -35,7 +37,9 @@ void Game::main_loop() {
 
     while(1) {
         char k = getchar();
+
         bool flag_break = false;
+        bool flag_refresh = false;
 
         move_player(k);
         to_start_cursor();
@@ -48,15 +52,24 @@ void Game::main_loop() {
                 break;
             case 'e':
                 player_try_pick_up_item();
+                flag_refresh = true;
                 break;
             case 'g':
-                // player_try_drop_item();
+                player_try_drop_item();
+                flag_refresh = true;
                 break;
             case 'c':
                 // player_try_equip_weapon();
                 break;
             default:
                 break;
+        }
+
+        if(flag_refresh) {
+            move_player(k);
+            to_start_cursor();
+            render_state();
+            cur_action_info();
         }
         
         if(flag_break) break;
@@ -98,27 +111,9 @@ void Game::move_player(char c) {
 }
 
 void Game::render_state() {
-    auto& inventory = p.get_inventory();
-
-    std::string st = std::format(
-        "PLAYER: HP {:3}/100 | STR {:2} | DEX {:2} | LCK {:2} | AGR {:2} | WIS {:2}\n",
-        p.get_hp(), p.get_str(), p.get_dex(), p.get_lck(), p.get_agr(), p.get_wis(), p.get_gold(), p.get_coins()
-    );
-    std::string inv = "INVENTORY: [ ";
-    int idx = 1;
-    for(auto& i : inventory) {
-        inv += std::format("{}.({}) ", idx++, i->get_name());
-    }
-    inv += "]\n";
-
-    std::string currency = std::format("COINS: {:<5} | GOLD: {:<5}\n", p.get_coins(), p.get_gold());
-
-    clear_line_cursor();
-    std::cout << st;
-    clear_line_cursor();
-    std::cout << inv;
-    clear_line_cursor();
-    std::cout << currency;
+    print_player_stats();
+    print_player_inventory();
+    print_player_wallet();
 
     std::stringstream ss;
     for(int r = 0; r < ROWS; r++) {
@@ -164,6 +159,40 @@ void Game::cur_action_info() {
     }
 }
 
+void Game::print_player_wallet() {
+    std::string currency = std::format("COINS: {:<5} | GOLD: {:<5}\n", p.get_coins(), p.get_gold());
+    clear_line_cursor();
+    std::cout << currency;
+}
+
+void Game::print_player_stats() {
+    std::string st = std::format(
+        "PLAYER: HP {:3}/100 | STR {:2} | DEX {:2} | LCK {:2} | AGR {:2} | WIS {:2}\n",
+        p.get_hp(), p.get_str(), p.get_dex(), p.get_lck(), p.get_agr(), p.get_wis(), p.get_gold(), p.get_coins()
+    );
+
+    clear_line_cursor();
+    std::cout << st;
+}
+
+void Game::print_player_inventory() {
+    auto& inventory = p.get_inventory();
+
+    std::string inv = "INVENTORY: [ ";
+    int idx = 1;
+    for(auto& i : inventory) {
+        inv += std::format("{}.({}) ", idx++, i->get_name());
+    }
+    inv += "]\n";
+
+    clear_line_cursor();
+    std::cout << inv;
+}
+
+void Game::print_player_hands() {
+    std::string in = "EQUIPED: ";
+}
+
 void Game::player_try_pick_up_item() {
     auto& cell = board[pos_r][pos_c];
     if(cell.empty()) {
@@ -178,7 +207,7 @@ void Game::player_try_pick_up_item() {
     if(cell.get_items().size() > 1) {
         std::cout << "Enter index which item to pick up (to cancel write 'cancel'): ";
         
-        std::cin >> input;
+        std::getline(std::cin,input);
         
         if(input == "cancel") {
             set_raw_mode(true);
@@ -201,16 +230,43 @@ void Game::player_try_pick_up_item() {
     }
 }
 
-/*
 void Game::player_try_drop_item() {
-    if(p.get_inventory().empty()) {
-        return;
-    } 
-
     set_raw_mode(false);
     unhide_cursor();
 
-    std::cout << "Enter index which item to drop from inventory (to cancel write 'cancel'): ";
-    // TOD0 FINISH
+    std::cout << "Enter index of item to drop it from inventory or write 'gold'/'coin' to drop a gold/coin (to cancel write 'cancel'): ";
+    std::string input;
+    std::getline(std::cin, input);
+
+    set_raw_mode(true);
+    hide_cursor();
+
+    Cell& cell = board[pos_r][pos_c];
+
+    if(input == "gold") {
+        int cnt_gold = p.get_gold();
+        if(cnt_gold > 0) {
+            p.set_gold(cnt_gold - 1);
+            cell.add_item(std::make_unique<Gold>(Gold()));
+        }
+        
+        return;
+    } else if(input == "coin") {
+        int cnt_coins = p.get_coins();
+        if(cnt_coins > 0) {
+            p.set_coins(cnt_coins - 1);
+            cell.add_item(std::make_unique<Coin>(Coin()));
+        }
+        return;
+    } else if(p.get_inventory().empty() || input == "cancel") {
+        return;
+    }    
+
+    try {
+        int idx = stoi(input);
+        cell.add_item(p.take_item(idx));
+    } catch(const std::exception& e) {
+        std::cout << "ERROR: " << e.what() << '\n' << "(to continue press any key)";
+        char _ = getchar();
+    }
 }
-*/

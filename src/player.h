@@ -26,6 +26,9 @@ public:
     const int& get_coins() const;
     void set_coins(int val);
 
+    const std::unique_ptr<Item>& get_left_hand() const;
+    const std::unique_ptr<Item>& get_right_hand() const;
+
     const std::vector<std::unique_ptr<Item>>& get_inventory() const;
 
     void add_item(std::unique_ptr<Item> item);

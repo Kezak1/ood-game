@@ -53,6 +53,14 @@ void Player::set_coins(int val) {
     coins = val;
 }
 
+const std::unique_ptr<Item>& Player::get_left_hand() const {
+    return left_hand;
+}
+
+const std::unique_ptr<Item>& Player::get_right_hand() const {
+    return right_hand;
+}
+
 const std::vector<std::unique_ptr<Item>>& Player::get_inventory() const {
     return inventory;
 }
@@ -60,7 +68,6 @@ const std::vector<std::unique_ptr<Item>>& Player::get_inventory() const {
 void Player::add_item(std::unique_ptr<Item> item) {
     inventory.push_back(std::move(item));
 }
-
 
 std::unique_ptr<Item> Player::take_item(int idx) {
     if(idx < 1 || idx > (int)inventory.size()) {

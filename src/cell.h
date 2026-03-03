@@ -26,7 +26,6 @@ public:
     cell_icon get_c() const;
     void set_c(cell_icon ci);
     
-    
     const std::vector<std::unique_ptr<Item>>& get_items() const;
     // POSSIBLE USELESS
     // const std::unique_ptr<Item>& get_item(int idx) const;
