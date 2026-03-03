@@ -1,7 +1,5 @@
 #include "game.h"
 #include "utils.h"
-#include <memory>
-
 
 Game::Game() : p(Player()), pos_r(1), pos_c(1) {
     board.resize(ROWS);
