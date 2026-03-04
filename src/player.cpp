@@ -1,4 +1,5 @@
 #include "player.h"
+#include <memory>
 
 Player::Player() : 
     hp(100),
@@ -10,7 +11,8 @@ Player::Player() :
     gold(0),
     coins(0),
     left_hand(nullptr), 
-    right_hand(nullptr) {
+    right_hand(nullptr),
+    both_hands(nullptr) {
 }
 
 const int& Player::get_hp() const {
@@ -59,6 +61,10 @@ const std::unique_ptr<Item>& Player::get_left_hand() const {
 
 const std::unique_ptr<Item>& Player::get_right_hand() const {
     return right_hand;
+}
+
+const std::unique_ptr<Item>& Player::get_both_hand() const {
+    return both_hands;
 }
 
 const std::vector<std::unique_ptr<Item>>& Player::get_inventory() const {

@@ -11,7 +11,7 @@ class Player {
     int hp, str, dex, lck, agr, wis;
     int gold, coins;
     std::vector<std::unique_ptr<Item>> inventory;
-    std::unique_ptr<Item> left_hand, right_hand;  
+    std::unique_ptr<Item> left_hand, right_hand, both_hands;  
 public:
     Player();
     const int& get_hp() const;
@@ -28,6 +28,7 @@ public:
 
     const std::unique_ptr<Item>& get_left_hand() const;
     const std::unique_ptr<Item>& get_right_hand() const;
+    const std::unique_ptr<Item>& get_both_hand() const;
 
     const std::vector<std::unique_ptr<Item>>& get_inventory() const;
 

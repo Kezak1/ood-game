@@ -1,5 +1,6 @@
 #include "game.h"
 #include "utils.h"
+#include <format>
 
 Game::Game() : p(Player()), pos_r(1), pos_c(1) {
     board.resize(ROWS);
@@ -112,6 +113,7 @@ void Game::render_state() {
     print_player_stats();
     print_player_inventory();
     print_player_wallet();
+    print_player_hands();
 
     std::stringstream ss;
     for(int r = 0; r < ROWS; r++) {
@@ -158,37 +160,52 @@ void Game::cur_action_info() {
 }
 
 void Game::print_player_wallet() {
-    std::string currency = std::format("COINS: {:<5} | GOLD: {:<5}\n", p.get_coins(), p.get_gold());
+    std::string out = std::format("COINS: {:<5} | GOLD: {:<5}\n", p.get_coins(), p.get_gold());
     clear_line_cursor();
-    std::cout << currency;
+    std::cout << out;
 }
 
 void Game::print_player_stats() {
-    std::string st = std::format(
+    std::string out = std::format(
         "PLAYER: HP {:3}/100 | STR {:2} | DEX {:2} | LCK {:2} | AGR {:2} | WIS {:2}\n",
         p.get_hp(), p.get_str(), p.get_dex(), p.get_lck(), p.get_agr(), p.get_wis(), p.get_gold(), p.get_coins()
     );
 
     clear_line_cursor();
-    std::cout << st;
+    std::cout << out;
 }
 
 void Game::print_player_inventory() {
     auto& inventory = p.get_inventory();
 
-    std::string inv = "INVENTORY: [ ";
+    std::stringstream out;
+    out << "INVENTORY: [ ";
     int idx = 1;
     for(auto& i : inventory) {
-        inv += std::format("{}.({}) ", idx++, i->get_name());
+        out << std::format("{}.({}) ", idx++, i->get_name());
     }
-    inv += "]\n";
+    out << "]\n";
 
     clear_line_cursor();
-    std::cout << inv;
+    std::cout << out.str();
 }
 
 void Game::print_player_hands() {
-    std::string in = "EQUIPED: ";
+    std::stringstream out;
+    out << "EQUIPED:";
+    if(p.get_left_hand()) {
+        out << std::format(" {}(left)", p.get_left_hand()->get_name());
+    }
+
+    if(p.get_right_hand()) {
+        out << std::format(" {}(right)", p.get_right_hand()->get_name());
+    }
+
+    if(p.get_both_hand()) {
+        out << std::format(" {}(both)", p.get_both_hand()->get_name());
+    }
+    out << "\n";
+    std::cout << out.str();
 }
 
 void Game::player_try_pick_up_item() {
@@ -245,7 +262,7 @@ void Game::player_try_drop_item() {
         int cnt_gold = p.get_gold();
         if(cnt_gold > 0) {
             p.set_gold(cnt_gold - 1);
-            cell.add_item(std::make_unique<Gold>(Gold()));
+            cell.add_item(std::make_unique<Gold>());
         }
         
         return;
@@ -253,7 +270,7 @@ void Game::player_try_drop_item() {
         int cnt_coins = p.get_coins();
         if(cnt_coins > 0) {
             p.set_coins(cnt_coins - 1);
-            cell.add_item(std::make_unique<Coin>(Coin()));
+            cell.add_item(std::make_unique<Coin>());
         }
         return;
     } else if(p.get_inventory().empty() || input == "cancel") {
