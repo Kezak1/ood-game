@@ -1,11 +1,11 @@
 #include "cell.h"
 
-Cell::Cell() : c(EMPTY), items() {}
+Cell::Cell() : c(cell_icon::EMPTY), items() {}
 
 Cell::Cell(cell_icon ci) : c(ci), items() {}
 
 Cell::Cell(cell_icon ci, std::unique_ptr<Item> item) {
-    if(ci != EMPTY) {
+    if(ci != cell_icon::EMPTY) {
         throw std::invalid_argument("this constructor works only for ci == EMPTY");
     }
     c = ci;
@@ -13,7 +13,7 @@ Cell::Cell(cell_icon ci, std::unique_ptr<Item> item) {
 }
 
 Cell::Cell(cell_icon ci, std::vector<std::unique_ptr<Item>> _items) {
-    if(ci != EMPTY) {
+    if(ci != cell_icon::EMPTY) {
         throw std::invalid_argument("this constructor works only for ci == EMPTY");
     }
     c = ci;

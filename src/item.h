@@ -15,6 +15,7 @@ public:
 
     virtual ~Item() = default;
     virtual bool carryable(Player& p) const;
+    virtual bool isweapon() const;  
 };
 
 #endif

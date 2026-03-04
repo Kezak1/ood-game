@@ -18,6 +18,8 @@
 #include <format>
 #include <vector>
 #include <sstream>
+#include <memory>
+#include <stdexcept>
 
 class Game {
     Player p;
@@ -38,7 +40,8 @@ private:
     
     void player_try_pick_up_item();
     void player_try_drop_item();
-    // void player_try_equip_weapon();
+    void player_try_equip_weapon();
+    void player_try_unequip_weapon();
 };
 
 #endif

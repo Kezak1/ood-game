@@ -11,3 +11,7 @@ const std::string& Item::get_name() {
 bool Item::carryable(Player&) const {
     return true;
 }
+
+bool Item::isweapon() const {
+    return false;
+}

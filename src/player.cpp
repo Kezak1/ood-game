@@ -1,4 +1,5 @@
 #include "player.h"
+#include "weapon.h"
 #include <memory>
 
 Player::Player() : 
@@ -55,16 +56,40 @@ void Player::set_coins(int val) {
     coins = val;
 }
 
-const std::unique_ptr<Item>& Player::get_left_hand() const {
+const std::unique_ptr<Weapon>& Player::get_left_weapon() const {
     return left_hand;
 }
 
-const std::unique_ptr<Item>& Player::get_right_hand() const {
+void Player::set_left_hand(std::unique_ptr<Weapon> w) {
+    left_hand = std::move(w);
+}
+
+std::unique_ptr<Weapon> Player::take_left_weapon() {
+    return std::move(left_hand);
+}
+
+const std::unique_ptr<Weapon>& Player::get_right_weapon() const {
     return right_hand;
 }
 
-const std::unique_ptr<Item>& Player::get_both_hand() const {
+void Player::set_right_hand(std::unique_ptr<Weapon> w) {
+    right_hand = std::move(w);
+}
+
+std::unique_ptr<Weapon> Player::take_right_weapon() {
+    return std::move(left_hand);
+}
+
+const std::unique_ptr<Weapon>& Player::get_both_weapon() const {
     return both_hands;
+}
+
+void Player::set_both_hands(std::unique_ptr<Weapon> w) {
+    both_hands = std::move(w);
+}
+
+std::unique_ptr<Weapon> Player::take_both_weapon() {
+    return std::move(both_hands);
 }
 
 const std::vector<std::unique_ptr<Item>>& Player::get_inventory() const {
@@ -73,6 +98,13 @@ const std::vector<std::unique_ptr<Item>>& Player::get_inventory() const {
 
 void Player::add_item(std::unique_ptr<Item> item) {
     inventory.push_back(std::move(item));
+}
+
+void Player::insert_item(int idx, std::unique_ptr<Item> item) {
+    if(idx < 1 || idx > (int)inventory.size()) {
+        throw std::out_of_range("idx");
+    }
+    inventory.insert(inventory.begin() + idx - 1, std::move(item));
 }
 
 std::unique_ptr<Item> Player::take_item(int idx) {

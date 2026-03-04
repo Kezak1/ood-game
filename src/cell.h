@@ -9,7 +9,7 @@
 #include <stdexcept>
 #include <utility>
 
-enum cell_icon {
+enum class cell_icon {
     WALL,
     EMPTY,
 };

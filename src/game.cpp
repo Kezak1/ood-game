@@ -1,6 +1,10 @@
 #include "game.h"
+#include "axe.h"
+#include "cell.h"
 #include "utils.h"
-#include <format>
+#include "weapon.h"
+#include <stdexcept>
+
 
 Game::Game() : p(Player()), pos_r(1), pos_c(1) {
     board.resize(ROWS);
@@ -11,16 +15,18 @@ Game::Game() : p(Player()), pos_r(1), pos_c(1) {
     for(int i = 0; i < ROWS; i++) {
         for(int j = 0; j < COLS; j++) {
             if(i == 0 || j == 0 || i == ROWS - 1 || j == COLS - 1) {
-                board[i][j] = Cell(WALL); 
+                board[i][j] = Cell(cell_icon::WALL); 
             } else {
-                board[i][j] = Cell(EMPTY);
+                board[i][j] = Cell(cell_icon::EMPTY);
             }
         }
     }
 
     board[10][10].add_item(std::make_unique<Rock>());
     board[10][10].add_item(std::make_unique<Sword>(10, "katana"));
-    board[10][10].add_item(std::make_unique<OldBook>());
+    board[10][10].add_item(std::make_unique<Axe>(10, "axe"));
+    board[10][10].add_item(std::make_unique<Sword>(10, "katana"));
+    board[10][10].add_item(std::make_unique<Bow>(10, "bow"));
 
     board[15][11].add_item(std::make_unique<Gold>());
     board[12][11].add_item(std::make_unique<Coin>());
@@ -38,7 +44,6 @@ void Game::main_loop() {
         char k = getchar();
 
         bool flag_break = false;
-        bool flag_refresh = false;
 
         move_player(k);
         to_start_cursor();
@@ -51,28 +56,26 @@ void Game::main_loop() {
                 break;
             case 'e':
                 player_try_pick_up_item();
-                flag_refresh = true;
                 break;
             case 'g':
                 player_try_drop_item();
-                flag_refresh = true;
                 break;
             case 'c':
-                // player_try_equip_weapon();
+                player_try_equip_weapon();
+                break;
+            case 'v':
+                player_try_unequip_weapon();
                 break;
             default:
                 break;
         }
 
-        if(flag_refresh) {
-            move_player(k);
-            to_start_cursor();
-            render_state();
-            cur_action_info();
-        }
-        
         if(flag_break) break;
-
+    
+        to_start_cursor();
+        render_state();
+        cur_action_info();
+       
         std::cout << std::flush;
     }
 
@@ -103,7 +106,7 @@ void Game::move_player(char c) {
             return;   std::vector<std::unique_ptr<Item>> items;
     }
 
-    if(in_range(new_r, new_c) && board[new_r][new_c].get_c() == EMPTY) {
+    if(in_range(new_r, new_c) && board[new_r][new_c].get_c() == cell_icon::EMPTY) {
         pos_r = new_r;
         pos_c = new_c;
     }
@@ -123,10 +126,10 @@ void Game::render_state() {
                 continue;
             }
             switch(board[r][c].get_c()) {
-                case WALL:
+                case cell_icon::WALL:
                     ss << C_WALL;
                     break;
-                case EMPTY:
+                case cell_icon::EMPTY:
                     if(board[r][c].empty()) {
                         ss << C_EMPTY;
                     } else {
@@ -193,18 +196,20 @@ void Game::print_player_inventory() {
 void Game::print_player_hands() {
     std::stringstream out;
     out << "EQUIPED:";
-    if(p.get_left_hand()) {
-        out << std::format(" {}(left)", p.get_left_hand()->get_name());
+    if(p.get_left_weapon()) {
+        out << std::format(" {}(left)", p.get_left_weapon()->get_name());
     }
 
-    if(p.get_right_hand()) {
-        out << std::format(" {}(right)", p.get_right_hand()->get_name());
+    if(p.get_right_weapon()) {
+        out << std::format(" {}(right)", p.get_right_weapon()->get_name());
     }
 
-    if(p.get_both_hand()) {
-        out << std::format(" {}(both)", p.get_both_hand()->get_name());
+    if(p.get_both_weapon()) {
+        out << std::format(" {}(both)", p.get_both_weapon()->get_name());
     }
     out << "\n";
+    
+    clear_line_cursor();
     std::cout << out.str();
 }
 
@@ -278,8 +283,102 @@ void Game::player_try_drop_item() {
     }    
 
     try {
-        int idx = stoi(input);
+        int idx = std::stoi(input);
         cell.add_item(p.take_item(idx));
+    } catch(const std::exception& e) {
+        std::cout << "ERROR: " << e.what() << '\n' << "(to continue press any key)";
+        char _ = getchar();
+    }
+}
+
+void Game::player_try_equip_weapon() {
+    set_raw_mode(false);
+    unhide_cursor();
+
+    std::cout << "Enter index of weapon from inventory (to cancel write 'cancel'): ";
+    std::string input;
+    std::getline(std::cin, input);
+
+    set_raw_mode(true);
+    hide_cursor();
+
+    try {
+        int idx = std::stoi(input);
+        std::unique_ptr<Item> item = p.take_item(idx);
+        
+        if(!item->isweapon()) {
+            p.insert_item(idx, std::move(item));
+            throw std::logic_error("tried to equip non-weapon item");
+        }
+        
+        std::unique_ptr<Weapon> w((Weapon*)item.release());
+
+        switch(w->get_hold()) {
+            case weapon_hold::SINGLE:
+                if(p.get_both_weapon()) {
+                    p.add_item(std::move(w));
+                    throw std::logic_error("hands are occupied");
+                }
+                if(!p.get_right_weapon()) {
+                    p.set_right_hand(std::move(w));
+                } else if(!p.get_left_weapon()) {
+                    p.set_left_hand(std::move(w));
+                } else {
+                    p.insert_item(idx, std::move(w));
+                    throw std::logic_error("hands are occupied");
+                }
+                break;
+            case weapon_hold::BOTH:
+                if(p.get_both_weapon() || p.get_left_weapon() || p.get_right_weapon()) {
+                    p.insert_item(idx, std::move(w));
+                    throw std::logic_error("hands are occupied");
+                }
+                p.set_both_hands(std::move(w));
+                break;  
+            default:
+                p.insert_item(idx, std::move(w));
+                throw std::invalid_argument("unknown weapon_hold");
+        }
+    } catch(const std::exception& e) {
+        std::cout << "ERROR: " << e.what() << '\n' << "(to continue press any key)";
+        char _ = getchar();
+    }
+}
+
+void Game::player_try_unequip_weapon() {
+    set_raw_mode(false);
+    unhide_cursor();
+
+    std::cout << "To unequip enter 'left'/'right'/'both' (to cancel write 'cancel'): ";
+    std::string input;
+    std::getline(std::cin, input);
+
+    set_raw_mode(true);
+    hide_cursor();
+    try {
+        if(input == "cancel") {
+            return;
+        } else if(input == "left") {
+            auto& left = p.get_left_weapon();
+            if(!left) {
+                return;
+            }
+            p.add_item(p.take_left_weapon());
+        } else if(input == "right") {
+            auto& right = p.get_right_weapon();
+            if(!right) {
+                return;
+            }
+            p.add_item(p.take_right_weapon());
+        } else if(input == "both") {
+            auto& both = p.get_both_weapon();
+            if(!both) {
+                return;
+            }
+            p.add_item(p.take_both_weapon());
+        } else {
+            throw std::invalid_argument("invalid input");
+        }
     } catch(const std::exception& e) {
         std::cout << "ERROR: " << e.what() << '\n' << "(to continue press any key)";
         char _ = getchar();
