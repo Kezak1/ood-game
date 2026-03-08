@@ -2,7 +2,7 @@
 #define ITEM_H
 
 #include <string>
-
+#include <memory>
 
 class Player;
 
@@ -11,11 +11,13 @@ class Item {
 public:
     Item(std::string s);
 
-    const std::string& get_name();
+    const std::string& get_name() const;
+    virtual std::string get_info() const;
+
+    virtual bool carryable(Player& p) const;
+    virtual std::unique_ptr<Item> equip(Player&, std::unique_ptr<Item> self);
 
     virtual ~Item() = default;
-    virtual bool carryable(Player& p) const;
-    virtual bool isweapon() const;  
 };
 
 #endif

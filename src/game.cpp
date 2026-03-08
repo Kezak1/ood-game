@@ -1,9 +1,5 @@
 #include "game.h"
-#include "axe.h"
-#include "cell.h"
 #include "utils.h"
-#include "weapon.h"
-#include <stdexcept>
 
 
 Game::Game() : p(Player()), pos_r(1), pos_c(1) {
@@ -11,25 +7,72 @@ Game::Game() : p(Player()), pos_r(1), pos_c(1) {
     for(auto& row : board) {
         row.resize(COLS);
     }
+    
+    const std::vector<std::string> char_board{
+        "##########################################",
+        "#     ####################           #####",
+        "#     #################### ######### #####",
+        "### #####                  ######### #####",
+        "### #####        #################    ####",
+        "###         *    #################    ####",
+        "#########        #################    ####",
+        "############## ###################*  *####",
+        "############## ###########################",
+        "############## ###########################",
+        "######                              ######",
+        "###### ############################ ######",
+        "###### ############################ ######",
+        "###### ############################ ######",
+        "###### ###########        ######### ######",
+        "###        #######   *    ######       ###",
+        "###        #######        ######       ###",
+        "###   *                   ######       ###",
+        "###        ######### ###########   *   ###",
+        "###### ############# ###########       ###",
+        "######               #####################",
+        "##########################################",
+    };
+
+    std::vector<std::pair<int, int>> items_cords;
 
     for(int i = 0; i < ROWS; i++) {
         for(int j = 0; j < COLS; j++) {
-            if(i == 0 || j == 0 || i == ROWS - 1 || j == COLS - 1) {
-                board[i][j] = Cell(cell_icon::WALL); 
+            auto& chr = char_board[i][j];
+            if(chr == '#') {
+                board[i][j] = Cell(true); 
             } else {
-                board[i][j] = Cell(cell_icon::EMPTY);
+                board[i][j] = Cell(false);
+                if(chr == '*') {
+                    items_cords.push_back({i, j});
+                }
             }
         }
     }
 
-    board[10][10].add_item(std::make_unique<Rock>());
-    board[10][10].add_item(std::make_unique<Sword>(10, "katana"));
-    board[10][10].add_item(std::make_unique<Axe>(10, "axe"));
-    board[10][10].add_item(std::make_unique<Sword>(10, "katana"));
-    board[10][10].add_item(std::make_unique<Bow>(10, "bow"));
+    int r1 = items_cords[0].first, c1 = items_cords[0].second;
+    board[r1][c1].add_item(std::make_unique<Rock>());
+    board[r1][c1].add_item(std::make_unique<Sword>(20, "katana"));
+    board[r1][c1].add_item(std::make_unique<Bow>(14, "great bow"));
 
-    board[15][11].add_item(std::make_unique<Gold>());
-    board[12][11].add_item(std::make_unique<Coin>());
+    int r2 = items_cords[1].first, c2 = items_cords[1].second;
+    board[r2][c2].add_item(std::make_unique<OldBook>());
+    board[r2][c2].add_item(std::make_unique<StrangeIdol>());
+
+    int r3 = items_cords[2].first, c3 = items_cords[2].second;
+    board[r3][c3].add_item(std::make_unique<Axe>(10, "axe"));
+
+    int r4 = items_cords[3].first, c4 = items_cords[3].second;
+    board[r4][c4].add_item(std::make_unique<Gold>());
+    board[r4][c4].add_item(std::make_unique<Gold>());
+    board[r4][c4].add_item(std::make_unique<Gold>());
+
+    int r5 = items_cords[4].first, c5 = items_cords[4].second;
+    board[r5][c5].add_item(std::make_unique<Coin>());
+    board[r5][c5].add_item(std::make_unique<Coin>());
+    board[r5][c5].add_item(std::make_unique<OldBook>());
+
+    int r6 = items_cords[5].first, c6 = items_cords[5].second;
+    board[r6][c6].add_item(std::make_unique<Sword>(14, "rapier"));
 }
 
 void Game::main_loop() {
@@ -60,11 +103,14 @@ void Game::main_loop() {
             case 'g':
                 player_try_drop_item();
                 break;
-            case 'c':
+            case 'j':
                 player_try_equip_weapon();
                 break;
-            case 'v':
+            case 'k':
                 player_try_unequip_weapon();
+                break;
+            case 'i':
+                player_get_info_item();
                 break;
             default:
                 break;
@@ -106,7 +152,7 @@ void Game::move_player(char c) {
             return;   std::vector<std::unique_ptr<Item>> items;
     }
 
-    if(in_range(new_r, new_c) && board[new_r][new_c].get_c() == cell_icon::EMPTY) {
+    if(in_range(new_r, new_c) && !board[new_r][new_c].is_wall()) {
         pos_r = new_r;
         pos_c = new_c;
     }
@@ -125,19 +171,12 @@ void Game::render_state() {
                 ss << C_PLAYER;
                 continue;
             }
-            switch(board[r][c].get_c()) {
-                case cell_icon::WALL:
-                    ss << C_WALL;
-                    break;
-                case cell_icon::EMPTY:
-                    if(board[r][c].empty()) {
-                        ss << C_EMPTY;
-                    } else {
-                        ss << C_ITEMS;
-                    }
-                    break;
-                default:
-                    break;
+            if(board[r][c].is_wall()) {
+                ss << C_WALL;
+            } else if(board[r][c].empty()) {
+                ss << C_EMPTY;
+            } else {
+                ss << C_ITEMS;
             }
         }
         ss << '\n';
@@ -163,7 +202,7 @@ void Game::cur_action_info() {
 }
 
 void Game::print_player_wallet() {
-    std::string out = std::format("COINS: {:<5} | GOLD: {:<5}\n", p.get_coins(), p.get_gold());
+    std::string out = std::format("COINS: {:<5} GOLD: {:<5}\n", p.get_coins(), p.get_gold());
     clear_line_cursor();
     std::cout << out;
 }
@@ -246,7 +285,7 @@ void Game::player_try_pick_up_item() {
         }
     } catch(const std::exception& e) {
         std::cout << "ERROR: " << e.what() << '\n' << "(to continue press any key)";
-        char _ = getchar();
+        getchar();
     }
 }
 
@@ -287,11 +326,15 @@ void Game::player_try_drop_item() {
         cell.add_item(p.take_item(idx));
     } catch(const std::exception& e) {
         std::cout << "ERROR: " << e.what() << '\n' << "(to continue press any key)";
-        char _ = getchar();
+        getchar();
     }
 }
 
 void Game::player_try_equip_weapon() {
+    if(p.get_inventory().empty()) {
+        return;
+    }
+
     set_raw_mode(false);
     unhide_cursor();
 
@@ -304,44 +347,17 @@ void Game::player_try_equip_weapon() {
 
     try {
         int idx = std::stoi(input);
-        std::unique_ptr<Item> item = p.take_item(idx);
-        
-        if(!item->isweapon()) {
-            p.insert_item(idx, std::move(item));
-            throw std::logic_error("tried to equip non-weapon item");
-        }
-        
-        std::unique_ptr<Weapon> w((Weapon*)item.release());
 
-        switch(w->get_hold()) {
-            case weapon_hold::SINGLE:
-                if(p.get_both_weapon()) {
-                    p.add_item(std::move(w));
-                    throw std::logic_error("hands are occupied");
-                }
-                if(!p.get_right_weapon()) {
-                    p.set_right_hand(std::move(w));
-                } else if(!p.get_left_weapon()) {
-                    p.set_left_hand(std::move(w));
-                } else {
-                    p.insert_item(idx, std::move(w));
-                    throw std::logic_error("hands are occupied");
-                }
-                break;
-            case weapon_hold::BOTH:
-                if(p.get_both_weapon() || p.get_left_weapon() || p.get_right_weapon()) {
-                    p.insert_item(idx, std::move(w));
-                    throw std::logic_error("hands are occupied");
-                }
-                p.set_both_hands(std::move(w));
-                break;  
-            default:
-                p.insert_item(idx, std::move(w));
-                throw std::invalid_argument("unknown weapon_hold");
+        std::unique_ptr<Item> item = p.take_item(idx);
+        Item* raw_item = item.get();
+        item = raw_item->equip(p, std::move(item));
+        if(item) {
+            p.insert_item(idx, std::move(item), true);
+            throw std::logic_error("cannot equip this item");
         }
     } catch(const std::exception& e) {
         std::cout << "ERROR: " << e.what() << '\n' << "(to continue press any key)";
-        char _ = getchar();
+        getchar();
     }
 }
 
@@ -349,7 +365,7 @@ void Game::player_try_unequip_weapon() {
     set_raw_mode(false);
     unhide_cursor();
 
-    std::cout << "To unequip enter 'left'/'right'/'both' (to cancel write 'cancel'): ";
+    std::cout << "Enter 'left'/'right'/'both' to unequip (to cancel write 'cancel'): ";
     std::string input;
     std::getline(std::cin, input);
 
@@ -381,6 +397,30 @@ void Game::player_try_unequip_weapon() {
         }
     } catch(const std::exception& e) {
         std::cout << "ERROR: " << e.what() << '\n' << "(to continue press any key)";
-        char _ = getchar();
+        getchar();
+    }
+}
+
+void Game::player_get_info_item() {
+    if(p.get_inventory().empty()) {
+        return;
+    }
+    set_raw_mode(false);
+    unhide_cursor();
+
+    std::cout << "Enter index to get info about chose item (to cancel write 'cancel'): ";
+    std::string input;
+    std::getline(std::cin, input);
+
+    set_raw_mode(true);
+    hide_cursor();
+
+    try {
+        int idx = std::stoi(input);
+        std::cout << "INFO: " << p.get_item_info(idx) << "\n(to continue press any key)";
+        getchar();
+    } catch(const std::exception& e) {
+        std::cout << "ERROR: " << e.what() << "\n(to continue press any key)";
+        getchar();
     }
 }

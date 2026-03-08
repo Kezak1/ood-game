@@ -1,3 +1,3 @@
 #include "rock.h"
 
-Rock::Rock() : Junk("Rock") {}
+Rock::Rock() : Junk("rock") {}

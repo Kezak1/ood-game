@@ -1,11 +1,13 @@
 #include "weapon.h"
 
-Weapon::Weapon(int _dmg, weapon_hold _hold, std::string s) : Item(s), dmg(_dmg), hold(_hold) {}
+Weapon::Weapon(int _dmg, std::string s) : Item(s), dmg(_dmg) {}
 
-bool Weapon::isweapon() const {
-    return true;
+std::string Weapon::get_stats() const {
+    std::stringstream res;
+    res << ", dmg: " << dmg;
+    return res.str();
 }
 
-const weapon_hold& Weapon::get_hold() const {
-    return hold;
+std::string Weapon::get_info() const {
+    return "weapon (unequippable)";
 }

@@ -42,6 +42,8 @@ private:
     void player_try_drop_item();
     void player_try_equip_weapon();
     void player_try_unequip_weapon();
+
+    void player_get_info_item();
 };
 
 #endif

@@ -9,22 +9,17 @@
 #include <stdexcept>
 #include <utility>
 
-enum class cell_icon {
-    WALL,
-    EMPTY,
-};
-
 class Cell {
-    cell_icon c;
+    bool wall;
     std::vector<std::unique_ptr<Item>> items;
 public:
     Cell();
-    Cell(cell_icon ci);
-    Cell(cell_icon ci, std::unique_ptr<Item> item);
-    Cell(cell_icon ci, std::vector<std::unique_ptr<Item>> _items);
+    Cell(bool is_wall);
+    Cell(bool is_wall, std::unique_ptr<Item> item);
+    Cell(bool is_wall, std::vector<std::unique_ptr<Item>> _items);
 
-    cell_icon get_c() const;
-    void set_c(cell_icon ci);
+    bool is_wall() const;
+    void set_wall(bool is_wall);
     
     const std::vector<std::unique_ptr<Item>>& get_items() const;
     // POSSIBLE USELESS

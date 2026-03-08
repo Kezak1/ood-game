@@ -1,31 +1,31 @@
 #include "cell.h"
 
-Cell::Cell() : c(cell_icon::EMPTY), items() {}
+Cell::Cell() : wall(false), items() {}
 
-Cell::Cell(cell_icon ci) : c(ci), items() {}
+Cell::Cell(bool is_wall) : wall(is_wall), items() {}
 
-Cell::Cell(cell_icon ci, std::unique_ptr<Item> item) {
-    if(ci != cell_icon::EMPTY) {
-        throw std::invalid_argument("this constructor works only for ci == EMPTY");
+Cell::Cell(bool is_wall, std::unique_ptr<Item> item) {
+    if(is_wall) {
+        throw std::invalid_argument("wall cells cannot store items");
     }
-    c = ci;
+    wall = is_wall;
     items.push_back(std::move(item));
 }
 
-Cell::Cell(cell_icon ci, std::vector<std::unique_ptr<Item>> _items) {
-    if(ci != cell_icon::EMPTY) {
-        throw std::invalid_argument("this constructor works only for ci == EMPTY");
+Cell::Cell(bool is_wall, std::vector<std::unique_ptr<Item>> _items) {
+    if(is_wall) {
+        throw std::invalid_argument("wall cells cannot store items");
     }
-    c = ci;
+    wall = is_wall;
     items = std::move(_items);
 }
 
-cell_icon Cell::get_c() const {
-    return c;
-} 
+bool Cell::is_wall() const {
+    return wall;
+}
 
-void Cell::set_c(cell_icon ci) {
-    c = ci;
+void Cell::set_wall(bool is_wall) {
+    wall = is_wall;
 }
 
 
