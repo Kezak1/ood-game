@@ -75,7 +75,7 @@ void Player::set_right_hand(std::unique_ptr<Item> w) {
     right_hand = std::move(w);
 }
 
-std::unique_ptr<Item> Player::take_right_weapon() {
+std::unique_ptr<Item> Player::take_right_hand() {
     return std::move(right_hand);
 }
 

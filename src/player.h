@@ -32,7 +32,7 @@ public:
 
     const std::unique_ptr<Item>& get_right_hand() const;
     void set_right_hand(std::unique_ptr<Item> w);
-    std::unique_ptr<Item> take_right_weapon();
+    std::unique_ptr<Item> take_right_hand();
     
     const std::unique_ptr<Item>& get_both_hands() const;
     void set_both_hands(std::unique_ptr<Item> w);

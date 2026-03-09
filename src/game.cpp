@@ -149,7 +149,7 @@ void Game::move_player(char c) {
             new_c++;
             break;
         default:
-            return;   std::vector<std::unique_ptr<Item>> items;
+            return;
     }
 
     if(in_range(new_r, new_c) && !board[new_r][new_c].is_wall()) {
@@ -393,7 +393,7 @@ void Game::player_try_unequip_weapon() {
             if(!right) {
                 return;
             }
-            p.add_item(p.take_right_weapon());
+            p.add_item(p.take_right_hand());
         } else if(input == "both") {
             auto& both = p.get_both_hands();
             if(!both) {
