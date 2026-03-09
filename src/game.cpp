@@ -235,16 +235,16 @@ void Game::print_player_inventory() {
 void Game::print_player_hands() {
     std::stringstream out;
     out << "EQUIPED:";
-    if(p.get_left_weapon()) {
-        out << std::format(" {}(left)", p.get_left_weapon()->get_name());
+    if(p.get_left_hand()) {
+        out << std::format(" {}(left)", p.get_left_hand()->get_name());
     }
 
-    if(p.get_right_weapon()) {
-        out << std::format(" {}(right)", p.get_right_weapon()->get_name());
+    if(p.get_right_hand()) {
+        out << std::format(" {}(right)", p.get_right_hand()->get_name());
     }
 
-    if(p.get_both_weapon()) {
-        out << std::format(" {}(both)", p.get_both_weapon()->get_name());
+    if(p.get_both_hands()) {
+        out << std::format(" {}(both)", p.get_both_hands()->get_name());
     }
     out << "\n";
     
@@ -300,6 +300,10 @@ void Game::player_try_drop_item() {
     set_raw_mode(true);
     hide_cursor();
 
+    if(input == "cancel") {
+        return;
+    }
+
     Cell& cell = board[pos_r][pos_c];
 
     if(input == "gold") {
@@ -345,6 +349,10 @@ void Game::player_try_equip_weapon() {
     set_raw_mode(true);
     hide_cursor();
 
+    if(input == "cancel") {
+        return;
+    }
+
     try {
         int idx = std::stoi(input);
 
@@ -375,23 +383,23 @@ void Game::player_try_unequip_weapon() {
         if(input == "cancel") {
             return;
         } else if(input == "left") {
-            auto& left = p.get_left_weapon();
+            auto& left = p.get_left_hand();
             if(!left) {
                 return;
             }
-            p.add_item(p.take_left_weapon());
+            p.add_item(p.take_left_hand());
         } else if(input == "right") {
-            auto& right = p.get_right_weapon();
+            auto& right = p.get_right_hand();
             if(!right) {
                 return;
             }
             p.add_item(p.take_right_weapon());
         } else if(input == "both") {
-            auto& both = p.get_both_weapon();
+            auto& both = p.get_both_hands();
             if(!both) {
                 return;
             }
-            p.add_item(p.take_both_weapon());
+            p.add_item(p.take_both_hands());
         } else {
             throw std::invalid_argument("invalid input");
         }
@@ -414,6 +422,10 @@ void Game::player_get_info_item() {
 
     set_raw_mode(true);
     hide_cursor();
+
+    if(input == "cancel") {
+        return;
+    }
 
     try {
         int idx = std::stoi(input);

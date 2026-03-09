@@ -26,17 +26,17 @@ public:
     const int& get_coins() const;
     void set_coins(int val);
 
-    const std::unique_ptr<Item>& get_left_weapon() const;
+    const std::unique_ptr<Item>& get_left_hand() const;
     void set_left_hand(std::unique_ptr<Item> w);
-    std::unique_ptr<Item> take_left_weapon();
+    std::unique_ptr<Item> take_left_hand();
 
-    const std::unique_ptr<Item>& get_right_weapon() const;
+    const std::unique_ptr<Item>& get_right_hand() const;
     void set_right_hand(std::unique_ptr<Item> w);
     std::unique_ptr<Item> take_right_weapon();
     
-    const std::unique_ptr<Item>& get_both_weapon() const;
+    const std::unique_ptr<Item>& get_both_hands() const;
     void set_both_hands(std::unique_ptr<Item> w);
-    std::unique_ptr<Item> take_both_weapon();
+    std::unique_ptr<Item> take_both_hands();
 
     bool equip_in_single_hand(std::unique_ptr<Item>& item);
     bool equip_in_both_hands(std::unique_ptr<Item>& item);

@@ -55,7 +55,7 @@ void Player::set_coins(int val) {
     coins = val;
 }
 
-const std::unique_ptr<Item>& Player::get_left_weapon() const {
+const std::unique_ptr<Item>& Player::get_left_hand() const {
     return left_hand;
 }
 
@@ -63,11 +63,11 @@ void Player::set_left_hand(std::unique_ptr<Item> w) {
     left_hand = std::move(w);
 }
 
-std::unique_ptr<Item> Player::take_left_weapon() {
+std::unique_ptr<Item> Player::take_left_hand() {
     return std::move(left_hand);
 }
 
-const std::unique_ptr<Item>& Player::get_right_weapon() const {
+const std::unique_ptr<Item>& Player::get_right_hand() const {
     return right_hand;
 }
 
@@ -79,7 +79,7 @@ std::unique_ptr<Item> Player::take_right_weapon() {
     return std::move(right_hand);
 }
 
-const std::unique_ptr<Item>& Player::get_both_weapon() const {
+const std::unique_ptr<Item>& Player::get_both_hands() const {
     return both_hands;
 }
 
@@ -87,7 +87,7 @@ void Player::set_both_hands(std::unique_ptr<Item> w) {
     both_hands = std::move(w);
 }
 
-std::unique_ptr<Item> Player::take_both_weapon() {
+std::unique_ptr<Item> Player::take_both_hands() {
     return std::move(both_hands);
 }
 
