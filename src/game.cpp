@@ -7,6 +7,8 @@ Game::Game() : p(Player()), pos_r(1), pos_c(1) {
     for(auto& row : board) {
         row.resize(COLS);
     }
+
+    init_actions();
     
     const std::vector<std::string> char_board{
         "##########################################",
@@ -86,37 +88,14 @@ void Game::main_loop() {
     while(1) {
         char k = getchar();
 
-        bool flag_break = false;
-
         move_player(k);
         to_start_cursor();
         render_state();
         cur_action_info();
 
-        switch(k) {
-            case 'q':
-                flag_break = true;
-                break;
-            case 'e':
-                player_try_pick_up_item();
-                break;
-            case 'g':
-                player_try_drop_item();
-                break;
-            case 'j':
-                player_try_equip_weapon();
-                break;
-            case 'k':
-                player_try_unequip_weapon();
-                break;
-            case 'i':
-                player_get_info_item();
-                break;
-            default:
-                break;
+        if(actions.find(k) != actions.end()) {
+            //TODO
         }
-
-        if(flag_break) break;
     
         to_start_cursor();
         render_state();
@@ -127,6 +106,10 @@ void Game::main_loop() {
 
     unhide_cursor();
     set_raw_mode(false);
+}
+
+void Game::init_actions() {
+    //TODO
 }
 
 bool in_range(int r, int c) {
@@ -280,7 +263,7 @@ void Game::player_try_pick_up_item() {
 
     try {
         auto item = cell.take_item(std::stoi(input));
-        if(item->carryable(p)) {
+        if(item->on_pick_up(p)) {
             p.add_item(std::move(item));
         }
     } catch(const std::exception& e) {

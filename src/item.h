@@ -14,7 +14,7 @@ public:
     const std::string& get_name() const;
     virtual std::string get_info() const;
 
-    virtual bool carryable(Player& p) const;
+    virtual bool on_pick_up(Player& p) const;
     virtual std::unique_ptr<Item> equip(Player&, std::unique_ptr<Item> self);
 
     virtual ~Item() = default;

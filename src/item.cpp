@@ -12,7 +12,7 @@ std::string Item::get_info() const {
     return "plain item";
 }
 
-bool Item::carryable(Player&) const {
+bool Item::on_pick_up(Player&) const {
     return true;
 }
 

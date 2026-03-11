@@ -6,7 +6,7 @@
 class Gold : public Currency {
 public:
     Gold();
-    bool carryable(Player& p) const override;
+    bool on_pick_up(Player& p) const override;
 };
 
 #endif

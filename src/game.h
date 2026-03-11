@@ -14,21 +14,26 @@
 #include "coin.h"
 #include "gold.h"
 
+#include <functional>
 #include <iostream>
 #include <format>
 #include <vector>
 #include <sstream>
 #include <memory>
 #include <stdexcept>
+#include <map>
 
 class Game {
     Player p;
     int pos_r, pos_c;
     std::vector<std::vector<Cell>> board;
+    std::unordered_map<char, std::function<void()>> actions;
 public:
     Game();
     void main_loop();
 private:
+    void init_actions();
+
     void move_player(char c);
     void render_state();
     void cur_action_info();
