@@ -87,6 +87,7 @@ void Game::main_loop() {
 
     while(1) {
         char k = getchar();
+        k = tolower(k);
 
         move_player(k);
         to_start_cursor();
@@ -94,7 +95,9 @@ void Game::main_loop() {
         cur_action_info();
 
         if(actions.find(k) != actions.end()) {
-            //TODO
+            if(actions[k]()) {
+                break;
+            }
         }
     
         to_start_cursor();
@@ -109,7 +112,29 @@ void Game::main_loop() {
 }
 
 void Game::init_actions() {
-    //TODO
+    actions['e'] = [this] {
+        player_try_pick_up_item();
+        return false;
+    };
+    actions['g'] = [this] {
+        player_try_drop_item();
+        return false;
+    };
+    actions['j'] = [this] {
+        player_try_equip_weapon();
+        return false;
+    };
+    actions['k'] = [this] {
+        player_try_unequip_weapon();
+        return false;
+    };
+    actions['i'] = [this] {
+        player_get_info_item();
+        return false;
+    };
+    actions['q'] = [this] {
+        return true;
+    };
 }
 
 bool in_range(int r, int c) {
@@ -118,6 +143,8 @@ bool in_range(int r, int c) {
 
 void Game::move_player(char c) {
     int new_r = pos_r, new_c = pos_c;
+    c = tolower(c);
+
     switch(c) {
         case 'w':
             new_r--;

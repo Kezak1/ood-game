@@ -27,7 +27,7 @@ class Game {
     Player p;
     int pos_r, pos_c;
     std::vector<std::vector<Cell>> board;
-    std::unordered_map<char, std::function<void()>> actions;
+    std::unordered_map<char, std::function<bool()>> actions;
 public:
     Game();
     void main_loop();
