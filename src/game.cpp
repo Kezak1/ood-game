@@ -1,15 +1,18 @@
 #include "game.h"
+#include "dungeon.h"
 #include "utils.h"
 
-
-Game::Game() : p(Player()), pos_r(1), pos_c(1) {
+Game::Game() : p(Player()), pos_r(1), pos_c(1), dungeon() {
+    init_actions();
+    dungeon.get_board()[pos_r][pos_c].set_wall(false);
+    
+    /*
+    auto& board = dungeon.get_board();
     board.resize(ROWS);
     for(auto& row : board) {
         row.resize(COLS);
     }
 
-    init_actions();
-    
     const std::vector<std::string> char_board{
         "##########################################",
         "#     ####################           #####",
@@ -75,6 +78,7 @@ Game::Game() : p(Player()), pos_r(1), pos_c(1) {
 
     int r6 = items_cords[5].first, c6 = items_cords[5].second;
     board[r6][c6].add_item(std::make_unique<Sword>(14, "rapier"));
+    */
 }
 
 void Game::main_loop() {
@@ -129,7 +133,7 @@ void Game::init_actions() {
         return false;
     };
     actions['i'] = [this] {
-        player_get_info_item();
+        player_try_get_item_info();
         return false;
     };
     actions['q'] = [this] {
@@ -137,11 +141,9 @@ void Game::init_actions() {
     };
 }
 
-bool in_range(int r, int c) {
-    return r >= 0 && c >= 0 && r < ROWS && c < COLS;
-}
 
 void Game::move_player(char c) {
+    auto& board = dungeon.get_board();
     int new_r = pos_r, new_c = pos_c;
     c = tolower(c);
 
@@ -169,6 +171,8 @@ void Game::move_player(char c) {
 }
 
 void Game::render_state() {
+    auto& board = dungeon.get_board();
+
     print_player_stats();
     print_player_inventory();
     print_player_wallet();
@@ -195,6 +199,8 @@ void Game::render_state() {
 }  
 
 void Game::cur_action_info() {
+    auto& board = dungeon.get_board();
+
     full_clear_from_cursor();
     auto& items = board[pos_r][pos_c].get_items();
     std::cout << "LOG: ";
@@ -263,7 +269,8 @@ void Game::print_player_hands() {
 }
 
 void Game::player_try_pick_up_item() {
-    auto& cell = board[pos_r][pos_c];
+    auto& cell = dungeon.get_board()[pos_r][pos_c];
+
     if(cell.empty()) {
         return;
     }
@@ -314,7 +321,7 @@ void Game::player_try_drop_item() {
         return;
     }
 
-    Cell& cell = board[pos_r][pos_c];
+    Cell& cell = dungeon.get_board()[pos_r][pos_c];
 
     if(input == "gold") {
         int cnt_gold = p.get_gold();
@@ -419,7 +426,7 @@ void Game::player_try_unequip_weapon() {
     }
 }
 
-void Game::player_get_info_item() {
+void Game::player_try_get_item_info() {
     if(p.get_inventory().empty()) {
         return;
     }

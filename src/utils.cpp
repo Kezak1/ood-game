@@ -8,6 +8,10 @@ int next_random(int l, int r) {
     return dist(gen);
 }
 
+bool in_range(int r, int c) {
+    return r >= 0 && c >= 0 && r < ROWS && c < COLS;
+}
+
 void full_clear() {
     std::cout << "\033[2J\033[H";
 }
