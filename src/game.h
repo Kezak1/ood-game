@@ -4,7 +4,7 @@
 #include "utils.h"
 #include "cell.h"
 #include "player.h"
-#include "dungeon.h"
+#include "dungeon_builder.h"
 
 #include "sword.h"
 #include "bow.h"
@@ -27,7 +27,7 @@
 class Game {
     Player p;
     int pos_r, pos_c;
-    Dungeon dungeon;
+    std::vector<std::vector<Cell>> board;
     std::unordered_map<char, std::function<bool()>> actions;
 public:
     Game();

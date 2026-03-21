@@ -11,10 +11,10 @@ inline constexpr int COLS = 42;
 inline constexpr int dr[4] = {0, 0, 1, -1};
 inline constexpr int dc[4] = {1, -1, 0, 0};
 
-inline constexpr const char* C_WALL = "█";
-inline constexpr const char* C_EMPTY = " ";
-inline constexpr const char* C_PLAYER = "¶";
-inline constexpr const char* C_ITEMS = "*";
+inline constexpr const char* C_WALL = "██";
+inline constexpr const char* C_EMPTY = "  ";
+inline constexpr const char* C_PLAYER = "¶ ";
+inline constexpr const char* C_ITEMS = "!*";
 
 
 int next_random(int l, int r);

@@ -1,4 +1,4 @@
-#include "dungeon.h"
+#include "dungeon_builder.h"
 
 #include "utils.h"
 #include "sword.h"
@@ -12,7 +12,11 @@ bool inside(int r, int c) {
     return r > 0 && c > 0 && r < ROWS - 1 && c < COLS - 1;
 }
 
-Dungeon::Dungeon() {
+DungeonBuilder::DungeonBuilder() {
+    init_board();
+}
+
+void DungeonBuilder::init_board() {
     board.resize(ROWS);
     for(auto& row : board) {
         row.resize(COLS);
@@ -30,25 +34,20 @@ Dungeon::Dungeon() {
 
     fill_dungeon();
 
-    add_random_path(10);
-    add_random_path(15);
-    add_center_room(10, 10);
-    add_random_chamber(5);
+    add_random_path();
+    // add_random_path(30);
+    // add_center_room(6, 6);
+    // add_random_chamber(4);
 
     add_random_items(2);
     add_random_weapons(2);
 }
 
-std::vector<std::vector<Cell>>& Dungeon::get_board() {
-    return board;
+std::vector<std::vector<Cell>> DungeonBuilder::build() {
+    return std::move(board);
 }
 
-
-const std::vector<std::vector<Cell>>& Dungeon::get_board() const {
-    return board;
-}
-
-void Dungeon::empty_dungeon() {
+void DungeonBuilder::empty_dungeon() {
     for(int i = 1; i < ROWS - 1; i++) {
         for(int j = 1; j < COLS - 1; j++) {
             board[i][j].set_wall(false);
@@ -56,7 +55,7 @@ void Dungeon::empty_dungeon() {
     }
 }
 
-void Dungeon::fill_dungeon() {
+void DungeonBuilder::fill_dungeon() {
     for(int i = 1; i < ROWS - 1; i++) {
         for(int j = 0; j < COLS - 1; j++) {
             board[i][j].set_wall(true);
@@ -64,10 +63,8 @@ void Dungeon::fill_dungeon() {
     }
 }
 
-void Dungeon::add_random_path(int len) {
-    if(len <= 0) {
-        return;
-    }    
+void DungeonBuilder::add_random_path() {
+    int len = next_random(10,30);
 
     int r = next_random(1, ROWS - 2);
     int c = next_random(1, COLS - 2);
@@ -76,7 +73,7 @@ void Dungeon::add_random_path(int len) {
     while(len-- > 0) {
         std::vector<int> ok;
         for(int i = 0; i < 4; i++) {
-            int nr = r + dr[i], nc = c + dc[i];
+            int nr = r + 2*dr[i], nc = c + 2*dc[i];
             if(!inside(nr, nc)) {
                 continue;
             }
@@ -87,27 +84,36 @@ void Dungeon::add_random_path(int len) {
 
             int cnt_adj = 0;
             for(int j = 0; j < 4; j++) {
-                int nr = r + dr[j], nc = c + dc[j];
+                nr = r + 2*dr[j], nc = c + 2*dc[j];
                 if(in_range(nr, nc) && !board[nr][nc].is_wall()) {
                     cnt_adj++;
                 }
-            }
-            if(cnt_adj > 1) {
-                continue;
             }
 
             ok.push_back(i);
         }
 
         if(ok.empty()) {
-            break;
+            continue;
         }
         
         int dir = ok[next_random(0, (int)ok.size() - 1)];
-        
-        r += dr[dir];
-        c += dc[dir];
-        board[r][c].set_wall(false);
+
+        for(int k = 0; k < 2; k++) {
+            r += dr[dir];
+            c += dc[dir];
+            board[r][c].set_wall(false);
+
+            //TODO make so its nice for empty starting board
+
+            // if(dir == 0 || dir == 1) {
+            //     if(in_range(r - 1, c)) board[r - 1][c].set_wall(true);
+            //     if(in_range(r + 1, c)) board[r + 1][c].set_wall(true);
+            // } else {
+            //     if(in_range(r, c - 1)) board[r][c - 1].set_wall(true);
+            //     if(in_range(r, c + 1)) board[r][c + 1].set_wall(true);
+            // }
+        }
     }
 }
 
@@ -124,7 +130,7 @@ void Dungeon::add_random_paths(int l, int r) {
 }
 */
 
-void Dungeon::add_random_chamber(int len) {
+void DungeonBuilder::add_random_chamber(int len) {
     int r = next_random(1, ROWS -  2 - len);
     int c = next_random(1, COLS - 2 - len);
 
@@ -148,7 +154,7 @@ void Dungeon::add_random_chambers(int l, int r) {
 }
 */
 
-void Dungeon::add_center_room(int w, int h) {
+void DungeonBuilder::add_center_room(int w, int h) {
     int start_r = std::max(ROWS/2 - h/2, 0);
     int start_c = std::max(COLS/2 - w/2, 0);
     
@@ -181,7 +187,7 @@ std::unique_ptr<Item> make_random_item() {
     }
 }
 
-void Dungeon::add_random_items(int count) {
+void DungeonBuilder::add_random_items(int count) {
     while(count-- > 0) {
         auto p = get_all_empty_pos();
         if(p.empty()) {
@@ -194,7 +200,7 @@ void Dungeon::add_random_items(int count) {
     }
 }
 
-void Dungeon::add_random_weapons(int count) {
+void DungeonBuilder::add_random_weapons(int count) {
     while(count-- > 0) {
         auto p = get_all_empty_pos();
         if(p.empty()) {
@@ -211,7 +217,7 @@ void connect_rooms() {
     //TODO make sure that all empty cells are 'connected'
 }
 
-std::vector<std::pair<int, int>> Dungeon::get_all_empty_pos() {
+std::vector<std::pair<int, int>> DungeonBuilder::get_all_empty_pos() {
     std::vector<std::pair<int, int>> res;
     for(int i = 1; i < ROWS - 1; i++) {
         for(int j = 1; j < COLS - 1; j++) {

@@ -1,18 +1,18 @@
 #include "game.h"
-#include "dungeon.h"
+#include "dungeon_builder.h"
 #include "utils.h"
 
-Game::Game() : p(Player()), pos_r(1), pos_c(1), dungeon() {
+Game::Game() : p(Player()), pos_r(1), pos_c(1) {
     init_actions();
-    dungeon.get_board()[pos_r][pos_c].set_wall(false);
+    DungeonBuilder d;
+    board = d.build();
     
     /*
-    auto& board = dungeon.get_board();
     board.resize(ROWS);
     for(auto& row : board) {
         row.resize(COLS);
     }
-
+    
     const std::vector<std::string> char_board{
         "##########################################",
         "#     ####################           #####",
@@ -143,7 +143,6 @@ void Game::init_actions() {
 
 
 void Game::move_player(char c) {
-    auto& board = dungeon.get_board();
     int new_r = pos_r, new_c = pos_c;
     c = tolower(c);
 
@@ -171,8 +170,6 @@ void Game::move_player(char c) {
 }
 
 void Game::render_state() {
-    auto& board = dungeon.get_board();
-
     print_player_stats();
     print_player_inventory();
     print_player_wallet();
@@ -199,8 +196,6 @@ void Game::render_state() {
 }  
 
 void Game::cur_action_info() {
-    auto& board = dungeon.get_board();
-
     full_clear_from_cursor();
     auto& items = board[pos_r][pos_c].get_items();
     std::cout << "LOG: ";
@@ -269,7 +264,7 @@ void Game::print_player_hands() {
 }
 
 void Game::player_try_pick_up_item() {
-    auto& cell = dungeon.get_board()[pos_r][pos_c];
+    auto& cell = board[pos_r][pos_c];
 
     if(cell.empty()) {
         return;
@@ -321,7 +316,7 @@ void Game::player_try_drop_item() {
         return;
     }
 
-    Cell& cell = dungeon.get_board()[pos_r][pos_c];
+    Cell& cell = board[pos_r][pos_c];
 
     if(input == "gold") {
         int cnt_gold = p.get_gold();
