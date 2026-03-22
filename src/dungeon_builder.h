@@ -5,18 +5,28 @@
 
 #include <vector>
 
-class DungeonBuilder {
+struct PlayerCapabilities {
+    bool can_move = false;
+    bool has_items = false;
+    bool has_weapons = false;
+};
+
+struct BuildResult {
     std::vector<std::vector<Cell>> board;
+    PlayerCapabilities capabilities;
+};
+
+class DungeonBuilder {
+    int player_start_pos_r, player_start_pos_c;
+    std::vector<std::vector<Cell>> board;
+    PlayerCapabilities capabilities;
 public:
-    DungeonBuilder();
-    std::vector<std::vector<Cell>> build();
+    DungeonBuilder(int r = 1, int c = 1, bool start_filled = true);
+    BuildResult build();
 private:
-    void init_board();
+    void init_board(bool start_filled);
 
     std::vector<std::pair<int, int>> get_all_empty_pos();
-
-    void empty_dungeon();
-    void fill_dungeon();
     
     void add_random_path();
     void add_random_chamber(int len);

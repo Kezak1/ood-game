@@ -4,8 +4,11 @@
 
 Game::Game() : p(Player()), pos_r(1), pos_c(1) {
     init_actions();
-    DungeonBuilder d;
-    board = d.build();
+    DungeonBuilder d(pos_r, pos_c, true);
+    auto res = d.build();
+
+    board = std::move(res.board);
+    capabilities = res.capabilities;
     
     /*
     board.resize(ROWS);
@@ -174,6 +177,8 @@ void Game::render_state() {
     print_player_inventory();
     print_player_wallet();
     print_player_hands();
+    std::cout << "\n\n";
+    print_instructions();
 
     std::stringstream ss;
     for(int r = 0; r < ROWS; r++) {
@@ -263,6 +268,28 @@ void Game::print_player_hands() {
     std::cout << out.str();
 }
 
+void Game::print_instructions() {
+    std::stringstream out;
+    if(capabilities.can_move) {
+        out << "MOVE(WASD) | ";
+    }
+    if(capabilities.has_items) {
+        out << "PICK UP(E) | DROP(G) | ";
+    }
+    if(capabilities.has_weapons) {
+        out << "EQUIP(J) | UNEQUIP(K) | ";
+    }
+    if(capabilities.has_items || capabilities.has_weapons) {
+        out << "GET INFO(I) | ";
+    }
+    auto strout = out.str();
+    strout.pop_back();
+    strout.pop_back();
+
+    clear_line_cursor();
+    std::cout << strout << '\n';
+}
+
 void Game::player_try_pick_up_item() {
     auto& cell = board[pos_r][pos_c];
 
@@ -305,7 +332,7 @@ void Game::player_try_drop_item() {
     set_raw_mode(false);
     unhide_cursor();
 
-    std::cout << "Enter index of item to drop it from inventory or write 'gold'/'coin' to drop a gold/coin (to cancel write 'cancel'): ";
+    std::cout << "Enter index of item to drop it from inventory (to cancel write 'cancel'): ";
     std::string input;
     std::getline(std::cin, input);
 
@@ -318,6 +345,7 @@ void Game::player_try_drop_item() {
 
     Cell& cell = board[pos_r][pos_c];
 
+    /*
     if(input == "gold") {
         int cnt_gold = p.get_gold();
         if(cnt_gold > 0) {
@@ -333,7 +361,7 @@ void Game::player_try_drop_item() {
             cell.add_item(std::make_unique<Coin>());
         }
         return;
-    } else if(p.get_inventory().empty() || input == "cancel") {
+    } else*/if(p.get_inventory().empty() || input == "cancel") {
         return;
     }    
 

@@ -8,6 +8,7 @@
 
 inline constexpr int ROWS = 22;
 inline constexpr int COLS = 42;
+//RIGHT, LEFT, DOWN, UP
 inline constexpr int dr[4] = {0, 0, 1, -1};
 inline constexpr int dc[4] = {1, -1, 0, 0};
 

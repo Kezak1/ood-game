@@ -28,6 +28,8 @@ class Game {
     Player p;
     int pos_r, pos_c;
     std::vector<std::vector<Cell>> board;
+    PlayerCapabilities capabilities;
+
     std::unordered_map<char, std::function<bool()>> actions;
 public:
     Game();
@@ -43,6 +45,7 @@ private:
     void print_player_wallet();
     void print_player_inventory();
     void print_player_hands();
+    void print_instructions();
     
     void player_try_pick_up_item();
     void player_try_drop_item();
