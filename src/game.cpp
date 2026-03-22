@@ -4,7 +4,7 @@
 
 Game::Game() : p(Player()), pos_r(1), pos_c(1) {
     init_actions();
-    DungeonBuilder d(pos_r, pos_c, true);
+    DungeonBuilder d(pos_r, pos_c, false);
     auto res = d.build();
 
     board = std::move(res.board);
@@ -96,7 +96,6 @@ void Game::main_loop() {
         char k = getchar();
         k = tolower(k);
 
-        move_player(k);
         to_start_cursor();
         render_state();
         cur_action_info();
@@ -105,6 +104,9 @@ void Game::main_loop() {
             if(actions[k]()) {
                 break;
             }
+        } else {
+            std::cerr << "invalid key pressed" << '\n' << "(to continue press any key)";
+            getchar();
         }
     
         to_start_cursor();
@@ -142,33 +144,45 @@ void Game::init_actions() {
     actions['q'] = [this] {
         return true;
     };
+    actions['w'] = [this] {
+        player_move_up();
+        return false;
+    };
+    actions['s'] = [this] {
+        player_move_down();
+        return false;
+    };
+    actions['a'] = [this] {
+        player_move_left();
+        return false;
+    };
+    actions['d'] = [this] {
+        player_move_right();
+        return false;
+    };
 }
 
-
-void Game::move_player(char c) {
-    int new_r = pos_r, new_c = pos_c;
-    c = tolower(c);
-
-    switch(c) {
-        case 'w':
-            new_r--;
-            break;
-        case 's':
-            new_r++;
-            break;
-        case 'a':
-            new_c--;
-            break;
-        case 'd':
-            new_c++;
-            break;
-        default:
-            return;
+void Game::player_move_up() {
+    if(!board[pos_r - 1][pos_c].is_wall()) {
+        pos_r--;
     }
+}
 
-    if(in_range(new_r, new_c) && !board[new_r][new_c].is_wall()) {
-        pos_r = new_r;
-        pos_c = new_c;
+void Game::player_move_down() {
+    if(!board[pos_r + 1][pos_c].is_wall()) {
+        pos_r++;
+    }
+}
+
+void Game::player_move_left() {
+    if(!board[pos_r][pos_c - 1].is_wall()) {
+        pos_c--;
+    }
+}
+
+void Game::player_move_right() {
+    if(!board[pos_r][pos_c + 1].is_wall()) {
+        pos_c++;
     }
 }
 
@@ -177,7 +191,7 @@ void Game::render_state() {
     print_player_inventory();
     print_player_wallet();
     print_player_hands();
-    std::cout << "\n\n";
+    std::cout << "\n";
     print_instructions();
 
     std::stringstream ss;

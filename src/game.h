@@ -36,8 +36,6 @@ public:
     void main_loop();
 private:
     void init_actions();
-
-    void move_player(char c);
     void render_state();
     void cur_action_info();
 
@@ -47,6 +45,11 @@ private:
     void print_player_hands();
     void print_instructions();
     
+    void player_move_up();
+    void player_move_down();
+    void player_move_left();
+    void player_move_right();
+
     void player_try_pick_up_item();
     void player_try_drop_item();
     void player_try_equip_weapon();
