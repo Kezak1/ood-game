@@ -8,13 +8,15 @@
 #include "old_book.h"
 #include "rock.h"
 
-// #include <queue>
-// #include <limits>
-
 DungeonBuilder::DungeonBuilder(int r, int c, bool start_filled) : player_start_pos_r(r), player_start_pos_c(c) {
     init_board(start_filled);
     add_random_path();
+    add_random_path();
+    add_random_path();
     add_center_room(6, 6);
+    add_random_chamber(2);
+    add_random_chamber(3);
+    add_random_chamber(4);
     connect_rooms();
     add_random_items(2);
     add_random_weapons(2);
@@ -272,7 +274,110 @@ void DungeonBuilder::add_random_weapons(int count) {
 }
 
 void DungeonBuilder::connect_rooms() {
-   //TO DO connect empty cells such way thats its connected graph
+    std::vector<std::pair<int, int>> rooms_centers;
+    std::vector<std::vector<bool>> vis(ROWS, std::vector<bool>(COLS, false));
+    
+    auto get_center_pos = [&](int start_r, int start_c) {
+        std::vector<int> rs, cs;
+        std::stack<std::pair<int, int>> s;
+        s.push({start_r, start_c});
+        vis[start_r][start_c] = true;
+
+        while(!s.empty()) {
+            auto [cur_r, cur_c] = s.top();
+            s.pop();
+            
+            rs.push_back(cur_r);
+            cs.push_back(cur_c);
+
+            for(int i = 0; i < 4; i++) {
+                int nr = cur_r + dr[i], nc = cur_c + dc[i];
+                if(in_range(nr, nc) && !board[nr][nc].is_wall() && !vis[nr][nc]) {
+                    s.push({nr, nc});
+                    vis[nr][nc] = true;                    
+                }
+            }
+        }
+        std::sort(rs.begin(), rs.end());
+        std::sort(cs.begin(), cs.end());
+
+        return std::make_pair(rs[rs.size() / 2], cs[cs.size() / 2]);
+    };
+
+    auto carve = [&](std::pair<int, int> a, std::pair<int, int> b) {
+        int start_r = a.first, start_c = a.second;
+        int end_r = b.first, end_c = b.second;
+
+        auto carve_line = [&](int r1, int c1, int r2, int c2) {
+            if(r1 == r2) {
+                int step = (c1 <= c2 ? 1 : -1);
+                for(int c = c1; c != c2 + step; c += step) {
+                    board[r1][c].set_wall(false);
+                }
+            } else {
+                int step = (r1 <= r2 ? 1 : -1);
+                for(int r = r1; r != r2 + step; r += step) {
+                    board[r][c1].set_wall(false);
+                }
+            }
+        };
+
+        if(next_random(0, 1)) {
+            carve_line(start_r, start_c, end_r, start_c);
+            carve_line(end_r, start_c, end_r, end_c);
+        } else {
+            carve_line(start_r, start_c, start_r, end_c);
+            carve_line(start_r, end_c, end_r, end_c);
+        }
+    };
+
+    auto manhathan_dis = [](std::pair<int, int> a, std::pair<int, int> b) {
+        return std::abs(a.first - b.first) + std::abs(a.second - b.second);
+    };
+
+    rooms_centers.push_back({player_start_pos_r, player_start_pos_c});
+    for(int i = 1; i < ROWS - 1; i++) {
+        for(int j = 1; j < COLS - 1; j++) {
+            if(!board[i][j].is_wall() && !vis[i][j]) {
+                rooms_centers.push_back(get_center_pos(i, j));
+            }
+        }
+    }
+
+    int size = rooms_centers.size();
+    if(size <= 1) {
+        return;
+    }
+
+    std::vector<bool> connected(size, false);
+    connected[0] = true;
+
+    for(int e = 0; e < size - 1; e++) {
+        int best_from = -1, best_to = -1;
+        int best = INT_MAX;
+
+        for(int i = 0; i < size; i++) {
+            if(!connected[i]) continue;
+
+            for(int j = 0; j < size; j++) {
+                if(connected[j]) continue;
+
+                int d = manhathan_dis(rooms_centers[i], rooms_centers[j]);
+                if(d < best) {
+                    best = d;
+                    best_from = i;
+                    best_to = j;
+                }
+            }
+        }
+
+        if(best_to == -1) {
+            break;
+        }
+
+        carve(rooms_centers[best_from], rooms_centers[best_to]);
+        connected[best_to] = true;
+    }
 }
 
 std::vector<std::pair<int, int>> DungeonBuilder::get_all_empty_pos() {

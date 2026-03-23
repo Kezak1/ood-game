@@ -4,7 +4,7 @@
 
 Game::Game() : p(Player()), pos_r(1), pos_c(1) {
     init_actions();
-    DungeonBuilder d(pos_r, pos_c, false);
+    DungeonBuilder d(pos_r, pos_c, true);
     auto res = d.build();
 
     board = std::move(res.board);

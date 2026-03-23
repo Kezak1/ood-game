@@ -4,6 +4,10 @@
 #include "cell.h"
 
 #include <vector>
+#include <stack>
+#include <algorithm>
+#include <unordered_set>
+#include <climits>
 
 struct PlayerCapabilities {
     bool can_move = false;
