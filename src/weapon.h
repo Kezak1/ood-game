@@ -6,11 +6,11 @@
 #include <sstream>
 
 class Weapon : public Item {
+protected:
     int dmg;
 public:
     Weapon(int _dmg, std::string s);
     virtual std::string get_info() const override;
-    virtual std::string get_stats() const;
 };
 
 #endif

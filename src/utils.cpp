@@ -1,5 +1,11 @@
 #include "utils.h"
 
+custom_exception::custom_exception(const char* msg) : msg(msg) {}
+
+const char* custom_exception::what() const noexcept {
+    return msg.c_str();
+}
+
 int next_random(int l, int r) {
     std::random_device rd;
     std::mt19937 gen(rd());

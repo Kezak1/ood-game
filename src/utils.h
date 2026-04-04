@@ -5,6 +5,14 @@
 #include <iostream>
 #include <termios.h>
 #include <unistd.h>
+#include <stdexcept>
+
+class custom_exception : public std::exception {
+    std::string msg;
+public:
+    custom_exception(const char* msg);
+    const char* what() const noexcept override;
+};
 
 inline constexpr int ROWS = 22;
 inline constexpr int COLS = 42;
@@ -16,7 +24,6 @@ inline constexpr const char* C_WALL = "██";
 inline constexpr const char* C_EMPTY = "  ";
 inline constexpr const char* C_PLAYER = "¶ ";
 inline constexpr const char* C_ITEMS = "!*";
-
 
 int next_random(int l, int r);
 bool in_range(int r, int c);

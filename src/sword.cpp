@@ -6,7 +6,7 @@ Sword::Sword(int _dmg, std::string s) : Weapon(_dmg, s) {
 
 std::string Sword::get_info() const {
     std::stringstream res;
-    res << "sword, hold: single" << get_stats();
+    res << "sword, hold: single, dmg: " << dmg;
     return res.str();
 }
 

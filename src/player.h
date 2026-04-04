@@ -14,12 +14,12 @@ class Player {
     std::unique_ptr<Item> left_hand, right_hand, both_hands;  
 public:
     Player();
-    const int& get_hp() const;
-    const int& get_str() const;
-    const int& get_dex() const;
-    const int& get_lck() const;
-    const int& get_agr() const;
-    const int& get_wis() const;
+    int get_hp() const;
+    int get_str() const;
+    int get_dex() const;
+    int get_lck() const;
+    int get_agr() const;
+    int get_wis() const;
 
     const int& get_gold() const;
     void set_gold(int val);
@@ -47,6 +47,9 @@ public:
     std::unique_ptr<Item> take_item(int idx);
 
     std::string get_item_info(int idx) const;
+    std::string get_left_hand_info() const;
+    std::string get_right_hand_info() const;
+    std::string get_both_hand_info() const;
 };
 
 #endif

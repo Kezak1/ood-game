@@ -2,6 +2,8 @@
 #define DUNGEON_BUILDER_H
 
 #include "cell.h"
+#include "strong_modifier.h"
+#include "unlucky_modifier.h"
 
 #include <vector>
 #include <stack>

@@ -1,87 +1,19 @@
 #include "game.h"
 #include "dungeon_builder.h"
+#include "equipment_handler.h"
+#include "inventory_handler.h"
+#include "quit_handler.h"
 #include "utils.h"
 
+#include <memory>
+
 Game::Game() : p(Player()), pos_r(1), pos_c(1) {
-    init_actions();
+    init_handlers();
     DungeonBuilder d(pos_r, pos_c, true);
     auto res = d.build();
 
     board = std::move(res.board);
-    capabilities = res.capabilities;
-    
-    /*
-    board.resize(ROWS);
-    for(auto& row : board) {
-        row.resize(COLS);
-    }
-    
-    const std::vector<std::string> char_board{
-        "##########################################",
-        "#     ####################           #####",
-        "#     #################### ######### #####",
-        "### #####                  ######### #####",
-        "### #####        #################    ####",
-        "###         *    #################    ####",
-        "#########        #################    ####",
-        "############## ###################*  *####",
-        "############## ###########################",
-        "############## ###########################",
-        "######                              ######",
-        "###### ############################ ######",
-        "###### ############################ ######",
-        "###### ############################ ######",
-        "###### ###########        ######### ######",
-        "###        #######   *    ######       ###",
-        "###        #######        ######       ###",
-        "###   *                   ######       ###",
-        "###        ######### ###########   *   ###",
-        "###### ############# ###########       ###",
-        "######               #####################",
-        "##########################################",
-    };
-
-    std::vector<std::pair<int, int>> items_cords;
-
-    for(int i = 0; i < ROWS; i++) {
-        for(int j = 0; j < COLS; j++) {
-            auto& chr = char_board[i][j];
-            if(chr == '#') {
-                board[i][j] = Cell(true); 
-            } else {
-                board[i][j] = Cell(false);
-                if(chr == '*') {
-                    items_cords.push_back({i, j});
-                }
-            }
-        }
-    }
-
-    int r1 = items_cords[0].first, c1 = items_cords[0].second;
-    board[r1][c1].add_item(std::make_unique<Rock>());
-    board[r1][c1].add_item(std::make_unique<Sword>(20, "katana"));
-    board[r1][c1].add_item(std::make_unique<Bow>(14, "great bow"));
-
-    int r2 = items_cords[1].first, c2 = items_cords[1].second;
-    board[r2][c2].add_item(std::make_unique<OldBook>());
-    board[r2][c2].add_item(std::make_unique<StrangeIdol>());
-
-    int r3 = items_cords[2].first, c3 = items_cords[2].second;
-    board[r3][c3].add_item(std::make_unique<Axe>(10, "axe"));
-
-    int r4 = items_cords[3].first, c4 = items_cords[3].second;
-    board[r4][c4].add_item(std::make_unique<Gold>());
-    board[r4][c4].add_item(std::make_unique<Gold>());
-    board[r4][c4].add_item(std::make_unique<Gold>());
-
-    int r5 = items_cords[4].first, c5 = items_cords[4].second;
-    board[r5][c5].add_item(std::make_unique<Coin>());
-    board[r5][c5].add_item(std::make_unique<Coin>());
-    board[r5][c5].add_item(std::make_unique<OldBook>());
-
-    int r6 = items_cords[5].first, c6 = items_cords[5].second;
-    board[r6][c6].add_item(std::make_unique<Sword>(14, "rapier"));
-    */
+capabilities = res.capabilities;
 }
 
 void Game::main_loop() {
@@ -100,12 +32,23 @@ void Game::main_loop() {
         render_state();
         cur_action_info();
 
-        if(actions.find(k) != actions.end()) {
-            if(actions[k]()) {
+        bool handled = false;
+        bool quit = false;
+
+        for(auto& handler : handlers) {
+            if(auto res = handler->handle(*this, k)) {
+                handled = true;
+                quit = *res;
                 break;
             }
-        } else {
-            std::cerr << "invalid key pressed" << '\n' << "(to continue press any key)";
+        }
+
+        if(quit) {
+            break;
+        }
+
+        if (!handled) {
+            std::cerr << "invalid key pressed\n(to continue press any key)";
             getchar();
         }
     
@@ -120,46 +63,13 @@ void Game::main_loop() {
     set_raw_mode(false);
 }
 
-void Game::init_actions() {
-    actions['e'] = [this] {
-        player_try_pick_up_item();
-        return false;
-    };
-    actions['g'] = [this] {
-        player_try_drop_item();
-        return false;
-    };
-    actions['j'] = [this] {
-        player_try_equip_weapon();
-        return false;
-    };
-    actions['k'] = [this] {
-        player_try_unequip_weapon();
-        return false;
-    };
-    actions['i'] = [this] {
-        player_try_get_item_info();
-        return false;
-    };
-    actions['q'] = [this] {
-        return true;
-    };
-    actions['w'] = [this] {
-        player_move_up();
-        return false;
-    };
-    actions['s'] = [this] {
-        player_move_down();
-        return false;
-    };
-    actions['a'] = [this] {
-        player_move_left();
-        return false;
-    };
-    actions['d'] = [this] {
-        player_move_right();
-        return false;
-    };
+void Game::init_handlers() {
+    handlers.clear();
+
+    handlers.push_back(std::make_unique<QuitHandler>());
+    handlers.push_back(std::make_unique<MoveHandler>());
+    handlers.push_back(std::make_unique<EquipmentHandler>());
+    handlers.push_back(std::make_unique<InventoryHandler>());
 }
 
 void Game::player_move_up() {
@@ -223,11 +133,11 @@ void Game::cur_action_info() {
     } else {
         std::cout << "stading on following items\n";
         int idx = 1;
-        std::cout << "[ ";
+        std::cout << "{ ";
         for(auto& i : items) {
-            std::cout << std::format("{}.({}) ", idx++, i->get_name());
+            std::cout << std::format("{}.[{}] ", idx++, i->get_name());
         }
-        std::cout << "]\n";
+        std::cout << "}\n";
     }
 }
 
@@ -251,12 +161,12 @@ void Game::print_player_inventory() {
     auto& inventory = p.get_inventory();
 
     std::stringstream out;
-    out << "INVENTORY: [ ";
+    out << "INVENTORY: { ";
     int idx = 1;
     for(auto& i : inventory) {
-        out << std::format("{}.({}) ", idx++, i->get_name());
+        out << std::format("{}.[{}] ", idx++, i->get_name());
     }
-    out << "]\n";
+    out << "}\n";
 
     clear_line_cursor();
     std::cout << out.str();
@@ -284,6 +194,7 @@ void Game::print_player_hands() {
 
 void Game::print_instructions() {
     std::stringstream out;
+    out << "QUIT(Q) | ";
     if(capabilities.can_move) {
         out << "MOVE(WASD) | ";
     }
@@ -415,7 +326,7 @@ void Game::player_try_equip_weapon() {
         item = raw_item->equip(p, std::move(item));
         if(item) {
             p.insert_item(idx, std::move(item), true);
-            throw std::logic_error("cannot equip this item");
+            throw custom_exception("cannot equip this item");
         }
     } catch(const std::exception& e) {
         std::cout << "ERROR: " << e.what() << '\n' << "(to continue press any key)";
@@ -470,7 +381,7 @@ void Game::player_try_get_item_info() {
     set_raw_mode(false);
     unhide_cursor();
 
-    std::cout << "Enter index to get info about chose item (to cancel write 'cancel'): ";
+    std::cout << "Enter inventory index or 'left'/'right'/'both' to get info about chosen item (to cancel write 'cancel'): ";
     std::string input;
     std::getline(std::cin, input);
 
@@ -482,8 +393,20 @@ void Game::player_try_get_item_info() {
     }
 
     try {
-        int idx = std::stoi(input);
-        std::cout << "INFO: " << p.get_item_info(idx) << "\n(to continue press any key)";
+        std::cout << "INFO: ";
+
+        if(input == "left") {
+            p.get_left_hand_info();
+        } else if(input == "right") {
+            p.get_right_hand_info();
+        } else if(input == "both") {
+            std::cout << p.get_both_hand_info();
+        } else {
+            int idx = std::stoi(input);
+            std::cout << p.get_item_info(idx);
+        }
+
+        std::cout << "\n(to continue press any key)";
         getchar();
     } catch(const std::exception& e) {
         std::cout << "ERROR: " << e.what() << "\n(to continue press any key)";

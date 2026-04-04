@@ -4,13 +4,34 @@
 Item::Item(std::string s) : name(s) {
 }
 
-const std::string& Item::get_name() const {
+std::string Item::get_name() const {
     return name;
 }
 
-std::string Item::get_info() const {
-    return "plain item";
+int Item::get_dmg() const {
+    return 0;
 }
+
+int Item::get_str_bonus() const {
+    return 0;
+}
+
+int Item::get_dex_bonus() const {
+    return 0;
+}
+
+int Item::get_lck_bonus() const {
+    return 0;
+}
+
+int Item::get_agr_bonus() const {
+    return 0;
+}
+
+int Item::get_wis_bonus() const {
+    return 0;
+}
+
 
 bool Item::on_pick_up(Player&) const {
     return true;

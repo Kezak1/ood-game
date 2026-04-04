@@ -1,5 +1,7 @@
 #include "dungeon_builder.h"
 
+#include "strong_modifier.h"
+#include "unlucky_modifier.h"
 #include "utils.h"
 #include "sword.h"
 #include "bow.h"
@@ -7,6 +9,7 @@
 #include "strange_idol.h"
 #include "old_book.h"
 #include "rock.h"
+#include <memory>
 
 DungeonBuilder::DungeonBuilder(int r, int c, bool start_filled) : player_start_pos_r(r), player_start_pos_c(c) {
     init_board(start_filled);
@@ -224,14 +227,23 @@ void DungeonBuilder::add_center_room(int w, int h) {
 }
 
 std::unique_ptr<Item> make_random_weapon() {
+    std::unique_ptr<Item> item;
     switch(next_random(1, 3)) {
         case 1: 
-            return std::make_unique<Sword>(next_random(3, 9), "rusty sword");
+            item = std::make_unique<Sword>(5, "sword");
+            break;
         case 2: 
-            return std::make_unique<Axe>(next_random(4, 7), "iron axe");
+            item = std::make_unique<Axe>(5, "axe");
+            break;
         default: 
-            return std::make_unique<Bow>(next_random(2, 6), "short bow");
+            item = std::make_unique<Bow>(5, "bow");
+            break;
     }
+
+    item = std::make_unique<StrongModifier>(std::move(item));
+    item = std::make_unique<UnluckyModifier>(std::move(item));
+
+    return item;
 }
 
 std::unique_ptr<Item> make_random_item() {

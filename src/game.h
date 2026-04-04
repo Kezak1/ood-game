@@ -15,6 +15,11 @@
 #include "coin.h"
 #include "gold.h"
 
+#include "action_handler.h"
+#include "move_handler.h"
+#include "inventory_handler.h"
+#include "equipment_handler.h"
+
 #include <functional>
 #include <iostream>
 #include <format>
@@ -30,21 +35,11 @@ class Game {
     std::vector<std::vector<Cell>> board;
     PlayerCapabilities capabilities;
 
-    std::unordered_map<char, std::function<bool()>> actions;
+    std::vector<std::unique_ptr<ActionHandler>> handlers;
 public:
     Game();
     void main_loop();
-private:
-    void init_actions();
-    void render_state();
-    void cur_action_info();
 
-    void print_player_stats();
-    void print_player_wallet();
-    void print_player_inventory();
-    void print_player_hands();
-    void print_instructions();
-    
     void player_move_up();
     void player_move_down();
     void player_move_left();
@@ -55,6 +50,16 @@ private:
     void player_try_equip_weapon();
     void player_try_unequip_weapon();
     void player_try_get_item_info();
+private:
+    void init_handlers();
+    void render_state();
+    void cur_action_info();
+
+    void print_player_stats();
+    void print_player_wallet();
+    void print_player_inventory();
+    void print_player_hands();
+    void print_instructions();
 };
 
 #endif

@@ -7,7 +7,7 @@ Axe::Axe(int _dmg, std::string s) : Weapon(_dmg, s) {
 
 std::string Axe::get_info() const {
     std::stringstream res;
-    res << "axe, hold: single" << get_stats();
+    res << "axe, hold: single, dmg: " << dmg;
     return res.str();
 }
 

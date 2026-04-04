@@ -1,13 +1,14 @@
 #include "player.h"
+#include "utils.h"
 #include <memory>
 
 Player::Player() : 
     hp(100),
-    str(next_random(0, 20)),
-    dex(next_random(0, 20)),
-    lck(next_random(0, 20)),
-    agr(next_random(0, 20)),
-    wis(next_random(0, 20)),
+    str(20),
+    dex(20),
+    lck(20),
+    agr(20),
+    wis(20),
     gold(0),
     coins(0),
     left_hand(nullptr), 
@@ -15,27 +16,33 @@ Player::Player() :
     both_hands(nullptr) {
 }
 
-const int& Player::get_hp() const {
+int Player::get_hp() const {
     return hp;
 }
 
-const int& Player::get_str() const {
+int Player::get_str() const {
     return str;
 }
 
-const int& Player::get_dex() const {
+int Player::get_dex() const {
     return dex;
 }
 
-const int& Player::get_lck() const {
-    return lck;
+int Player::get_lck() const {
+    int bonus = 0;
+
+    if(left_hand) bonus += left_hand->get_lck_bonus();
+    if(right_hand) bonus += right_hand->get_lck_bonus();
+    if(both_hands) bonus += both_hands->get_lck_bonus();
+
+    return std::max(lck + bonus, 0);
 }
 
-const int& Player::get_agr() const {
+int Player::get_agr() const {
     return agr;
 }
 
-const int& Player::get_wis() const {
+int Player::get_wis() const {
     return wis;
 }
 
@@ -160,4 +167,28 @@ std::string Player::get_item_info(int idx) const {
     }
 
     return inventory[idx - 1]->get_info();
+}
+
+std::string Player::get_left_hand_info() const {
+    if(!left_hand) {
+        throw custom_exception("null left hand");
+    }
+
+    return left_hand->get_info();
+}
+
+std::string Player::get_right_hand_info() const {
+    if(!right_hand) {
+        throw custom_exception("null right hand");
+    }
+    
+    return right_hand->get_info();
+}
+
+std::string Player::get_both_hand_info() const {
+    if(!both_hands) {
+        throw custom_exception("null both hands");
+    }
+    
+    return both_hands->get_info();
 }

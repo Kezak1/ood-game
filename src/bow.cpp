@@ -6,7 +6,7 @@ Bow::Bow(int _dmg, std::string s) : Weapon(_dmg, s) {
 
 std::string Bow::get_info() const {
     std::stringstream res;
-    res << "bow, hold: both" << get_stats();
+    res << "bow, hold: both, dmg: " << dmg;
     return res.str();
 }
 
