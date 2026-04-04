@@ -16,9 +16,9 @@ rpg game - uni project
 
 ## Instruction
 1. **Icons**:
-    - Player (¶)
-    - Wall (█)
-    - Items on the ground (*)
+    - Player (`¶ `)
+    - Wall (`██`)
+    - Items on the ground (`!*`)
 2. **Controls:**
     - to move use **WASD** keys
     - to pick up an item that is on the cell the ¶ is on press **E**
