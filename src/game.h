@@ -3,8 +3,11 @@
 
 #include "utils.h"
 #include "cell.h"
-#include "player.h"
 #include "dungeon_builder.h"
+
+#include "entity.h"
+#include "player.h"
+#include "enemy.h"
 
 #include "sword.h"
 #include "bow.h"
@@ -31,7 +34,9 @@
 
 class Game {
     Player p;
-    int pos_r, pos_c;
+    std::vector<Enemy> enemies;
+    std::vector<std::vector<int>> enemy_map;
+    
     std::vector<std::vector<Cell>> board;
     PlayerCapabilities capabilities;
 
@@ -60,6 +65,8 @@ private:
     void print_player_inventory();
     void print_player_hands();
     void print_instructions();
+
+    bool is_enemy_pos(int r, int c);
 };
 
 #endif

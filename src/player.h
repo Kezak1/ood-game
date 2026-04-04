@@ -1,20 +1,20 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
+#include "entity.h"
 #include "item.h"
 #include "utils.h"
 
 #include <vector>
 #include <memory>
 
-class Player {
-    int hp, str, dex, lck, agr, wis;
+class Player : public Entity {
+    int str, dex, lck, agr, wis;
     int gold, coins;
     std::vector<std::unique_ptr<Item>> inventory;
     std::unique_ptr<Item> left_hand, right_hand, both_hands;  
 public:
     Player();
-    int get_hp() const;
     int get_str() const;
     int get_dex() const;
     int get_lck() const;

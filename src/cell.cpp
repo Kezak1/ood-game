@@ -1,4 +1,5 @@
 #include "cell.h"
+#include "utils.h"
 
 Cell::Cell() : wall(false), items() {}
 
@@ -6,7 +7,7 @@ Cell::Cell(bool is_wall) : wall(is_wall), items() {}
 
 Cell::Cell(bool is_wall, std::unique_ptr<Item> item) {
     if(is_wall) {
-        throw std::invalid_argument("wall cells cannot store items");
+        throw custom_exception("wall cells cannot store items");
     }
     wall = is_wall;
     items.push_back(std::move(item));
@@ -14,7 +15,7 @@ Cell::Cell(bool is_wall, std::unique_ptr<Item> item) {
 
 Cell::Cell(bool is_wall, std::vector<std::unique_ptr<Item>> _items) {
     if(is_wall) {
-        throw std::invalid_argument("wall cells cannot store items");
+        throw custom_exception("wall cells cannot store items");
     }
     wall = is_wall;
     items = std::move(_items);

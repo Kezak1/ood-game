@@ -10,8 +10,10 @@
 #include "old_book.h"
 #include "rock.h"
 #include <memory>
+#include <string>
 
-DungeonBuilder::DungeonBuilder(int r, int c, bool start_filled) : player_start_pos_r(r), player_start_pos_c(c) {
+DungeonBuilder::DungeonBuilder(bool start_filled) 
+    : player_start_pos_r(1), player_start_pos_c(1) {
     init_board(start_filled);
     add_random_path();
     add_random_path();
@@ -23,6 +25,7 @@ DungeonBuilder::DungeonBuilder(int r, int c, bool start_filled) : player_start_p
     connect_rooms();
     add_random_items(2);
     add_random_weapons(2);
+    add_random_enemies();
 }
 
 void DungeonBuilder::init_board(bool start_filled) {
@@ -42,12 +45,12 @@ void DungeonBuilder::init_board(bool start_filled) {
     }
 }
 
-
 BuildResult DungeonBuilder::build() {
     board[player_start_pos_r][player_start_pos_c].set_wall(false);
     BuildResult res {
         .board = std::move(board),
-        .capabilities = capabilities
+        .enemies = enemies,
+        .capabilities = capabilities,
     };
     return res;
 }
@@ -389,6 +392,14 @@ void DungeonBuilder::connect_rooms() {
 
         carve(rooms_centers[best_from], rooms_centers[best_to]);
         connected[best_to] = true;
+    }
+}
+
+void DungeonBuilder::add_random_enemies(int count) {
+    auto a = get_all_empty_pos();
+    while(count-- > 0) {
+        auto [r, c] = a[next_random(0, (int)a.size() - 1)];
+        enemies.push_back(Enemy("Enemy" + std::to_string(count), r, c));
     }
 }
 

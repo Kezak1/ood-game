@@ -1,6 +1,5 @@
 #include "equipment_handler.h"
 #include "game.h"
-#include <optional>
 
 std::optional<bool> EquipmentHandler::handle(Game& game, char key) {
     switch(tolower(key)) {

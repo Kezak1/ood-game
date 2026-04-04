@@ -16,14 +16,16 @@ public:
 
 inline constexpr int ROWS = 22;
 inline constexpr int COLS = 42;
+
 //RIGHT, LEFT, DOWN, UP
 inline constexpr int dr[4] = {0, 0, 1, -1};
 inline constexpr int dc[4] = {1, -1, 0, 0};
 
-inline constexpr const char* C_WALL = "██";
-inline constexpr const char* C_EMPTY = "  ";
-inline constexpr const char* C_PLAYER = "¶ ";
-inline constexpr const char* C_ITEMS = "!*";
+inline constexpr auto C_WALL = "█";
+inline constexpr auto C_EMPTY = " ";
+inline constexpr auto C_PLAYER = "¶";
+inline constexpr auto C_ITEMS = "*";
+inline constexpr auto C_ENEMY = "@";
 
 int next_random(int l, int r);
 bool in_range(int r, int c);

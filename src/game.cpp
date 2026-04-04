@@ -7,13 +7,20 @@
 
 #include <memory>
 
-Game::Game() : p(Player()), pos_r(1), pos_c(1) {
+Game::Game() : p(Player()) {
     init_handlers();
-    DungeonBuilder d(pos_r, pos_c, true);
+    DungeonBuilder d(true);
     auto res = d.build();
-
     board = std::move(res.board);
-capabilities = res.capabilities;
+    capabilities = res.capabilities;
+    enemies = res.enemies;
+
+    enemy_map.assign(ROWS, std::vector<int>(COLS, -1));
+
+    int idx = 0;
+    for(auto& e : enemies) {
+        enemy_map[e.get_r()][e.get_c()] = idx++;
+    }
 }
 
 void Game::main_loop() {
@@ -73,27 +80,31 @@ void Game::init_handlers() {
 }
 
 void Game::player_move_up() {
-    if(!board[pos_r - 1][pos_c].is_wall()) {
-        pos_r--;
+    if(!board[p.get_r() - 1][p.get_c()].is_wall()) {
+        p.set_r(p.get_r() - 1);
     }
 }
 
 void Game::player_move_down() {
-    if(!board[pos_r + 1][pos_c].is_wall()) {
-        pos_r++;
+    if(!board[p.get_r() + 1][p.get_c()].is_wall()) {
+        p.set_r(p.get_r() + 1);
     }
 }
 
 void Game::player_move_left() {
-    if(!board[pos_r][pos_c - 1].is_wall()) {
-        pos_c--;
+    if(!board[p.get_r()][p.get_c() - 1].is_wall()) {
+        p.set_c(p.get_c() - 1);
     }
 }
 
 void Game::player_move_right() {
-    if(!board[pos_r][pos_c + 1].is_wall()) {
-        pos_c++;
+    if(!board[p.get_r()][p.get_c() + 1].is_wall()) {
+        p.set_c(p.get_c() + 1);
     }
+}
+
+bool Game::is_enemy_pos(int r, int c) {
+    return enemy_map[r][c] >= 0;
 }
 
 void Game::render_state() {
@@ -107,12 +118,18 @@ void Game::render_state() {
     std::stringstream ss;
     for(int r = 0; r < ROWS; r++) {
         for(int c = 0; c < COLS; c++) {
-            if(r == pos_r && c == pos_c) {
-                ss << C_PLAYER;
+            if(board[r][c].is_wall()) {
+                ss << C_WALL << C_WALL;
                 continue;
             }
-            if(board[r][c].is_wall()) {
-                ss << C_WALL;
+            if(r == p.get_r() && c == p.get_c()) {
+                ss << C_PLAYER;
+            } else {
+                ss << C_EMPTY;
+            }
+
+            if(is_enemy_pos(r, c)) {
+                ss << C_ENEMY;
             } else if(board[r][c].empty()) {
                 ss << C_EMPTY;
             } else {
@@ -126,12 +143,15 @@ void Game::render_state() {
 
 void Game::cur_action_info() {
     full_clear_from_cursor();
-    auto& items = board[pos_r][pos_c].get_items();
+    auto& items = board[p.get_r()][p.get_c()].get_items();
     std::cout << "LOG: ";
-    if(items.empty()) {
+    if(is_enemy_pos(p.get_r(), p.get_c())) {
+        int idx = enemy_map[p.get_r()][p.get_c()];
+        std::cout << std::format("{} - hp({}), attack({}), armor({})\n", enemies[idx].get_name(), enemies[idx].get_hp(), enemies[idx].get_attack(), enemies[idx].get_arrmor());
+    } else if(items.empty()) {
         std::cout << "standing on empty cell\n";
     } else {
-        std::cout << "stading on following items\n";
+        std::cout << "standing on following items\n";
         int idx = 1;
         std::cout << "{ ";
         for(auto& i : items) {
@@ -216,7 +236,7 @@ void Game::print_instructions() {
 }
 
 void Game::player_try_pick_up_item() {
-    auto& cell = board[pos_r][pos_c];
+    auto& cell = board[p.get_r()][p.get_c()];
 
     if(cell.empty()) {
         return;
@@ -268,7 +288,7 @@ void Game::player_try_drop_item() {
         return;
     }
 
-    Cell& cell = board[pos_r][pos_c];
+    Cell& cell = board[p.get_r()][p.get_c()];
 
     /*
     if(input == "gold") {
@@ -366,7 +386,7 @@ void Game::player_try_unequip_weapon() {
             }
             p.add_item(p.take_both_hands());
         } else {
-            throw std::invalid_argument("invalid input");
+            throw custom_exception("invalid input");
         }
     } catch(const std::exception& e) {
         std::cout << "ERROR: " << e.what() << '\n' << "(to continue press any key)";
@@ -393,20 +413,22 @@ void Game::player_try_get_item_info() {
     }
 
     try {
-        std::cout << "INFO: ";
+        std::stringstream ss;
+        ss << "INFO: ";
 
         if(input == "left") {
-            p.get_left_hand_info();
+            ss << p.get_left_hand_info();
         } else if(input == "right") {
-            p.get_right_hand_info();
+            ss << p.get_right_hand_info();
         } else if(input == "both") {
-            std::cout << p.get_both_hand_info();
+            ss << p.get_both_hand_info();
         } else {
             int idx = std::stoi(input);
-            std::cout << p.get_item_info(idx);
+            ss << p.get_item_info(idx);
         }
 
-        std::cout << "\n(to continue press any key)";
+        ss << "\n(to continue press any key)";
+        std::cout << ss.str();
         getchar();
     } catch(const std::exception& e) {
         std::cout << "ERROR: " << e.what() << "\n(to continue press any key)";

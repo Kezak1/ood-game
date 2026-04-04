@@ -4,6 +4,7 @@
 #include "cell.h"
 #include "strong_modifier.h"
 #include "unlucky_modifier.h"
+#include "enemy.h"
 
 #include <vector>
 #include <stack>
@@ -19,15 +20,18 @@ struct PlayerCapabilities {
 
 struct BuildResult {
     std::vector<std::vector<Cell>> board;
+    std::vector<Enemy> enemies;
     PlayerCapabilities capabilities;
 };
 
 class DungeonBuilder {
     int player_start_pos_r, player_start_pos_c;
+    
+    std::vector<Enemy> enemies;
     std::vector<std::vector<Cell>> board;
     PlayerCapabilities capabilities;
 public:
-    DungeonBuilder(int r = 1, int c = 1, bool start_filled = true);
+    DungeonBuilder(bool start_filled = true);
     BuildResult build();
 private:
     void init_board(bool start_filled);
@@ -40,6 +44,8 @@ private:
 
     void add_random_items(int count = 5);
     void add_random_weapons(int count = 5);
+    
+    void add_random_enemies(int count = 5);
 
     void connect_rooms();
 };

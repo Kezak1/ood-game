@@ -32,7 +32,6 @@ int Item::get_wis_bonus() const {
     return 0;
 }
 
-
 bool Item::on_pick_up(Player&) const {
     return true;
 }

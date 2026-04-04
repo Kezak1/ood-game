@@ -1,9 +1,10 @@
 #include "player.h"
+#include "entity.h"
 #include "utils.h"
 #include <memory>
 
 Player::Player() : 
-    hp(100),
+    Entity(1, 1),
     str(20),
     dex(20),
     lck(20),
@@ -14,10 +15,6 @@ Player::Player() :
     left_hand(nullptr), 
     right_hand(nullptr),
     both_hands(nullptr) {
-}
-
-int Player::get_hp() const {
-    return hp;
 }
 
 int Player::get_str() const {
