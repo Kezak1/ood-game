@@ -1,11 +1,11 @@
-#ifndef SWORD_H
-#define SWORD_H
+#ifndef DAGGER_H
+#define DAGGER_H
 
-#include "weapon.h"
+#include "light_weapon.h"
 
-class Sword : public Weapon {
+class Dagger : public LightWeapon {
 public:
-    Sword(int _dmg, std::string s);
+    Dagger();
     virtual std::string get_info() const override;
     std::unique_ptr<Item> equip(Player& p, std::unique_ptr<Item> self) override;
 };

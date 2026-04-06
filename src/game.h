@@ -9,15 +9,6 @@
 #include "player.h"
 #include "enemy.h"
 
-#include "sword.h"
-#include "bow.h"
-#include "axe.h"
-#include "strange_idol.h"
-#include "old_book.h"
-#include "rock.h"
-#include "coin.h"
-#include "gold.h"
-
 #include "action_handler.h"
 #include "move_handler.h"
 #include "inventory_handler.h"

@@ -1,17 +1,17 @@
-#include "axe.h"
+#include "staff.h"
+#include "attack.h"
 #include "player.h"
-#include <memory>
 
-Axe::Axe() : HeavyWeapon(20, "axe") {
+Staff::Staff() : MagicalWeapon(30, "staff") {
 }
 
-std::string Axe::get_info() const {
+std::string Staff::get_info() const {
     std::stringstream res;
     res << "hold: single, dmg: " << dmg;
     return res.str();
 }
 
-std::unique_ptr<Item> Axe::equip(Player& p, std::unique_ptr<Item> self) {
+std::unique_ptr<Item> Staff::equip(Player& p, std::unique_ptr<Item> self) {
     if(p.equip_in_single_hand(self)) {
         return nullptr;
     }

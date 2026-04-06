@@ -3,8 +3,9 @@
 #include "strong_modifier.h"
 #include "unlucky_modifier.h"
 #include "utils.h"
-#include "sword.h"
-#include "bow.h"
+#include "great_sword.h"
+#include "dagger.h"
+#include "staff.h"
 #include "axe.h"
 #include "strange_idol.h"
 #include "old_book.h"
@@ -231,15 +232,18 @@ void DungeonBuilder::add_center_room(int w, int h) {
 
 std::unique_ptr<Item> make_random_weapon() {
     std::unique_ptr<Item> item;
-    switch(next_random(1, 3)) {
+    switch(next_random(1, 4)) {
         case 1: 
-            item = std::make_unique<Sword>(5, "sword");
+            item = std::make_unique<GreatSword>();
             break;
         case 2: 
-            item = std::make_unique<Axe>(5, "axe");
+            item = std::make_unique<Axe>();
+            break;
+        case 3:
+            item = std::make_unique<Staff>();
             break;
         default: 
-            item = std::make_unique<Bow>(5, "bow");
+            item = std::make_unique<Dagger>();
             break;
     }
 

@@ -42,6 +42,14 @@ void unhide_cursor() {
     std::cout << "\033[?25h";
 }
 
+void enter_alt_terminal() {
+    std::cout << "\033[?1049h";
+}
+
+void exit_alt_terminal() {
+    std::cout << "\033[?1049l";
+}
+
 void set_raw_mode(bool enable) {
     static termios old_t;
     if(enable) {

@@ -16,7 +16,6 @@ Game::Game() : p(Player()) {
     enemies = res.enemies;
 
     enemy_map.assign(ROWS, std::vector<int>(COLS, -1));
-
     int idx = 0;
     for(auto& e : enemies) {
         enemy_map[e.get_r()][e.get_c()] = idx++;

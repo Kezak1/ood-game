@@ -1,11 +1,12 @@
-#ifndef BOW_H
-#define BOW_H
+#ifndef STAFF_H
+#define STAFF_H
 
-#include "weapon.h"
+#include "attack.h"
+#include "magical_weapon.h"
 
-class Bow : public Weapon {
+class Staff : public MagicalWeapon {
 public:
-    Bow(int _dmg, std::string s);
+    Staff();
     virtual std::string get_info() const override;
     std::unique_ptr<Item> equip(Player& p, std::unique_ptr<Item> self) override;
 };

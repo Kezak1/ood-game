@@ -2,9 +2,11 @@
 #define ITEM_H
 
 #include <string>
-#include <memory>
+#include <memory>   
 
 class Player;
+class Attack;
+class Enemy;
 
 class Item {
 protected:
@@ -25,6 +27,9 @@ public:
 
     virtual bool on_pick_up(Player& p) const;
     virtual std::unique_ptr<Item> equip(Player&, std::unique_ptr<Item> self);
+
+    virtual int attack(const Player& p, const Attack& a) const;
+    virtual int defense(const Player& p, const Enemy& e, const Attack& a) const;
 };
 
 #endif
