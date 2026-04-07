@@ -10,5 +10,5 @@ int StrongModifier::get_dmg() const {
 }
 
 std::string StrongModifier::get_info() const {
-    return std::format("{}+{}", ItemModifier::get_info(), get_dmg());
+    return std::format("{}+{}", ItemModifier::get_info(), 5);
 }

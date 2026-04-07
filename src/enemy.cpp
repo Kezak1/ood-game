@@ -30,5 +30,5 @@ void Enemy::take_dmg(int dmg) {
     if(dmg <= 0) {
         return;
     }
-    hp = std::max(0, hp - std::max(1, dmg - armor));
+    hp = std::max(0, hp - std::max(0, dmg - armor));
 }

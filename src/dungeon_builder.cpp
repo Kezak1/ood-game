@@ -1,5 +1,6 @@
 #include "dungeon_builder.h"
 
+#include "mystic_modifier.h"
 #include "strong_modifier.h"
 #include "unlucky_modifier.h"
 #include "utils.h"
@@ -10,8 +11,6 @@
 #include "strange_idol.h"
 #include "old_book.h"
 #include "rock.h"
-#include <memory>
-#include <string>
 
 DungeonBuilder::DungeonBuilder(bool start_filled) 
     : player_start_pos_r(1), player_start_pos_c(1) {
@@ -220,7 +219,7 @@ std::unique_ptr<Item> make_random_item() {
         case 1: 
             return std::make_unique<Rock>();
         case 2: 
-            return std::make_unique<OldBook>();
+            return std::make_unique<MysticModifier>(std::make_unique<OldBook>());
         default: 
             return std::make_unique<StrangeIdol>();
     }
@@ -363,11 +362,22 @@ void DungeonBuilder::connect_rooms() {
 
 void DungeonBuilder::add_random_enemies(int count) {
     auto a = get_all_empty_pos();
-    while(count-- > 0) {
-        auto [r, c] = a[next_random(0, (int)a.size() - 1)];
-        enemies.push_back(Enemy("Enemy" + std::to_string(count), r, c, next_random(30, 50)));
+
+    for(int i = 0; i < count && !a.empty(); i++) {
+        int idx = next_random(0, (int)a.size() - 1);
+        auto [r, c] = a[idx];
+
+        if(r == player_start_pos_r && c == player_start_pos_c) {
+            a.erase(a.begin() + idx);
+            continue;
+        }
+
+        enemies.push_back(Enemy("Enemy" + std::to_string((int)enemies.size() + 1), r, c, next_random(30, 50)));
+    
+        a.erase(a.begin() + idx);
     }
-    capabilities.has_enemies = true;
+
+    capabilities.has_enemies = !enemies.empty();
 }
 
 std::vector<std::pair<int, int>> DungeonBuilder::get_all_empty_pos() {

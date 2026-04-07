@@ -48,7 +48,13 @@ int Player::get_agr() const {
 }
 
 int Player::get_wis() const {
-    return wis;
+    int bonus = 0;
+
+    if(left_hand) bonus += left_hand->get_wis_bonus();
+    if(right_hand) bonus += right_hand->get_wis_bonus();
+    if(both_hands) bonus += both_hands->get_wis_bonus();
+
+    return std::max(wis + bonus, 0);
 }
 
 const int& Player::get_gold() const {

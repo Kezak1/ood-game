@@ -320,7 +320,7 @@ void Game::player_try_equip_weapon() {
     set_raw_mode(false);
     unhide_cursor();
 
-    std::cout << "Enter index of weapon from inventory (to cancel write 'cancel'): ";
+    std::cout << "Enter index of item from inventory (to cancel write 'cancel'): ";
     std::string input;
     std::getline(std::cin, input);
 
