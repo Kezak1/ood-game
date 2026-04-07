@@ -3,13 +3,21 @@
 #include "utils.h"
 #include <memory>
 
+int throw_three_dices() {
+    int sum = 0;
+    for(int i = 0; i < 3; i++) {
+        sum += next_random(1, 6);
+    }
+    return sum;
+}
+
 Player::Player() : 
     Entity(1, 1),
-    str(20),
-    dex(20),
-    lck(20),
-    agr(20),
-    wis(20),
+    str(throw_three_dices()),
+    dex(throw_three_dices()),
+    lck(throw_three_dices()),
+    agr(throw_three_dices()),
+    wis(throw_three_dices()),
     gold(0),
     coins(0),
     left_hand(nullptr), 
@@ -188,4 +196,8 @@ std::string Player::get_both_hand_info() const {
     }
     
     return both_hands->get_info();
+}
+
+void Player::take_dmg(int dmg) {
+    hp = std::max(0, hp - std::max(0, dmg));
 }

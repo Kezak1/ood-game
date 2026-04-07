@@ -2,10 +2,11 @@
 #define ENTITY_H
 
 class Entity {
+protected:
     int r, c;
-    int hp = 100;
+    int hp;
 public:
-    Entity(int r, int c);
+    Entity(int r, int c, int hp = 100);
     
     const int& get_r() const;
     void set_r(int row);
@@ -13,6 +14,7 @@ public:
     void set_c(int col);
 
     const int& get_hp() const;
+    bool is_dead() const;
 };
 
 #endif

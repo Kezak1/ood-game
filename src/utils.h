@@ -27,6 +27,8 @@ inline constexpr auto C_PLAYER = "¶";
 inline constexpr auto C_ITEMS = "*";
 inline constexpr auto C_ENEMY = "@";
 
+inline constexpr double DEF_MAX = 36.0;
+
 int next_random(int l, int r);
 bool in_range(int r, int c);
 
@@ -39,6 +41,11 @@ void to_start_cursor();
 void hide_cursor();
 void unhide_cursor();
 
+void enter_alt_terminal();
+void exit_alt_terminal();
+
 void set_raw_mode(bool enable);
+
+std::string all_toupper(std::string s); 
 
 #endif

@@ -1,11 +1,17 @@
 #include "game.h"
+#include "begin_battle_handler.h"
 #include "dungeon_builder.h"
 #include "equipment_handler.h"
 #include "inventory_handler.h"
+#include "item.h"
+#include "magical_attack.h"
+#include "normal_attack.h"
 #include "quit_handler.h"
+#include "stealth_attack.h"
 #include "utils.h"
 
 #include <memory>
+#include <cstring>
 
 Game::Game() : p(Player()) {
     init_handlers();
@@ -76,6 +82,7 @@ void Game::init_handlers() {
     handlers.push_back(std::make_unique<MoveHandler>());
     handlers.push_back(std::make_unique<EquipmentHandler>());
     handlers.push_back(std::make_unique<InventoryHandler>());
+    handlers.push_back(std::make_unique<BeginBattleHandler>());
 }
 
 void Game::player_move_up() {
@@ -145,7 +152,7 @@ void Game::cur_action_info() {
     auto& items = board[p.get_r()][p.get_c()].get_items();
     std::cout << "LOG: ";
     if(is_enemy_pos(p.get_r(), p.get_c())) {
-        int idx = enemy_map[p.get_r()][p.get_c()];
+        int idx = player_enemy_map_value();
         std::cout << std::format("{} - hp({}), attack({}), armor({})\n", enemies[idx].get_name(), enemies[idx].get_hp(), enemies[idx].get_attack(), enemies[idx].get_arrmor());
     } else if(items.empty()) {
         std::cout << "standing on empty cell\n";
@@ -226,6 +233,9 @@ void Game::print_instructions() {
     if(capabilities.has_items || capabilities.has_weapons) {
         out << "GET INFO(I) | ";
     }
+    if(capabilities.has_enemies) {
+        out << "BATTLE(F) | ";
+    }
     auto strout = out.str();
     strout.pop_back();
     strout.pop_back();
@@ -289,23 +299,7 @@ void Game::player_try_drop_item() {
 
     Cell& cell = board[p.get_r()][p.get_c()];
 
-    /*
-    if(input == "gold") {
-        int cnt_gold = p.get_gold();
-        if(cnt_gold > 0) {
-            p.set_gold(cnt_gold - 1);
-            cell.add_item(std::make_unique<Gold>());
-        }
-        
-        return;
-    } else if(input == "coin") {
-        int cnt_coins = p.get_coins();
-        if(cnt_coins > 0) {
-            p.set_coins(cnt_coins - 1);
-            cell.add_item(std::make_unique<Coin>());
-        }
-        return;
-    } else*/if(p.get_inventory().empty() || input == "cancel") {
+    if(p.get_inventory().empty() || input == "cancel") {
         return;
     }    
 
@@ -433,4 +427,224 @@ void Game::player_try_get_item_info() {
         std::cout << "ERROR: " << e.what() << "\n(to continue press any key)";
         getchar();
     }
+}
+
+void Game::print_battlefield() {
+    std::cout << R"(.-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-.
+|                                                 |
+|                                 @@@@@@@@@@@     |
+|                                @@@@@@@@@@@@@    |
+|                               @@@@       @@@@   | 
+|    ________                   @@@  @@@@@  @@@   !
+!   /  ___| |                   @@@  @@@@@  @@@   :
+:  /  /	  | |                   @@@  @@@@@  @@@   :
+: |  |	  | |                   @@@__@@@@@__@@@   .
+.  \  \___| |                   @@@@       @@@@   : 
+.   \_____| |                  / @@@@@@@@@@@@@ \  :
+:         | |                  \  @@@@@@@@@@@  /  :
+:    _____| |_____              \_____________/   !
+!   /     | |     \                               |
+|  /      |_|      \                              |
+|  \               /                              |
+|   \_____________/                               |
+|                                                 |
+`-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-'
+)";
+}
+
+void Game::print_enemy_hp(int enemy_idx) {
+    auto& e = enemies[enemy_idx];
+    std::string out = std::format("{}: HP {:3}/{}\n", all_toupper(e.get_name()), e.get_hp(), e.get_max_hp());
+    clear_line_cursor();
+    std::cout << out;
+}
+
+void Game::render_battle_state(int enemy_idx) {
+    full_clear();
+    print_player_stats();
+    print_player_hands();
+    std::cout << '\n';
+    print_enemy_hp(enemy_idx);
+    print_battlefield();
+}
+
+bool Game::player_has_equipped_item() const {
+    return p.get_left_hand() || p.get_right_hand() || p.get_both_hands();
+}
+
+const Item* Game::choose_battle_item() const {
+    if(p.get_both_hands()) {
+        return p.get_both_hands().get();
+    }
+    if(p.get_left_hand() && !p.get_right_hand()) {
+        return p.get_left_hand().get();
+    }
+    if(!p.get_left_hand() && p.get_right_hand()) {
+        return p.get_right_hand().get();
+    }
+    if(!player_has_equipped_item()) {
+        return nullptr;
+    }
+
+    std::cout << "Choose item, enter 'left'/'right'/'both' (or 'give up'): ";
+
+    std::string hold;
+    std::getline(std::cin, hold);
+
+    if(hold == "give up") {
+        throw custom_exception("give up");
+    }
+
+    if(hold == "left") {
+        if(!p.get_left_hand()) {
+            throw custom_exception("left is null");
+        }
+        return p.get_left_hand().get();    
+    }
+
+    if(hold == "right") {
+        if(!p.get_right_hand()) {
+            throw custom_exception("right is null");
+        }
+        return p.get_right_hand().get();
+    }
+
+    if(hold == "both") {
+        if(!p.get_both_hands()) {
+            throw custom_exception("both is null");
+        }
+        return p.get_both_hands().get();
+    }
+
+    throw custom_exception("invalid input");
+}
+
+std::unique_ptr<Attack> Game::choose_battle_attack() const {
+    std::cout << "Choose attack type, enter 'normal'/'stealth'/'magical' (or 'give up'): ";
+
+    std::string attack_type;
+    std::getline(std::cin, attack_type);
+
+    if(attack_type == "give up") {
+        throw custom_exception("give up");
+    }
+
+    if(attack_type == "normal") {
+        return std::make_unique<NormalAttack>();
+    }
+
+    if(attack_type == "stealth") {
+        return std::make_unique<SlealthAttack>();
+    }
+
+    if(attack_type == "magical") {
+        return std::make_unique<MagicalAttack>();
+    }
+    
+    throw custom_exception("invalid input");
+}
+
+void Game::remove_enemy_from_map(int enemy_idx) {
+    enemy_map[enemies[enemy_idx].get_r()][enemies[enemy_idx].get_c()] = -1;
+}
+
+bool Game::battle() {
+    int enemy_idx = player_enemy_map_value();
+    if(enemy_idx < 0) {
+        return false;
+    }
+
+    if(!player_has_equipped_item()) {
+        std::cout << "INFO: cannot start a battle without equip any item\n";
+        std::cout << "(to continue press any key)\n";
+        getchar();
+        return false;
+    }
+
+    enter_alt_terminal();
+    set_raw_mode(false);
+
+    auto continue_press_any_key = []() {
+        hide_cursor();
+        set_raw_mode(true);
+        
+        std::cout << "(to continue press any key)\n";
+        getchar();
+
+        unhide_cursor();
+        set_raw_mode(false);
+    };
+
+    auto& e = enemies[enemy_idx];
+    bool player_won = true;
+
+    while(!p.is_dead() && !e.is_dead()) {
+        render_battle_state(enemy_idx);
+
+        std::cout << "PLAYER:\n";
+        try {
+            const Item* item = choose_battle_item();
+            std::unique_ptr<Attack> attack = choose_battle_attack();
+            
+            int dealt = 0;
+            if(item) {
+                int prev_hp = e.get_hp();
+                e.take_dmg(item->attack(p, *attack));
+                dealt = prev_hp - e.get_hp();
+            }
+
+            render_battle_state(enemy_idx);
+            std::cout << std::format("PLAYER dealt {} damage to {}\n", dealt, all_toupper(e.get_name()));
+
+            if(e.is_dead()) {
+                std::cout << std::format("{} was defeated\n", all_toupper(e.get_name()));
+                continue_press_any_key();
+                break;
+            }
+
+            int defense = 0;
+            if(item) {
+                defense = item->defense(p, *attack);
+            }
+            int dealt_enemy = std::max(1, e.get_attack() - defense / 4);
+            p.take_dmg(dealt_enemy);
+            render_battle_state(enemy_idx);
+            std::cout << std::format("{} dealt {} damage to PLAYER\n", all_toupper(e.get_name()), dealt_enemy);
+            std::cout << std::format("PLAYER dealt {} damage to {}\n", dealt, all_toupper(e.get_name()));
+
+            if(p.is_dead()) {
+                std::cout << "PLAYER lost a battle\n";
+                player_won = false;
+                continue_press_any_key();
+                break;
+            }
+
+            continue_press_any_key();
+        } catch(const custom_exception& e) {
+            if(strcmp(e.what(), "give up") == 0) {
+                player_won = false;
+                break;
+            }
+
+            render_battle_state(enemy_idx);
+            std::cout << "ERROR: " << e.what() << '\n';
+            continue_press_any_key();
+        }
+    }
+
+    exit_alt_terminal();
+    set_raw_mode(true);
+
+    if(player_won == false) {
+        full_clear();
+        std::cout << "GAME OVER\n";
+        return true;
+    }
+    
+    remove_enemy_from_map(enemy_idx);
+    return false;
+}
+
+int Game::player_enemy_map_value() {
+    return enemy_map[p.get_r()][p.get_c()];
 }

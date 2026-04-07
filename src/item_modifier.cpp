@@ -45,3 +45,11 @@ bool ItemModifier::on_pick_up(Player& p) const {
 std::unique_ptr<Item> ItemModifier::equip(Player& p, std::unique_ptr<Item> self) {
     return inner->equip(p, std::move(self));
 }
+
+int ItemModifier::attack(const Player& p, const Attack& a) const {
+    return inner->attack(p, a);
+}
+
+int ItemModifier::defense(const Player& p, const Attack& a) const {
+    return inner->defense(p, a);
+}

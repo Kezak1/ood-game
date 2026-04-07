@@ -50,6 +50,8 @@ public:
     std::string get_left_hand_info() const;
     std::string get_right_hand_info() const;
     std::string get_both_hand_info() const;
+
+    void take_dmg(int dmg);
 };
 
 #endif

@@ -26,6 +26,9 @@ public:
 
     bool on_pick_up(Player& p) const override;
     std::unique_ptr<Item> equip(Player&, std::unique_ptr<Item> self) override;
+
+    int attack(const Player& p, const Attack& a) const override;
+    int defense(const Player& p, const Attack& a) const override;
 };
 
 #endif

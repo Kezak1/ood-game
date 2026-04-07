@@ -29,7 +29,7 @@ public:
     virtual std::unique_ptr<Item> equip(Player&, std::unique_ptr<Item> self);
 
     virtual int attack(const Player& p, const Attack& a) const;
-    virtual int defense(const Player& p, const Enemy& e, const Attack& a) const;
+    virtual int defense(const Player& p, const Attack& a) const;
 };
 
 #endif

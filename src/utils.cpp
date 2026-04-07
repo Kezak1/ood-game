@@ -1,4 +1,5 @@
 #include "utils.h"
+#include <cctype>
 
 custom_exception::custom_exception(const char* msg) : msg(msg) {}
 
@@ -63,4 +64,11 @@ void set_raw_mode(bool enable) {
     } else {
         tcsetattr(STDIN_FILENO, TCSANOW, &old_t);
     }
+}
+
+std::string all_toupper(std::string s) {
+    for(auto& c : s) {
+        c = toupper(c);
+    }
+    return s;
 }

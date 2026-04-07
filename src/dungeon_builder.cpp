@@ -24,8 +24,8 @@ DungeonBuilder::DungeonBuilder(bool start_filled)
     add_random_chamber(3);
     add_random_chamber(4);
     connect_rooms();
-    add_random_items(2);
-    add_random_weapons(2);
+    add_random_items(3);
+    add_random_weapons(4);
     add_random_enemies();
 }
 
@@ -55,24 +55,6 @@ BuildResult DungeonBuilder::build() {
     };
     return res;
 }
-
-/*
-void DungeonBuilder::empty_dungeon() {
-    for(int i = 1; i < ROWS - 1; i++) {
-        for(int j = 1; j < COLS - 1; j++) {
-            board[i][j].set_wall(false);
-        }
-    }
-}
-
-void DungeonBuilder::fill_dungeon() {
-    for(int i = 1; i < ROWS - 1; i++) {
-        for(int j = 0; j < COLS - 1; j++) {
-            board[i][j].set_wall(true);
-        }
-    }
-}
-*/
 
 bool inside(int r, int c) {
     return r > 0 && c > 0 && r < ROWS - 1 && c < COLS - 1;
@@ -170,19 +152,6 @@ void DungeonBuilder::add_random_path() {
     }
 }
 
-/*
-void Dungeon::add_random_paths(int l, int r) {
-    if(l > r || l <= 0) {
-        return;
-    }
-
-    int k = next_random(l, r);
-    while(k-- > 0) {
-        add_random_path(next_random(5, 15));
-    }
-}
-*/
-
 void DungeonBuilder::add_random_chamber(int len) {
     capabilities.can_move = true;
 
@@ -200,19 +169,6 @@ void DungeonBuilder::add_random_chamber(int len) {
         }
     }
 }
-
-/*
-void Dungeon::add_random_chambers(int l, int r) {
-    if(l > r || l <= 0) {
-        return;
-    }
-
-    int k = next_random(l, r);
-    while(k-- > 0) {
-        add_random_chamber(next_random(1, 10));
-    }
-}
-*/
 
 void DungeonBuilder::add_center_room(int w, int h) {
     capabilities.can_move = true;
@@ -247,9 +203,15 @@ std::unique_ptr<Item> make_random_weapon() {
             break;
     }
 
-    item = std::make_unique<StrongModifier>(std::move(item));
-    item = std::make_unique<UnluckyModifier>(std::move(item));
-
+    int rand = next_random(1, 10);
+    if(rand > 5) {
+        item = std::make_unique<StrongModifier>(std::move(item));
+    }
+    rand = next_random(1, 10);
+    if(rand > 8) {
+        item = std::make_unique<UnluckyModifier>(std::move(item));
+    }
+    
     return item;
 }
 
@@ -403,8 +365,9 @@ void DungeonBuilder::add_random_enemies(int count) {
     auto a = get_all_empty_pos();
     while(count-- > 0) {
         auto [r, c] = a[next_random(0, (int)a.size() - 1)];
-        enemies.push_back(Enemy("Enemy" + std::to_string(count), r, c));
+        enemies.push_back(Enemy("Enemy" + std::to_string(count), r, c, next_random(30, 50)));
     }
+    capabilities.has_enemies = true;
 }
 
 std::vector<std::pair<int, int>> DungeonBuilder::get_all_empty_pos() {

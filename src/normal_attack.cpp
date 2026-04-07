@@ -5,34 +5,34 @@
 #include "magical_weapon.h"
 #include "item.h"
 
-int NormalAttack::attack_dmg(const Player& p, const HeavyWeapon& w) const {
+int NormalAttack::attack_pts(const Player& p, const HeavyWeapon& w) const {
     return (p.get_str() + p.get_agr()) / 2 + w.get_dmg();
 }
 
-int NormalAttack::attack_dmg(const Player& p, const LightWeapon& w) const {
+int NormalAttack::attack_pts(const Player& p, const LightWeapon& w) const {
     return (p.get_dex() + p.get_lck()) / 2 + w.get_dmg();
 }
 
-int NormalAttack::attack_dmg(const Player&, const MagicalWeapon&) const {
+int NormalAttack::attack_pts(const Player&, const MagicalWeapon&) const {
     return 1;
 }
 
-int NormalAttack::attack_dmg(const Player&, const Item&) const {
+int NormalAttack::attack_pts(const Player&, const Item&) const {
     return 0;
 }
 
-double NormalAttack::defense_ratio(const Player& p, const HeavyWeapon&) const {
-    return (double)(p.get_str() + p.get_lck()) / DEF_MAX;
+int NormalAttack::defense_pts(const Player& p, const HeavyWeapon&) const {
+    return p.get_str() + p.get_lck();
 }
 
-double NormalAttack::defense_ratio(const Player& p, const LightWeapon&) const {
-    return (double)(p.get_dex() + p.get_lck()) / DEF_MAX;
+int NormalAttack::defense_pts(const Player& p, const LightWeapon&) const {
+    return p.get_dex() + p.get_lck();
 }
 
-double NormalAttack::defense_ratio(const Player& p, const MagicalWeapon&) const {
-    return (double)(p.get_dex() + p.get_lck()) / DEF_MAX;
+int NormalAttack::defense_pts(const Player& p, const MagicalWeapon&) const {
+    return p.get_dex() + p.get_lck();
 }
 
-double NormalAttack::defense_ratio(const Player& p, const Item&) const {
-    return (double)(p.get_dex()) / DEF_MAX;
+int NormalAttack::defense_pts(const Player& p, const Item&) const {
+    return p.get_dex();
 }

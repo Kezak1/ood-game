@@ -1,6 +1,6 @@
 #include "entity.h"
 
-Entity::Entity(int r, int c) : r(r), c(c) {}
+Entity::Entity(int r, int c, int hp) : r(r), c(c), hp(hp) {}
 
 const int& Entity::get_r() const {
     return r;
@@ -20,4 +20,8 @@ void Entity::set_c(int col) {
 
 const int& Entity::get_hp() const {
     return hp;
+}
+
+bool Entity::is_dead() const {
+    return hp == 0;
 }

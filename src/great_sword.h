@@ -6,7 +6,7 @@
 class GreatSword : public HeavyWeapon {
 public:
     GreatSword();
-    virtual std::string get_info() const override;
+    std::string get_info() const override;
     std::unique_ptr<Item> equip(Player& p, std::unique_ptr<Item> self) override;
 };
 

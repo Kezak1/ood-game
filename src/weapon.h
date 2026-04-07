@@ -10,7 +10,6 @@ protected:
     int dmg;
 public:
     Weapon(int _dmg, std::string s);
-    virtual std::string get_info() const override;
 };
 
 #endif

@@ -16,6 +16,7 @@ struct PlayerCapabilities {
     bool can_move = false;
     bool has_items = false;
     bool has_weapons = false;
+    bool has_enemies = false;
 };
 
 struct BuildResult {
