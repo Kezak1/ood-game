@@ -27,4 +27,5 @@ rpg game - uni project
     - to equip a weapon from invertory press **J**
     - to unquip a equiped weapon press **K**
     - to get info about item in the invetory press **I**
+    - to battle enemy press **F**
     - to exit a game press **Q**
