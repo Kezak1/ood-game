@@ -118,8 +118,8 @@ void Game::render_state() {
     print_player_inventory();
     print_player_wallet();
     print_player_hands();
-    std::cout << "\n";
     print_instructions();
+    std::cout << "\n";
 
     std::stringstream ss;
     for(int r = 0; r < ROWS; r++) {
@@ -283,6 +283,9 @@ void Game::player_try_pick_up_item() {
 }
 
 void Game::player_try_drop_item() {
+    if(p.get_inventory().empty()) {
+        return;
+    }
     set_raw_mode(false);
     unhide_cursor();
 
@@ -298,10 +301,6 @@ void Game::player_try_drop_item() {
     }
 
     Cell& cell = board[p.get_r()][p.get_c()];
-
-    if(p.get_inventory().empty() || input == "cancel") {
-        return;
-    }    
 
     try {
         int idx = std::stoi(input);
@@ -563,6 +562,7 @@ bool Game::battle() {
 
     enter_alt_terminal();
     set_raw_mode(false);
+    unhide_cursor();
 
     auto continue_press_any_key = []() {
         hide_cursor();
@@ -634,6 +634,7 @@ bool Game::battle() {
 
     exit_alt_terminal();
     set_raw_mode(true);
+    hide_cursor();
 
     if(player_won == false) {
         full_clear();
