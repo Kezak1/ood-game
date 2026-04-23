@@ -11,6 +11,8 @@ protected:
     std::unique_ptr<Item> inner;
     std::string modifier_name;
 
+    int attack_dispatched(const Player& p,  const Attack& a, const Item& stats) const override;
+    int defense_dispatched(const Player& p, const Attack& a, const Item& stats) const override;
 public:
     ItemModifier(std::unique_ptr<Item> item, std::string name);
 
@@ -26,9 +28,6 @@ public:
 
     bool on_pick_up(Player& p) const override;
     std::unique_ptr<Item> equip(Player&, std::unique_ptr<Item> self) override;
-
-    int attack(const Player& p, const Attack& a) const override;
-    int defense(const Player& p, const Attack& a) const override;
 };
 
 #endif

@@ -533,7 +533,7 @@ std::unique_ptr<Attack> Game::choose_battle_attack() const {
     }
 
     if(attack_type == "stealth") {
-        return std::make_unique<SlealthAttack>();
+        return std::make_unique<StealthAttack>();
     }
 
     if(attack_type == "magical") {

@@ -28,8 +28,11 @@ public:
     virtual bool on_pick_up(Player& p) const;
     virtual std::unique_ptr<Item> equip(Player&, std::unique_ptr<Item> self);
 
-    virtual int attack(const Player& p, const Attack& a) const;
-    virtual int defense(const Player& p, const Attack& a) const;
+    int attack(const Player& p, const Attack& a) const;
+    int defense(const Player& p, const Attack& a) const;
+
+    virtual int attack_dispatched(const Player&, const Attack&, const Item&) const;
+    virtual int defense_dispatched(const Player&, const Attack&, const Item&) const;
 };
 
 #endif

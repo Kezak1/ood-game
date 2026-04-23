@@ -1,11 +1,10 @@
 #include "enemy.h"
 #include "entity.h"
-#include "utils.h"
 
-Enemy::Enemy(std::string name, int r, int c, int hp) : 
+Enemy::Enemy(std::string name, int r, int c, int atk, int hp) : 
     Entity(r, c, hp),
     name(name),
-    attack(next_random(5, 15)),
+    attack(atk),
     armor(5),
     max_hp(hp)
     {}

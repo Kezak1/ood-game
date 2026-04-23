@@ -6,8 +6,8 @@
 class MagicalWeapon : public Weapon {
 public:
     MagicalWeapon(int dmg, std::string name);
-    int attack(const Player& p, const Attack& a) const override;
-    int defense(const Player& p, const Attack& a) const override;
+    int attack_dispatched(const Player& p,  const Attack& a, const Item& stats) const override;
+    int defense_dispatched(const Player& p, const Attack& a, const Item& stats) const override;
 };
 
 #endif

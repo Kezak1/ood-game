@@ -1,5 +1,6 @@
 #include "dungeon_builder.h"
 
+#include "enemy.h"
 #include "mystic_modifier.h"
 #include "strong_modifier.h"
 #include "unlucky_modifier.h"
@@ -11,10 +12,14 @@
 #include "strange_idol.h"
 #include "old_book.h"
 #include "rock.h"
+#include "gold.h"
+#include "coin.h"
+#include <memory>
 
 DungeonBuilder::DungeonBuilder(bool start_filled) 
     : player_start_pos_r(1), player_start_pos_c(1) {
     init_board(start_filled);
+    /*
     add_random_path();
     add_random_path();
     add_random_path();
@@ -25,7 +30,33 @@ DungeonBuilder::DungeonBuilder(bool start_filled)
     connect_rooms();
     add_random_items(3);
     add_random_weapons(4);
+    add_random_currencies();
     add_random_enemies();
+    */
+    modifier_tester_setup();
+}
+
+void DungeonBuilder::modifier_tester_setup() {
+    add_center_room(6, 6);
+    auto a = get_all_empty_pos();
+    connect_rooms();
+    
+    int idx = next_random(0, (int)a.size() - 1);
+    auto [r, c] = a[idx];
+    a.erase(a.begin() + idx);
+    
+    enemies.push_back(Enemy("Dummy Tank", r, c, 0, 500));
+
+    idx = next_random(0, (int)a.size() - 1);
+    r = a[idx].first;
+    c = a[idx].second;
+
+    board[r][c].add_item(std::make_unique<StrongModifier>(std::make_unique<Axe>()));
+    board[r][c].add_item(std::make_unique<Axe>());
+
+    capabilities.has_items = true;
+    capabilities.has_enemies = true;
+    capabilities.has_weapons = true;
 }
 
 void DungeonBuilder::init_board(bool start_filled) {
@@ -372,12 +403,32 @@ void DungeonBuilder::add_random_enemies(int count) {
             continue;
         }
 
-        enemies.push_back(Enemy("Enemy" + std::to_string((int)enemies.size() + 1), r, c, next_random(30, 50)));
+        enemies.push_back(Enemy("Enemy" + std::to_string((int)enemies.size() + 1), r, c, next_random(10, 20), next_random(30, 50)));
     
         a.erase(a.begin() + idx);
     }
 
     capabilities.has_enemies = !enemies.empty();
+}
+
+void DungeonBuilder::add_random_currencies(int count) {
+    auto a = get_all_empty_pos();
+
+    for(int i = 0; i < count && !a.empty(); i++) {
+        int idx = next_random(0, (int)a.size() - 1);
+        auto [r, c] = a[idx];
+        
+        if(r == player_start_pos_r && c == player_start_pos_c) {
+            a.erase(a.begin() + idx);
+            continue;
+        }
+
+        if(next_random(0, 1)) {
+            board[r][c].add_item(std::make_unique<Coin>());
+        } else {
+            board[r][c].add_item(std::make_unique<Gold>());
+        }
+    }
 }
 
 std::vector<std::pair<int, int>> DungeonBuilder::get_all_empty_pos() {

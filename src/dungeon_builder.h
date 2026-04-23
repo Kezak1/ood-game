@@ -36,6 +36,7 @@ public:
     BuildResult build();
 private:
     void init_board(bool start_filled);
+    void modifier_tester_setup();
 
     std::vector<std::pair<int, int>> get_all_empty_pos();
     
@@ -47,6 +48,7 @@ private:
     void add_random_weapons(int count = 5);
     
     void add_random_enemies(int count = 5);
+    void add_random_currencies(int count = 5);
 
     void connect_rooms();
 };

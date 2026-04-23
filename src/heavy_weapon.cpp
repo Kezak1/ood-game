@@ -6,10 +6,10 @@
 HeavyWeapon::HeavyWeapon(int dmg, std::string name) : Weapon(dmg, name) {
 }
 
-int HeavyWeapon::attack(const Player& p, const Attack& a) const {
-    return a.attack_pts(p, *this);
+int HeavyWeapon::attack_dispatched(const Player& p,  const Attack& a, const Item& stats) const {
+    return a.attack_pts(p, *this, stats);
 }
 
-int HeavyWeapon::defense(const Player& p, const Attack& a) const {
-    return a.defense_pts(p, *this);
+int HeavyWeapon::defense_dispatched(const Player& p, const Attack& a, const Item& stats) const {
+    return a.defense_pts(p, *this, stats);
 }
