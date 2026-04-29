@@ -14,7 +14,7 @@
 #include "rock.h"
 #include "gold.h"
 #include "coin.h"
-#include <memory>
+#include "dungeon_builder_facade.h"
 
 DungeonBuilder::DungeonBuilder(bool start_filled) 
     : player_start_pos_r(1), player_start_pos_c(1) {
@@ -33,13 +33,13 @@ DungeonBuilder::DungeonBuilder(bool start_filled)
     add_random_currencies();
     add_random_enemies();
     */
-    modifier_tester_setup();
 }
 
+/*
 void DungeonBuilder::modifier_tester_setup() {
     add_center_room(6, 6);
-    auto a = get_all_empty_pos();
-    connect_rooms();
+    auto a = get_empty_pos();
+    connect_empty();
     
     int idx = next_random(0, (int)a.size() - 1);
     auto [r, c] = a[idx];
@@ -56,8 +56,8 @@ void DungeonBuilder::modifier_tester_setup() {
 
     capabilities.has_items = true;
     capabilities.has_enemies = true;
-    capabilities.has_weapons = true;
 }
+*/
 
 void DungeonBuilder::init_board(bool start_filled) {
     board.resize(ROWS);
@@ -76,8 +76,12 @@ void DungeonBuilder::init_board(bool start_filled) {
     }
 }
 
-BuildResult DungeonBuilder::build() {
+BuildResult DungeonBuilder::build(const DungeonTheme& theme) {
     board[player_start_pos_r][player_start_pos_c].set_wall(false);
+
+    DungeonBuilderFacade facade(*this);
+    theme.generate(facade);
+
     BuildResult res {
         .board = std::move(board),
         .enemies = enemies,
@@ -202,6 +206,7 @@ void DungeonBuilder::add_random_chamber(int len) {
 
 void DungeonBuilder::add_center_room(int w, int h) {
     capabilities.can_move = true;
+
     w += 2, h += 2;
     int start_r = std::max(ROWS/2 - h/2, 0), start_c = std::max(COLS/2 - w/2, 0);
     int end_r = std::min(start_r + h, ROWS), end_c = std::min(start_c + w, COLS);
@@ -245,7 +250,7 @@ std::unique_ptr<Item> make_random_weapon() {
     return item;
 }
 
-std::unique_ptr<Item> make_random_item() {
+std::unique_ptr<Item> make_random_junk() {
     switch(next_random(1, 3)) {
         case 1: 
             return std::make_unique<Rock>();
@@ -256,35 +261,62 @@ std::unique_ptr<Item> make_random_item() {
     }
 }
 
-void DungeonBuilder::add_random_items(int count) {
-    if(count > 0) capabilities.has_items = true;
+void DungeonBuilder::add_item(int r, int c, std::unique_ptr<Item> item) {
+    if(item->goes_to_inv()) {
+        capabilities.has_items = true;
+    } else {
+        capabilities.has_currency = true;
+    }
+    board[r][c].add_item(std::move(item));
+}
+
+void DungeonBuilder::add_random_junks(int count) {
     while(count-- > 0) {
-        auto p = get_all_empty_pos();
+        auto p = get_empty_pos();
         if(p.empty()) {
             return;
         }
         
         int idx = next_random(0, (int)p.size() - 1);
         auto [r, c] = p[idx];
-        board[r][c].add_item(make_random_item());
+        add_item(r, c, make_random_junk());
     }
 }
 
 void DungeonBuilder::add_random_weapons(int count) {
-    capabilities.has_weapons = true;
     while(count-- > 0) {
-        auto p = get_all_empty_pos();
+        auto p = get_empty_pos();
         if(p.empty()) {
             return;
         }
 
         int idx = next_random(0, (int)p.size() - 1);
         auto [r, c] = p[idx];
-        board[r][c].add_item(make_random_weapon());
+        add_item(r, c, make_random_weapon());
     }
 }
 
-void DungeonBuilder::connect_rooms() {
+void DungeonBuilder::add_random_currencies(int count) {
+    auto a = get_empty_pos();
+
+    for(int i = 0; i < count && !a.empty(); i++) {
+        int idx = next_random(0, (int)a.size() - 1);
+        auto [r, c] = a[idx];
+        
+        if(r == player_start_pos_r && c == player_start_pos_c) {
+            a.erase(a.begin() + idx);
+            continue;
+        }
+
+        if(next_random(0, 1)) {
+            add_item(r, c, std::make_unique<Coin>());
+        } else {
+            add_item(r, c, std::make_unique<Gold>());
+        }
+    }
+}
+
+void DungeonBuilder::connect_empty() {
     std::vector<std::pair<int, int>> rooms_centers;
     std::vector<std::vector<bool>> vis(ROWS, std::vector<bool>(COLS, false));
     
@@ -391,47 +423,31 @@ void DungeonBuilder::connect_rooms() {
     }
 }
 
+void DungeonBuilder::add_enemy(std::string name, int r, int c, int attack, int hp) {
+    enemies.push_back(Enemy(name, r, c, attack, hp));
+    capabilities.has_enemies = true;
+}
+
 void DungeonBuilder::add_random_enemies(int count) {
-    auto a = get_all_empty_pos();
+    auto a = get_empty_pos();
 
     for(int i = 0; i < count && !a.empty(); i++) {
         int idx = next_random(0, (int)a.size() - 1);
         auto [r, c] = a[idx];
 
-        if(r == player_start_pos_r && c == player_start_pos_c) {
+        // todo make so its imposible to have enemy and item in one cell
+        if((r == player_start_pos_r && c == player_start_pos_c)) {
             a.erase(a.begin() + idx);
+            i--;
             continue;
         }
 
-        enemies.push_back(Enemy("Enemy" + std::to_string((int)enemies.size() + 1), r, c, next_random(10, 20), next_random(30, 50)));
-    
+        add_enemy("Enemy", r, c, next_random(15, 30), next_random(60, 90));
         a.erase(a.begin() + idx);
     }
-
-    capabilities.has_enemies = !enemies.empty();
 }
 
-void DungeonBuilder::add_random_currencies(int count) {
-    auto a = get_all_empty_pos();
-
-    for(int i = 0; i < count && !a.empty(); i++) {
-        int idx = next_random(0, (int)a.size() - 1);
-        auto [r, c] = a[idx];
-        
-        if(r == player_start_pos_r && c == player_start_pos_c) {
-            a.erase(a.begin() + idx);
-            continue;
-        }
-
-        if(next_random(0, 1)) {
-            board[r][c].add_item(std::make_unique<Coin>());
-        } else {
-            board[r][c].add_item(std::make_unique<Gold>());
-        }
-    }
-}
-
-std::vector<std::pair<int, int>> DungeonBuilder::get_all_empty_pos() {
+std::vector<std::pair<int, int>> DungeonBuilder::get_empty_pos() {
     std::vector<std::pair<int, int>> res;
     for(int i = 1; i < ROWS - 1; i++) {
         for(int j = 1; j < COLS - 1; j++) {

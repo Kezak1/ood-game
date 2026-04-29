@@ -14,9 +14,9 @@ protected:
 public:
     Item(std::string s);
     virtual ~Item() = default;
-
+    
     virtual std::string get_name() const;
-    virtual std::string get_info() const = 0;
+    virtual std::string get_info() const;
     
     virtual int get_dmg() const;
     virtual int get_str_bonus() const;
@@ -24,7 +24,8 @@ public:
     virtual int get_lck_bonus() const;
     virtual int get_agr_bonus() const;
     virtual int get_wis_bonus() const;
-
+    
+    virtual bool goes_to_inv() const;
     virtual bool on_pick_up(Player& p) const;
     virtual std::unique_ptr<Item> equip(Player&, std::unique_ptr<Item> self);
 

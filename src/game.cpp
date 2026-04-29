@@ -9,6 +9,7 @@
 #include "quit_handler.h"
 #include "stealth_attack.h"
 #include "utils.h"
+#include "vault_theme.h"
 
 #include <memory>
 #include <cstring>
@@ -16,7 +17,10 @@
 Game::Game() : p(Player()) {
     init_handlers();
     DungeonBuilder d(true);
-    auto res = d.build();
+    VaultTheme vt;
+    
+    auto res = d.build(vt);
+
     board = std::move(res.board);
     capabilities = res.capabilities;
     enemies = res.enemies;
@@ -224,18 +228,16 @@ void Game::print_instructions() {
     if(capabilities.can_move) {
         out << "MOVE(WASD) | ";
     }
+    if(capabilities.has_currency && !capabilities.has_items) {
+        out << "PICK UP(E) | ";
+    }
     if(capabilities.has_items) {
-        out << "PICK UP(E) | DROP(G) | ";
-    }
-    if(capabilities.has_weapons) {
-        out << "EQUIP(J) | UNEQUIP(K) | ";
-    }
-    if(capabilities.has_items || capabilities.has_weapons) {
-        out << "GET INFO(I) | ";
+        out << "PICK UP(E) | DROP(G) | EQUIP(J) | UNEQUIP(K) | GET INFO(I) | ";
     }
     if(capabilities.has_enemies) {
         out << "BATTLE(F) | ";
     }
+    
     auto strout = out.str();
     strout.pop_back();
     strout.pop_back();

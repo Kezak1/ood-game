@@ -9,6 +9,10 @@ std::string Item::get_name() const {
     return name;
 }
 
+std::string Item::get_info() const {
+    return "this shouldn't be possible haha";
+}
+
 int Item::get_dmg() const {
     return 0;
 }
@@ -33,8 +37,12 @@ int Item::get_wis_bonus() const {
     return 0;
 }
 
-bool Item::on_pick_up(Player&) const {
+bool Item::goes_to_inv() const {
     return true;
+}
+
+bool Item::on_pick_up(Player&) const {
+    return goes_to_inv();
 }
 
 std::unique_ptr<Item> Item::equip(Player&, std::unique_ptr<Item> self) {
