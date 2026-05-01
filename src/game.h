@@ -50,6 +50,7 @@ public:
 
     int player_enemy_map_value();
 private:
+    void init_board();
     void init_handlers();
     void render_state();
     void render_battle_state(int enemy_idx);

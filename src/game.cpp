@@ -5,21 +5,56 @@
 #include "inventory_handler.h"
 #include "item.h"
 #include "magical_attack.h"
+#include "metal_theme.h"
 #include "normal_attack.h"
 #include "quit_handler.h"
 #include "stealth_attack.h"
 #include "utils.h"
 #include "vault_theme.h"
 
+#include <cstdlib>
 #include <memory>
 #include <cstring>
 
 Game::Game() : p(Player()) {
     init_handlers();
+    init_board();
+}
+
+void Game::init_board() {
+    full_clear();
+    std::stringstream ss;
+    ss << "1. Library theme\n";
+    ss << "2. Metal theme\n";
+    ss << "3. Vault theme\n\n";
+    ss << "Choose board theme: ";
+    std::cout << ss.str();
+    int input;
+    std::cin >> input;
+    getchar();
+
     DungeonBuilder d(true);
-    VaultTheme vt;
-    
-    auto res = d.build(vt);
+    BuildResult res;
+
+    switch(input) {
+        case 1:
+            throw custom_exception("not done yet");
+        case 2: {
+            MetalTheme mt;
+            res = d.build(mt);
+            break;
+        }
+
+        case 3: {
+            VaultTheme vt;
+            res = d.build(vt);
+            break;
+        }
+
+        default:
+            std::cerr << "invalid input (exiting)\n";
+            exit(EXIT_FAILURE);
+    }
 
     board = std::move(res.board);
     capabilities = res.capabilities;
@@ -30,6 +65,14 @@ Game::Game() : p(Player()) {
     for(auto& e : enemies) {
         enemy_map[e.get_r()][e.get_c()] = idx++;
     }
+
+    std::cout << "\n\033[1m" << res.begining_msg << "\033[22m\n";
+    set_raw_mode(true);
+    hide_cursor();
+    std::cout << "(to continue press any key)\n";
+    getchar();
+    unhide_cursor();
+    set_raw_mode(false);
 }
 
 void Game::main_loop() {
@@ -140,7 +183,7 @@ void Game::render_state() {
 
             if(is_enemy_pos(r, c)) {
                 ss << C_ENEMY;
-            } else if(board[r][c].empty()) {
+            } else if(board[r][c].no_items()) {
                 ss << C_EMPTY;
             } else {
                 ss << C_ITEMS;
@@ -249,7 +292,7 @@ void Game::print_instructions() {
 void Game::player_try_pick_up_item() {
     auto& cell = board[p.get_r()][p.get_c()];
 
-    if(cell.empty()) {
+    if(cell.no_items()) {
         return;
     }
 
@@ -389,7 +432,7 @@ void Game::player_try_unequip_weapon() {
 }
 
 void Game::player_try_get_item_info() {
-    if(p.get_inventory().empty()) {
+    if(p.get_inventory().empty() && p.get_both_hands() && p.get_left_hand() && p.get_right_hand()) {
         return;
     }
     set_raw_mode(false);

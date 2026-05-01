@@ -43,7 +43,7 @@ const std::unique_ptr<Item>& Cell::get_item(int idx) const {
 }
 */
 
-bool Cell::empty() const {
+bool Cell::no_items() const {
     return items.empty();
 }
 

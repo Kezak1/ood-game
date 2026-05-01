@@ -11,7 +11,7 @@ class Enemy : public Entity {
     int armor;
     int max_hp;
 public:
-    Enemy(std::string name, int r, int c, int atk, int hp);
+    Enemy(std::string name, int r, int c, int atk, int armor, int hp);
 
     const std::string& get_name() const; 
     const int& get_attack() const;

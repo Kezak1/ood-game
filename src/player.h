@@ -11,6 +11,7 @@
 class Player : public Entity {
     int str, dex, lck, agr, wis;
     int gold, coins;
+    // todo do limit 5-6 items in inventory
     std::vector<std::unique_ptr<Item>> inventory;
     std::unique_ptr<Item> left_hand, right_hand, both_hands;  
 public:

@@ -22,10 +22,8 @@ public:
     void set_wall(bool is_wall);
     
     const std::vector<std::unique_ptr<Item>>& get_items() const;
-    // POSSIBLE USELESS
-    // const std::unique_ptr<Item>& get_item(int idx) const;
 
-    bool empty() const; 
+    bool no_items() const; 
     
     void add_item(std::unique_ptr<Item> item);
     std::unique_ptr<Item> take_item(int idx);

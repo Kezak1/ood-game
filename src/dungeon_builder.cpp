@@ -16,6 +16,18 @@
 #include "coin.h"
 #include "dungeon_builder_facade.h"
 
+/*
+Correct building order:
+1. fill the dungeon - default
+2. create empty spaces
+3. connect rooms
+4. add items
+5. add enemies
+
+by default player goes to top-left corner
+ofc all points are optional
+*/
+
 DungeonBuilder::DungeonBuilder(bool start_filled) 
     : player_start_pos_r(1), player_start_pos_c(1) {
     init_board(start_filled);
@@ -85,6 +97,7 @@ BuildResult DungeonBuilder::build(const DungeonTheme& theme) {
     BuildResult res {
         .board = std::move(board),
         .enemies = enemies,
+        .begining_msg = theme.intro(),
         .capabilities = capabilities,
     };
     return res;
@@ -178,7 +191,7 @@ void DungeonBuilder::add_random_path() {
         for(int j = 0; j < COLS; j++) {
             char& c = f[i][j];
             if(c == '#') {
-                board[i][j].set_wall(true);
+                // board[i][j].set_wall(true);
             } else if(c == '*') {
                 board[i][j].set_wall(false);
             }
@@ -196,7 +209,7 @@ void DungeonBuilder::add_random_chamber(int len) {
     for(int i = r; i < r + len; i++) {
         for(int j = c; j < c + len; j++) {
             if(i == r || j == c || i == r + len - 1 || j == c + len - 1) {
-                board[i][j].set_wall(true);
+                // board[i][j].set_wall(true);
             } else {
                 board[i][j].set_wall(false);
             }
@@ -213,7 +226,7 @@ void DungeonBuilder::add_center_room(int w, int h) {
     for(int i = start_r; i < end_r; i++) {
         for(int j = start_c; j < end_c; j++) {
             if(i == start_r || i == end_r - 1 || j == start_c || j == end_c - 1) {
-                board[i][j].set_wall(true);
+                // board[i][j].set_wall(true);
             } else {
                 board[i][j].set_wall(false);
             }
@@ -423,27 +436,26 @@ void DungeonBuilder::connect_empty() {
     }
 }
 
-void DungeonBuilder::add_enemy(std::string name, int r, int c, int attack, int hp) {
-    enemies.push_back(Enemy(name, r, c, attack, hp));
+void DungeonBuilder::add_enemy(std::string name, int r, int c, int attack, int armor, int hp) {
+    enemies.push_back(Enemy(name, r, c, attack, armor, hp));
     capabilities.has_enemies = true;
 }
 
 void DungeonBuilder::add_random_enemies(int count) {
-    auto a = get_empty_pos();
+    auto a = get_no_items_pos();
 
-    for(int i = 0; i < count && !a.empty(); i++) {
+    for(int i = 0; i < count && !a.empty(); ) {
         int idx = next_random(0, (int)a.size() - 1);
         auto [r, c] = a[idx];
 
-        // todo make so its imposible to have enemy and item in one cell
         if((r == player_start_pos_r && c == player_start_pos_c)) {
             a.erase(a.begin() + idx);
-            i--;
             continue;
         }
 
-        add_enemy("Enemy", r, c, next_random(15, 30), next_random(60, 90));
-        a.erase(a.begin() + idx);
+        add_enemy("Enemy", r, c, next_random(15, 30), next_random(0, 10), next_random(60, 90));
+        a.erase(a.begin() + idx);   
+        i++;
     }
 }
 
@@ -452,6 +464,18 @@ std::vector<std::pair<int, int>> DungeonBuilder::get_empty_pos() {
     for(int i = 1; i < ROWS - 1; i++) {
         for(int j = 1; j < COLS - 1; j++) {
             if(!board[i][j].is_wall()) {
+                res.push_back({i, j});        
+            }
+        }
+    }
+    return res;
+}
+
+std::vector<std::pair<int, int>> DungeonBuilder::get_no_items_pos() {
+    std::vector<std::pair<int, int>> res;
+    for(int i = 1; i < ROWS - 1; i++) {
+        for(int j = 1; j < COLS - 1; j++) {
+            if(!board[i][j].is_wall() && board[i][j].no_items()) {
                 res.push_back({i, j});        
             }
         }
