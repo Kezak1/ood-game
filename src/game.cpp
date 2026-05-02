@@ -11,6 +11,7 @@
 #include "stealth_attack.h"
 #include "utils.h"
 #include "vault_theme.h"
+#include "library_theme.h"
 
 #include <cstdlib>
 #include <memory>
@@ -37,8 +38,11 @@ void Game::init_board() {
     BuildResult res;
 
     switch(input) {
-        case 1:
-            throw custom_exception("not done yet");
+        case 1: {
+            LibraryTheme lt;
+            res = d.build(lt);
+            break;
+        }
         case 2: {
             MetalTheme mt;
             res = d.build(mt);

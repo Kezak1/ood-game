@@ -6,12 +6,14 @@ rpg game - uni project
 
     - Linux OS, probably would work on any popular distro (tested on arch, manjaro and ubuntu)
     - C++ 20
-    - `make`
+    - CMake 3.16 or newer
 2. **Run:**
 
     run from repo directory:
     ```bash
-    make run
+    cmake -S . -B build
+    cmake --build build
+    ./build/rpg
     ```
 
 ## Instruction
