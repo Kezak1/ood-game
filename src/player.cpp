@@ -11,8 +11,8 @@ int throw_three_dices() {
     return sum;
 }
 
-Player::Player() : 
-    Entity(1, 1),
+Player::Player(std::string name) : 
+    Entity(name, 1, 1),
     str(throw_three_dices()),
     dex(throw_three_dices()),
     lck(throw_three_dices()),
@@ -139,11 +139,22 @@ const std::vector<std::unique_ptr<Item>>& Player::get_inventory() const {
     return inventory;
 }
 
+bool Player::can_add_item() const {
+    return inventory.size() < max_inventory_cap;
+}
+
 void Player::add_item(std::unique_ptr<Item> item) {
+    if(!can_add_item()) {
+        throw custom_exception("inventory is full");
+    }
     inventory.push_back(std::move(item));
 }
 
 void Player::insert_item(int idx, std::unique_ptr<Item> item, bool restoring) {
+    if(!can_add_item()) {
+        throw custom_exception("inventory is full");
+    }
+    
     if(restoring) {
         if(idx < 1 || idx > (int)inventory.size() + 1) {
             throw std::out_of_range("idx");

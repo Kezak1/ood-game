@@ -4,6 +4,7 @@
 #include "utils.h"
 #include "cell.h"
 #include "dungeon_builder.h"
+#include "file_logger.h"
 
 #include "entity.h"
 #include "player.h"
@@ -32,11 +33,16 @@ class Game {
     PlayerCapabilities capabilities;
 
     std::vector<std::unique_ptr<ActionHandler>> handlers;
+
+    Logger& logger;
+    std::filesystem::path log_file;
 public:
-    Game();
+    Game(Logger&, std::string, std::filesystem::path);
     void main_loop();
     bool battle();
+    void show_full_log_history();
 
+    void player_move(int dr, int dc, std::string direction);
     void player_move_up();
     void player_move_down();
     void player_move_left();
@@ -61,6 +67,7 @@ private:
     void print_player_wallet();
     void print_player_inventory();
     void print_player_hands();
+    void print_board_with_recent_logs();
     
     void print_instructions();
     void print_enemy_hp(int enemy_idx); 

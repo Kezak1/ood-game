@@ -1,6 +1,10 @@
 #include "entity.h"
 
-Entity::Entity(int r, int c, int hp) : r(r), c(c), hp(hp) {}
+Entity::Entity(std::string name, int r, int c, int hp) : name(name), r(r), c(c), hp(hp) {}
+
+const std::string& Entity::get_name() const {
+    return name;
+}
 
 const int& Entity::get_r() const {
     return r;

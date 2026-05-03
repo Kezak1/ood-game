@@ -34,15 +34,6 @@ const std::vector<std::unique_ptr<Item>>& Cell::get_items() const {
     return items;
 }
 
-/*
-const std::unique_ptr<Item>& Cell::get_item(int idx) const {
-    if(idx < 1 || idx > (int)items.size()) {
-        throw std::out_of_range("idx");
-    }
-    return items[idx - 1];
-}
-*/
-
 bool Cell::no_items() const {
     return items.empty();
 }

@@ -46,10 +46,10 @@ std::unique_ptr<Item> ItemModifier::equip(Player& p, std::unique_ptr<Item> self)
     return inner->equip(p, std::move(self));
 }
 
-int ItemModifier::attack_dispatched(const Player& p,  const Attack& a, const Item& stats) const {
-    return inner->attack_dispatched(p, a, stats);
+int ItemModifier::accept_attack(const Player& p,  const Attack& a, const Item& stats) const {
+    return inner->accept_attack(p, a, stats);
 }
 
-int ItemModifier::defense_dispatched(const Player& p, const Attack& a, const Item& stats) const {
-    return inner->defense_dispatched(p, a, stats);
+int ItemModifier::accept_defense(const Player& p, const Attack& a, const Item& stats) const {
+    return inner->accept_defense(p, a, stats);
 }

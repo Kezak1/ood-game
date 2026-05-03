@@ -6,8 +6,8 @@
 class LightWeapon : public Weapon {
 public:
     LightWeapon(int dmg, std::string name);
-    int attack_dispatched(const Player& p,  const Attack& a, const Item& stats) const override;
-    int defense_dispatched(const Player& p, const Attack& a, const Item& stats) const override;
+    int accept_attack(const Player& p,  const Attack& a, const Item& stats) const override;
+    int accept_defense(const Player& p, const Attack& a, const Item& stats) const override;
 };
 
 #endif

@@ -1,5 +1,10 @@
 #include "utils.h"
+
 #include <cctype>
+#include <filesystem>
+#include <fstream>
+#include <format>
+#include <stdexcept>
 
 custom_exception::custom_exception(const char* msg) : msg(msg) {}
 
@@ -71,4 +76,70 @@ std::string all_toupper(std::string s) {
         c = toupper(c);
     }
     return s;
+}
+
+std::string trim(std::string s) {
+    auto first = s.find_first_not_of(" \t\r\n");
+    if(first == std::string::npos) {
+        return "";
+    }
+
+    auto last = s.find_last_not_of(" \t\r\n");
+    return s.substr(first, last - first + 1);
+} 
+
+GameConfig load_game_config(const std::filesystem::path& path) {
+    std::ifstream input(path);
+    if(!input) {
+        throw std::runtime_error(std::format("cannot open config file '{}'", path.string()));
+    }
+
+    GameConfig config;
+    bool has_player_name = false;
+    bool has_log_file = false;
+
+    std::string line;
+    int line_count = 0;
+    
+    while(std::getline(input, line)) {
+        line_count++;
+
+        std::string cleaned = trim(line);
+        if(cleaned.empty() || cleaned[0] == '#') {
+            continue;
+        }
+
+        auto separator = cleaned.find('=');
+        if(separator == std::string::npos) {
+            throw std::runtime_error(std::format("valid config line {} (expected key=value)", line_count));
+        }
+
+        std::string key = trim(cleaned.substr(0, separator));
+        std::string value = trim(cleaned.substr(separator + 1));
+
+        if(key == "player_name") {
+            config.player_name = value;
+            has_player_name = true;
+        } else if(key == "log_file") {
+            config.log_file = value;
+            has_log_file = true;
+        }
+    }
+
+    if(!has_player_name || config.player_name.empty()) {
+        throw std::runtime_error("config is missing required value: player_name");
+    }
+
+    if(!has_log_file || config.log_file.empty()) {
+        throw std::runtime_error("config is missing required value: log_file");
+    }
+
+    if(config.log_file.is_relative()) {
+        auto config_dir = path.parent_path();
+        if(!config_dir.empty()) {
+            config.log_file = config_dir / config.log_file;
+        }
+    }
+
+    return config;
 }

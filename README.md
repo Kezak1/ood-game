@@ -15,6 +15,19 @@ rpg game - uni project
     cmake --build build
     ./build/rpg
     ```
+    
+    can also pass another config file:
+    ```bash
+    ./build/rpg <your_config_file_path>
+    ```
+
+    the game loads `config.ini` before startup:
+    ```ini
+    player_name=Ken
+    log_file=logs/game.log
+    ```
+
+
 
 ## Instruction
 1. **Icons**:
@@ -26,8 +39,8 @@ rpg game - uni project
     - to move use **WASD** keys
     - to pick up an item that is on the cell the ¶ is on press **E**
     - to drop of a item to the ground press **G**
-    - to equip a weapon from invertory press **J**
-    - to unquip a equiped weapon press **K**
+    - to equip a weapon from invertory press **K**
+    - to unquip a equiped weapon press **L**
     - to get info about item in the invetory press **I**
     - to battle enemy press **F**
     - to exit a game press **Q**

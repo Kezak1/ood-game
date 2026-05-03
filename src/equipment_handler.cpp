@@ -3,10 +3,10 @@
 
 std::optional<bool> EquipmentHandler::handle(Game& game, char key) {
     switch(tolower(key)) {
-        case 'j':
+        case 'k':
             game.player_try_equip_weapon();
             return false;
-        case 'k':
+        case 'l':
             game.player_try_unequip_weapon();
             return false;
         default:

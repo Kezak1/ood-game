@@ -2,8 +2,7 @@
 #include "entity.h"
 
 Enemy::Enemy(std::string name, int r, int c, int atk, int armor, int hp) : 
-    Entity(r, c, hp),
-    name(name),
+    Entity(name, r, c, hp),
     attack(atk),
     armor(armor),
     max_hp(hp)

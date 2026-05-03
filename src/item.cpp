@@ -50,17 +50,17 @@ std::unique_ptr<Item> Item::equip(Player&, std::unique_ptr<Item> self) {
 }
 
 int Item::attack(const Player& p, const Attack& a) const {
-    return attack_dispatched(p, a, *this);
+    return accept_attack(p, a, *this);
 }
 
 int Item::defense(const Player& p, const Attack& a) const {
-    return defense_dispatched(p, a, *this);
+    return accept_defense(p, a, *this);
 }
 
-int Item::attack_dispatched(const Player& p, const Attack& a, const Item& stats) const {
-    return a.attack_pts(p, stats, stats);
+int Item::accept_attack(const Player& p, const Attack& a, const Item& stats) const {
+    return a.visit_attack(p, stats, stats);
 }
 
-int Item::defense_dispatched(const Player& p, const Attack& a, const Item& stats) const {
-    return a.defense_pts(p, stats, stats);
+int Item::accept_defense(const Player& p, const Attack& a, const Item& stats) const {
+    return a.visit_defense(p, stats, stats);
 }

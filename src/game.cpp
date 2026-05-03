@@ -2,6 +2,8 @@
 #include "begin_battle_handler.h"
 #include "dungeon_builder.h"
 #include "equipment_handler.h"
+#include "event.h"
+#include "file_logger.h"
 #include "inventory_handler.h"
 #include "item.h"
 #include "magical_attack.h"
@@ -12,14 +14,29 @@
 #include "utils.h"
 #include "vault_theme.h"
 #include "library_theme.h"
+#include "event_bus.h"
+#include "view_log_handler.h"
 
+#include <cstdio>
 #include <cstdlib>
 #include <memory>
 #include <cstring>
+#include <stdexcept>
 
-Game::Game() : p(Player()) {
+Game::Game(Logger& logger, std::string player_name, std::filesystem::path log_file) : p(Player(player_name)), logger(logger), log_file(log_file) {
     init_handlers();
     init_board();
+}
+
+void Game::init_handlers() {
+    handlers.clear();
+
+    handlers.push_back(std::make_unique<QuitHandler>());
+    handlers.push_back(std::make_unique<MoveHandler>());
+    handlers.push_back(std::make_unique<EquipmentHandler>());
+    handlers.push_back(std::make_unique<InventoryHandler>());
+    handlers.push_back(std::make_unique<BeginBattleHandler>());
+    handlers.push_back(std::make_unique<ViewLogHandler>());
 }
 
 void Game::init_board() {
@@ -111,6 +128,8 @@ void Game::main_loop() {
         }
 
         if (!handled) {
+            EventBus::instance().publish(UnknownKeyEvent(k));
+
             std::cerr << "invalid key pressed\n(to continue press any key)";
             getchar();
         }
@@ -126,38 +145,35 @@ void Game::main_loop() {
     set_raw_mode(false);
 }
 
-void Game::init_handlers() {
-    handlers.clear();
+void Game::player_move(int dr, int dc, std::string direction) {
+    int nr = p.get_r() + dr;
+    int nc = p.get_c() + dc;
 
-    handlers.push_back(std::make_unique<QuitHandler>());
-    handlers.push_back(std::make_unique<MoveHandler>());
-    handlers.push_back(std::make_unique<EquipmentHandler>());
-    handlers.push_back(std::make_unique<InventoryHandler>());
-    handlers.push_back(std::make_unique<BeginBattleHandler>());
+    if(board[nr][nc].is_wall()) {
+        EventBus::instance().publish(WallHitEvent(direction));
+        return;
+    }
+
+    p.set_r(nr);
+    p.set_c(nc);
+
+    EventBus::instance().publish(PlayerMoveEvent(direction));
 }
 
 void Game::player_move_up() {
-    if(!board[p.get_r() - 1][p.get_c()].is_wall()) {
-        p.set_r(p.get_r() - 1);
-    }
+    player_move(-1, 0, "up");
 }
 
 void Game::player_move_down() {
-    if(!board[p.get_r() + 1][p.get_c()].is_wall()) {
-        p.set_r(p.get_r() + 1);
-    }
+    player_move(1, 0, "down");
 }
 
 void Game::player_move_left() {
-    if(!board[p.get_r()][p.get_c() - 1].is_wall()) {
-        p.set_c(p.get_c() - 1);
-    }
+    player_move(0, -1, "left");
 }
 
 void Game::player_move_right() {
-    if(!board[p.get_r()][p.get_c() + 1].is_wall()) {
-        p.set_c(p.get_c() + 1);
-    }
+    player_move(0, 1, "right");
 }
 
 bool Game::is_enemy_pos(int r, int c) {
@@ -170,7 +186,12 @@ void Game::render_state() {
     print_player_wallet();
     print_player_hands();
     print_instructions();
+    print_board_with_recent_logs();
+}  
+
+void Game::print_board_with_recent_logs() {
     std::cout << "\n";
+    const auto logs = logger.recent(8);
 
     std::stringstream ss;
     for(int r = 0; r < ROWS; r++) {
@@ -193,15 +214,24 @@ void Game::render_state() {
                 ss << C_ITEMS;
             }
         }
+
+        if(r == 0) {
+            ss << "   RECENT LOGS";
+        } else if(r <= (int)logs.size()) {
+            std::string text = format_log_entry(logs[logs.size() - r]);
+            ss << "   \033[K" << text;
+        }
+
         ss << '\n';
     }
+
     std::cout << ss.str();
-}  
+}
 
 void Game::cur_action_info() {
     full_clear_from_cursor();
     auto& items = board[p.get_r()][p.get_c()].get_items();
-    std::cout << "LOG: ";
+    std::cout << "INFO: ";
     if(is_enemy_pos(p.get_r(), p.get_c())) {
         int idx = player_enemy_map_value();
         std::cout << std::format("{} - hp({}), attack({}), armor({})\n", enemies[idx].get_name(), enemies[idx].get_hp(), enemies[idx].get_attack(), enemies[idx].get_arrmor());
@@ -226,8 +256,8 @@ void Game::print_player_wallet() {
 
 void Game::print_player_stats() {
     std::string out = std::format(
-        "PLAYER: HP {:3}/100 | STR {:2} | DEX {:2} | LCK {:2} | AGR {:2} | WIS {:2}\n",
-        p.get_hp(), p.get_str(), p.get_dex(), p.get_lck(), p.get_agr(), p.get_wis(), p.get_gold(), p.get_coins()
+        "PLAYER({}): HP {:3}/100 | STR {:2} | DEX {:2} | LCK {:2} | AGR {:2} | WIS {:2}\n",
+        p.get_name(), p.get_hp(), p.get_str(), p.get_dex(), p.get_lck(), p.get_agr(), p.get_wis(), p.get_gold(), p.get_coins()
     );
 
     clear_line_cursor();
@@ -271,7 +301,7 @@ void Game::print_player_hands() {
 
 void Game::print_instructions() {
     std::stringstream out;
-    out << "QUIT(Q) | ";
+    out << "QUIT(Q) | GET FULL LOG(J) | ";
     if(capabilities.can_move) {
         out << "MOVE(WASD) | ";
     }
@@ -279,7 +309,7 @@ void Game::print_instructions() {
         out << "PICK UP(E) | ";
     }
     if(capabilities.has_items) {
-        out << "PICK UP(E) | DROP(G) | EQUIP(J) | UNEQUIP(K) | GET INFO(I) | ";
+        out << "PICK UP(E) | DROP(G) | EQUIP(K) | UNEQUIP(L) | GET INFO(I) | ";
     }
     if(capabilities.has_enemies) {
         out << "BATTLE(F) | ";
@@ -320,15 +350,30 @@ void Game::player_try_pick_up_item() {
     set_raw_mode(true);
     hide_cursor();
 
+    std::string item_name;
+
     try {
-        auto item = cell.take_item(std::stoi(input));
+        int idx = std::stoi(input);
+        const auto& items = cell.get_items();
+        if(idx < 1 || idx > (int)items.size()) {
+            throw std::out_of_range("idx");
+        }
+        if(items[idx - 1]->goes_to_inv() && !p.can_add_item()) {
+            throw custom_exception("inventory is full");
+        }
+        auto item = cell.take_item(idx);
+        item_name = item->get_name();
+
         if(item->on_pick_up(p)) {
             p.add_item(std::move(item));
         }
     } catch(const std::exception& e) {
-        std::cout << "ERROR: " << e.what() << '\n' << "(to continue press any key)";
+        std::cerr << "ERROR: " << e.what() << '\n' << "(to continue press any key)";
         getchar();
+        return;
     }
+
+    EventBus::instance().publish(ItemPickUpEvent(item_name));
 }
 
 void Game::player_try_drop_item() {
@@ -351,13 +396,23 @@ void Game::player_try_drop_item() {
 
     Cell& cell = board[p.get_r()][p.get_c()];
 
+    std::string item_name;
+
     try {
         int idx = std::stoi(input);
+        if(idx < 1 || idx > (int)p.get_inventory().size()) {
+            throw std::out_of_range("idx");
+        }
+        item_name = p.get_inventory()[idx - 1]->get_name();
+        
         cell.add_item(p.take_item(idx));
     } catch(const std::exception& e) {
-        std::cout << "ERROR: " << e.what() << '\n' << "(to continue press any key)";
+        std::cerr << "ERROR: " << e.what() << '\n' << "(to continue press any key)";
         getchar();
+        return;
     }
+
+    EventBus::instance().publish(ItemDropEvent(item_name));
 }
 
 void Game::player_try_equip_weapon() {
@@ -379,10 +434,14 @@ void Game::player_try_equip_weapon() {
         return;
     }
 
+    std::string item_name;
+
     try {
         int idx = std::stoi(input);
 
         std::unique_ptr<Item> item = p.take_item(idx);
+        item_name = item->get_name();
+
         Item* raw_item = item.get();
         item = raw_item->equip(p, std::move(item));
         if(item) {
@@ -390,9 +449,12 @@ void Game::player_try_equip_weapon() {
             throw custom_exception("cannot equip this item");
         }
     } catch(const std::exception& e) {
-        std::cout << "ERROR: " << e.what() << '\n' << "(to continue press any key)";
+        std::cerr << "ERROR: " << e.what() << '\n' << "(to continue press any key)";
         getchar();
+        return;
     }
+
+    EventBus::instance().publish(ItemEquipEvent(item_name));
 }
 
 void Game::player_try_unequip_weapon() {
@@ -405,23 +467,33 @@ void Game::player_try_unequip_weapon() {
 
     set_raw_mode(true);
     hide_cursor();
+
+    std::string item_name;
     try {
+        if(!p.can_add_item()) {
+            throw custom_exception("inventory is full");
+        }
+
         if(input == "cancel") {
             return;
         } else if(input == "left") {
             auto& left = p.get_left_hand();
+            item_name = left->get_name();
             if(!left) {
                 return;
             }
+            
             p.add_item(p.take_left_hand());
         } else if(input == "right") {
             auto& right = p.get_right_hand();
+            item_name = right->get_name();
             if(!right) {
                 return;
             }
             p.add_item(p.take_right_hand());
         } else if(input == "both") {
             auto& both = p.get_both_hands();
+            item_name = both->get_name();
             if(!both) {
                 return;
             }
@@ -430,9 +502,12 @@ void Game::player_try_unequip_weapon() {
             throw custom_exception("invalid input");
         }
     } catch(const std::exception& e) {
-        std::cout << "ERROR: " << e.what() << '\n' << "(to continue press any key)";
+        std::cerr << "ERROR: " << e.what() << '\n' << "(to continue press any key)";
         getchar();
+        return;
     }
+
+    EventBus::instance().publish(ItemUnequipEvent(item_name));
 }
 
 void Game::player_try_get_item_info() {
@@ -472,7 +547,7 @@ void Game::player_try_get_item_info() {
         std::cout << ss.str();
         getchar();
     } catch(const std::exception& e) {
-        std::cout << "ERROR: " << e.what() << "\n(to continue press any key)";
+        std::cerr << "ERROR: " << e.what() << "\n(to continue press any key)";
         getchar();
     }
 }
@@ -596,6 +671,17 @@ void Game::remove_enemy_from_map(int enemy_idx) {
     enemy_map[enemies[enemy_idx].get_r()][enemies[enemy_idx].get_c()] = -1;
 }
 
+void continue_press_any_key() {
+    hide_cursor();
+    set_raw_mode(true);
+    
+    std::cout << "(to continue press any key)\n";
+    getchar();
+
+    unhide_cursor();
+    set_raw_mode(false);
+};
+
 bool Game::battle() {
     int enemy_idx = player_enemy_map_value();
     if(enemy_idx < 0) {
@@ -609,20 +695,11 @@ bool Game::battle() {
         return false;
     }
 
+    EventBus::instance().publish(BattleStartEvent(enemies[enemy_idx].get_name()));
+
     enter_alt_terminal();
     set_raw_mode(false);
     unhide_cursor();
-
-    auto continue_press_any_key = []() {
-        hide_cursor();
-        set_raw_mode(true);
-        
-        std::cout << "(to continue press any key)\n";
-        getchar();
-
-        unhide_cursor();
-        set_raw_mode(false);
-    };
 
     auto& e = enemies[enemy_idx];
     bool player_won = true;
@@ -644,8 +721,10 @@ bool Game::battle() {
 
             render_battle_state(enemy_idx);
             std::cout << std::format("PLAYER dealt {} damage to {}\n", dealt, all_toupper(e.get_name()));
+            EventBus::instance().publish(AttackEvent("Player", e.get_name(), dealt));
 
             if(e.is_dead()) {
+                EventBus::instance().publish(EnemyDefeatEvent(e.get_name()));
                 std::cout << std::format("{} was defeated\n", all_toupper(e.get_name()));
                 continue_press_any_key();
                 break;
@@ -660,8 +739,10 @@ bool Game::battle() {
             render_battle_state(enemy_idx);
             std::cout << std::format("{} dealt {} damage to PLAYER\n", all_toupper(e.get_name()), dealt_enemy);
             std::cout << std::format("PLAYER dealt {} damage to {}\n", dealt, all_toupper(e.get_name()));
+            EventBus::instance().publish(AttackEvent(e.get_name(), "Player", dealt_enemy));
 
             if(p.is_dead()) {
+                EventBus::instance().publish(PlayerDefeatEvent(e.get_name()));
                 std::cout << "PLAYER lost a battle\n";
                 player_won = false;
                 continue_press_any_key();
@@ -676,7 +757,7 @@ bool Game::battle() {
             }
 
             render_battle_state(enemy_idx);
-            std::cout << "ERROR: " << e.what() << '\n';
+            std::cerr << "ERROR: " << e.what() << '\n';
             continue_press_any_key();
         }
     }
@@ -687,7 +768,7 @@ bool Game::battle() {
 
     if(player_won == false) {
         full_clear();
-        std::cout << "GAME OVER\n";
+        std::cout << "GAME OVER\nLOG FILE: " << log_file.string() << '\n'; 
         return true;
     }
     
@@ -697,4 +778,24 @@ bool Game::battle() {
 
 int Game::player_enemy_map_value() {
     return enemy_map[p.get_r()][p.get_c()];
+}
+
+void Game::show_full_log_history() {
+    enter_alt_terminal();
+    set_raw_mode(false);
+    unhide_cursor();
+
+    std::stringstream ss;
+
+    for(auto e : logger.all()) {
+        ss << format_log_entry(e) << '\n';
+    }
+
+    std::cout << ss.str();
+
+    continue_press_any_key();
+
+    exit_alt_terminal();
+    set_raw_mode(true);
+    hide_cursor();
 }

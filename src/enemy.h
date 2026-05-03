@@ -6,7 +6,6 @@
 #include <string>
 
 class Enemy : public Entity {
-    std::string name;
     int attack;
     int armor;
     int max_hp;

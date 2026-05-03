@@ -32,8 +32,8 @@ public:
     int attack(const Player& p, const Attack& a) const;
     int defense(const Player& p, const Attack& a) const;
 
-    virtual int attack_dispatched(const Player&, const Attack&, const Item&) const;
-    virtual int defense_dispatched(const Player&, const Attack&, const Item&) const;
+    virtual int accept_attack(const Player&, const Attack&, const Item&) const;
+    virtual int accept_defense(const Player&, const Attack&, const Item&) const;
 };
 
 #endif

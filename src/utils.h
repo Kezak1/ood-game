@@ -6,6 +6,8 @@
 #include <termios.h>
 #include <unistd.h>
 #include <stdexcept>
+#include <filesystem>
+#include <string>
 
 class custom_exception : public std::exception {
     std::string msg;
@@ -47,5 +49,12 @@ void exit_alt_terminal();
 void set_raw_mode(bool enable);
 
 std::string all_toupper(std::string s); 
+
+struct GameConfig {
+    std::string player_name;
+    std::filesystem::path log_file;
+};
+
+GameConfig load_game_config(const std::filesystem::path& path);
 
 #endif

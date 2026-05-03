@@ -9,13 +9,15 @@
 #include <memory>
 
 class Player : public Entity {
+    std::string name;
     int str, dex, lck, agr, wis;
     int gold, coins;
-    // todo do limit 5-6 items in inventory
+
     std::vector<std::unique_ptr<Item>> inventory;
+    static constexpr size_t max_inventory_cap = 6; 
     std::unique_ptr<Item> left_hand, right_hand, both_hands;  
 public:
-    Player();
+    Player(std::string name);
     int get_str() const;
     int get_dex() const;
     int get_lck() const;
@@ -43,6 +45,7 @@ public:
     bool equip_in_both_hands(std::unique_ptr<Item>& item);
 
     const std::vector<std::unique_ptr<Item>>& get_inventory() const;
+    bool can_add_item() const;
     void add_item(std::unique_ptr<Item> item);
     void insert_item(int idx, std::unique_ptr<Item> item, bool restoring);
     std::unique_ptr<Item> take_item(int idx);
