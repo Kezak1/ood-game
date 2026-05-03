@@ -15,7 +15,7 @@ rpg game - uni project
     cmake --build build
     ./build/rpg
     ```
-    
+
     can also pass another config file:
     ```bash
     ./build/rpg <your_config_file_path>
@@ -43,4 +43,5 @@ rpg game - uni project
     - to unquip a equiped weapon press **L**
     - to get info about item in the invetory press **I**
     - to battle enemy press **F**
+    - to get full logs press **J**
     - to exit a game press **Q**
