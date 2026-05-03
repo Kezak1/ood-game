@@ -7,34 +7,28 @@ rpg game - uni project
     - Linux OS, probably would work on any popular distro (tested on arch, manjaro and ubuntu)
     - C++ 20
     - CMake 3.16 or newer
-2. **Run:**
-
-    run from repo directory:
+2. **Build:**
     ```bash
     cmake -S . -B build
     cmake --build build
+    ```
+3. **Run:**
+    ```bash
     ./build/rpg
     ```
-
-    can also pass another config file:
+    or
     ```bash
     ./build/rpg <your_config_file_path>
     ```
 
-    the game loads `config.ini` before startup:
-    ```ini
-    player_name=Ken
-    log_file=logs/game.log
-    ```
-
-
+    **note:** the game loads `config.ini` as default
 
 ## Instruction
 1. **Icons**:
     - Wall (`██`)
     - Player (`¶ `)
     - Enemy (` @`)
-    - Items on the ground (` *`)
+    - Item(s) on the ground (` *`)
 2. **Controls:**
     - to move use **WASD** keys
     - to pick up an item that is on the cell the ¶ is on press **E**
