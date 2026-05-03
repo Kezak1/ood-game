@@ -52,7 +52,7 @@ std::string all_toupper(std::string s);
 
 struct GameConfig {
     std::string player_name;
-    std::filesystem::path log_file;
+    std::filesystem::path log_path;
 };
 
 GameConfig load_game_config(const std::filesystem::path& path);

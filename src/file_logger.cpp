@@ -27,6 +27,7 @@ std::string format_log_entry(const LogEntry& entry) {
     return ss.str();
 }
 
+/*
 std::filesystem::path prepare_log_file(const std::filesystem::path& path) {
     const auto parent = path.parent_path();
     if(!parent.empty()) {
@@ -35,8 +36,9 @@ std::filesystem::path prepare_log_file(const std::filesystem::path& path) {
 
     return path;
 }
+*/
 
-/*
+
 std::filesystem::path make_unique_path(const std::filesystem::path& dir, const std::string& player_name) {
     std::filesystem::create_directories(dir);
     
@@ -51,13 +53,12 @@ std::filesystem::path make_unique_path(const std::filesystem::path& dir, const s
 
     return path;
 }
-*/
 
-FileLogger::FileLogger(std::filesystem::path file_path, std::string player_name) : path(prepare_log_file(file_path)), file(path, std::ios::app) {
+
+FileLogger::FileLogger(std::filesystem::path dir, std::string player_name) : path(make_unique_path(dir, player_name)), file(path, std::ios::app) {
     if(!file) {
         throw std::runtime_error(std::format("cannot open log file '{}'", path.string()));
     }
-    file << "===================================================================================================\n";
     log(std::format("Game started - player_name: {}", player_name));
 }
 
@@ -80,6 +81,6 @@ const std::vector<LogEntry>& FileLogger::all() const {
     return entries;
 }
 
-std::filesystem::path FileLogger::file_path() const {
+const std::filesystem::path& FileLogger::get_path() const {
     return path;
 }
