@@ -7,6 +7,10 @@
 #include <stdexcept>
 #include <filesystem>
 #include <string>
+#include <queue>
+#include <vector>
+
+class Cell;
 
 class custom_exception : public std::exception {
     std::string msg;
@@ -55,3 +59,5 @@ struct GameConfig {
 };
 
 GameConfig load_game_config(const std::filesystem::path& path);
+
+int walkable_dis(const std::vector<std::vector<Cell>>& board, int from_r, int from_c, int to_r, int to_c); 

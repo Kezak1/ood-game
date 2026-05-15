@@ -33,8 +33,10 @@ std::unique_ptr<Item> MetalThemeFactory::create_artifact() const {
     return std::make_unique<Blaster>();
 }
 
-std::vector<Enemy> MetalThemeFactory::create_enemy_roster() const {
-    std::vector<Enemy> res;
-    res.push_back(Enemy("Cleaning Robot", -1, -1, 20, 5, 50));
-    return res;
+std::vector<std::function<std::unique_ptr<Enemy>(int, int)>> MetalThemeFactory::create_enemy_roster() const {
+    return {
+        [](int r, int c) {
+            return std::make_unique<Enemy>("Cleaning Robot", r, c, 20, 5, 50);
+        }
+    };
 }

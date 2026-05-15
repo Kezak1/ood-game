@@ -80,12 +80,12 @@ void Game::init_board() {
 
     board = std::move(res.board);
     capabilities = res.capabilities;
-    enemies = res.enemies;
+    enemies = std::move(res.enemies);
 
     enemy_map.assign(ROWS, std::vector<int>(COLS, -1));
     int idx = 0;
     for(auto& e : enemies) {
-        enemy_map[e.get_r()][e.get_c()] = idx++;
+        enemy_map[e->get_r()][e->get_c()] = idx++;
     }
 
     std::cout << "\n\033[1m" << res.begining_msg << "\033[22m\n";
@@ -235,7 +235,7 @@ void Game::cur_action_info() {
     std::cout << "INFO: ";
     if(is_enemy_pos(p.get_r(), p.get_c())) {
         int idx = player_enemy_map_value();
-        std::cout << std::format("{} - hp({}), attack({}), armor({})\n", enemies[idx].get_name(), enemies[idx].get_hp(), enemies[idx].get_attack(), enemies[idx].get_arrmor());
+        std::cout << std::format("{} - hp({}), attack({}), armor({})\n", enemies[idx]->get_name(), enemies[idx]->get_hp(), enemies[idx]->get_attack(), enemies[idx]->get_arrmor());
     } else if(items.empty()) {
         std::cout << "standing on empty cell\n";
     } else {
@@ -364,6 +364,11 @@ void Game::player_try_pick_up_item() {
         }
         auto item = cell.take_item(idx);
         item_name = item->get_name();
+
+        int range = item->sound_range();
+        if(range > 0) {
+            EventBus::instance().publish(SoundEvent{p.get_r(), p.get_c(), range, board});
+        }
 
         if(item->on_pick_up(p)) {
             p.add_item(std::move(item));
@@ -578,7 +583,7 @@ void Game::print_battlefield() {
 
 void Game::print_enemy_hp(int enemy_idx) {
     auto& e = enemies[enemy_idx];
-    std::string out = std::format("{}: HP {:3}/{}\n", all_toupper(e.get_name()), e.get_hp(), e.get_max_hp());
+    std::string out = std::format("{}: HP {:3}/{}\n", all_toupper(e->get_name()), e->get_hp(), e->get_max_hp());
     clear_line_cursor();
     std::cout << out;
 }
@@ -669,7 +674,7 @@ std::unique_ptr<Attack> Game::choose_battle_attack() const {
 }
 
 void Game::remove_enemy_from_map(int enemy_idx) {
-    enemy_map[enemies[enemy_idx].get_r()][enemies[enemy_idx].get_c()] = -1;
+    enemy_map[enemies[enemy_idx]->get_r()][enemies[enemy_idx]->get_c()] = -1;
 }
 
 void continue_press_any_key() {
@@ -696,7 +701,7 @@ bool Game::battle() {
         return false;
     }
 
-    EventBus::instance().publish(BattleStartEvent(enemies[enemy_idx].get_name()));
+    EventBus::instance().publish(BattleStartEvent(enemies[enemy_idx]->get_name()));
 
     enter_alt_terminal();
     set_raw_mode(false);
@@ -705,7 +710,7 @@ bool Game::battle() {
     auto& e = enemies[enemy_idx];
     bool player_won = true;
 
-    while(!p.is_dead() && !e.is_dead()) {
+    while(!p.is_dead() && !e->is_dead()) {
         render_battle_state(enemy_idx);
 
         std::cout << "PLAYER:\n";
@@ -715,18 +720,18 @@ bool Game::battle() {
             
             int dealt = 0;
             if(item) {
-                int prev_hp = e.get_hp();
-                e.take_dmg(item->attack(p, *attack));
-                dealt = prev_hp - e.get_hp();
+                int prev_hp = e->get_hp();
+                e->take_dmg(item->attack(p, *attack));
+                dealt = prev_hp - e->get_hp();
             }
 
             render_battle_state(enemy_idx);
-            std::cout << std::format("PLAYER dealt {} damage to {}\n", dealt, all_toupper(e.get_name()));
-            EventBus::instance().publish(AttackEvent("Player", e.get_name(), dealt));
+            std::cout << std::format("PLAYER dealt {} damage to {}\n", dealt, all_toupper(e->get_name()));
+            EventBus::instance().publish(AttackEvent("Player", e->get_name(), dealt));
 
-            if(e.is_dead()) {
-                EventBus::instance().publish(EnemyDefeatEvent(e.get_name()));
-                std::cout << std::format("{} was defeated\n", all_toupper(e.get_name()));
+            if(e->is_dead()) {
+                EventBus::instance().publish(EnemyDefeatEvent(e->get_name(), e->get_species()));
+                std::cout << std::format("{} was defeated\n", all_toupper(e->get_name()));
                 continue_press_any_key();
                 break;
             }
@@ -735,15 +740,15 @@ bool Game::battle() {
             if(item) {
                 defense = item->defense(p, *attack);
             }
-            int dealt_enemy = std::max(1, e.get_attack() - defense / 4);
+            int dealt_enemy = std::max(1, e->get_attack() - defense / 4);
             p.take_dmg(dealt_enemy);
             render_battle_state(enemy_idx);
-            std::cout << std::format("{} dealt {} damage to PLAYER\n", all_toupper(e.get_name()), dealt_enemy);
-            std::cout << std::format("PLAYER dealt {} damage to {}\n", dealt, all_toupper(e.get_name()));
-            EventBus::instance().publish(AttackEvent(e.get_name(), "Player", dealt_enemy));
+            std::cout << std::format("{} dealt {} damage to PLAYER\n", all_toupper(e->get_name()), dealt_enemy);
+            std::cout << std::format("PLAYER dealt {} damage to {}\n", dealt, all_toupper(e->get_name()));
+            EventBus::instance().publish(AttackEvent(e->get_name(), "Player", dealt_enemy));
 
             if(p.is_dead()) {
-                EventBus::instance().publish(PlayerDefeatEvent(e.get_name()));
+                EventBus::instance().publish(PlayerDefeatEvent(e->get_name()));
                 std::cout << "PLAYER lost a battle\n";
                 player_won = false;
                 continue_press_any_key();

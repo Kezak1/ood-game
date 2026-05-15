@@ -19,4 +19,5 @@ public:
     void visit(const EnemyDefeatEvent&) override;
     void visit(const PlayerDefeatEvent&) override;
     void visit(const UnknownKeyEvent&) override;
+    void visit(const SoundEvent&) override;
 };

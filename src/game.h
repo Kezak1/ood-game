@@ -25,7 +25,7 @@
 
 class Game {
     Player p;
-    std::vector<Enemy> enemies;
+    std::vector<std::unique_ptr<Enemy>> enemies;
     std::vector<std::vector<int>> enemy_map;
     
     std::vector<std::vector<Cell>> board;

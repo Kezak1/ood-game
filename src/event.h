@@ -1,6 +1,9 @@
 #pragma once
 
 #include <string>
+#include <vector>
+
+#include "cell.h"
 
 struct PlayerMoveEvent;
 struct WallHitEvent;
@@ -13,6 +16,7 @@ struct AttackEvent;
 struct EnemyDefeatEvent;
 struct PlayerDefeatEvent;
 struct UnknownKeyEvent;
+struct SoundEvent;
 
 class EventVisitor {
 public:
@@ -29,6 +33,7 @@ public:
     virtual void visit(const EnemyDefeatEvent&) = 0;
     virtual void visit(const PlayerDefeatEvent&) = 0;
     virtual void visit(const UnknownKeyEvent&) = 0;
+    virtual void visit(const SoundEvent&) = 0;
 };
 
 class Event {
@@ -90,7 +95,8 @@ struct AttackEvent : public Event {
 
 struct EnemyDefeatEvent : public Event {
     std::string enemy_name;
-    EnemyDefeatEvent(std::string enemy_name);
+    std::string species;
+    EnemyDefeatEvent(std::string enemy_name, std::string species);
     void accept(EventVisitor&) const override;
 };
 
@@ -103,5 +109,13 @@ struct PlayerDefeatEvent : public Event {
 struct UnknownKeyEvent : public Event {
     char key;
     UnknownKeyEvent(char key);
+    void accept(EventVisitor&) const override;
+};
+
+struct SoundEvent : public Event {
+    int source_r, source_c;
+    int range;
+    const std::vector<std::vector<Cell>>& board;
+    SoundEvent(int source_r, int source_c, int range, const std::vector<std::vector<Cell>>& board);
     void accept(EventVisitor&) const override;
 };

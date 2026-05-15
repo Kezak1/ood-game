@@ -17,6 +17,7 @@
 #include "gold.h"
 #include "coin.h"
 #include "dungeon_builder_facade.h"
+#include <memory>
 
 /*
 Correct building order:
@@ -124,18 +125,15 @@ BuildResult DungeonBuilder::build(const DungeonThemeFactory& factory) {
             a.erase(a.begin() + idx);
 
             int roster_idx = next_random(0, (int)enemy_roster.size() - 1);
-            auto enemy = enemy_roster[roster_idx];
-            
-            enemy.set_r(r);
-            enemy.set_c(c);
+            auto enemy = enemy_roster[roster_idx](r, c);
 
-            add_enemy(enemy);
+            add_enemy(std::move(enemy));
         }
     }
     
     BuildResult res {
         .board = std::move(board),
-        .enemies = enemies,
+        .enemies = std::move(enemies),
         .begining_msg = factory.intro(),
         .capabilities = capabilities,
     };
@@ -475,8 +473,8 @@ void DungeonBuilder::connect_empty() {
     }
 }
 
-void DungeonBuilder::add_enemy(Enemy enemy) {
-    enemies.push_back(enemy);
+void DungeonBuilder::add_enemy(std::unique_ptr<Enemy> enemy) {
+    enemies.push_back(std::move(enemy));
     capabilities.has_enemies = true;
 }
 
@@ -492,7 +490,7 @@ void DungeonBuilder::add_random_enemies(int count) {
             continue;
         }
 
-        add_enemy(Enemy("Enemy", r, c, next_random(15, 30), next_random(0, 10), next_random(60, 90)));
+        add_enemy(std::make_unique<Enemy>("Enemy", r, c, next_random(15, 30), next_random(0, 10), next_random(60, 90)));
         a.erase(a.begin() + idx);   
         i++;
     }

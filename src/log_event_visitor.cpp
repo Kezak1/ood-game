@@ -1,4 +1,5 @@
 #include "log_event_visitor.h"
+#include "event.h"
 
 #include <cctype>
 #include <format>
@@ -80,4 +81,8 @@ void LogEventVisitor::visit(const PlayerDefeatEvent& e) {
 
 void LogEventVisitor::visit(const UnknownKeyEvent& e) {
     logger.log(std::format("Player pressed unknown key '{}'", printable_key(e.key)));
+}
+
+void LogEventVisitor::visit(const SoundEvent& e) {
+    logger.log(std::format("Sound at ({},{}) range={}", e.source_r, e.source_c, e.range));
 }

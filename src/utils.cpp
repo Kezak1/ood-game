@@ -1,10 +1,13 @@
 #include "utils.h"
+#include "cell.h"
 
 #include <cctype>
 #include <filesystem>
 #include <fstream>
 #include <format>
+#include <queue>
 #include <stdexcept>
+#include <vector>
 
 custom_exception::custom_exception(const char* msg) : msg(msg) {}
 
@@ -142,4 +145,41 @@ GameConfig load_game_config(const std::filesystem::path& path) {
     }
 
     return config;
+}
+
+int walkable_dis(const std::vector<std::vector<Cell>>& board, int from_r, int from_c, int to_r, int to_c) {
+    if(from_r == to_r && from_c == to_c) {
+        return 0;
+    }
+
+    std::vector<std::vector<bool>> vis(ROWS, std::vector<bool> (COLS, false));
+    std::queue<std::pair<int, int>> q;
+
+    q.push({from_r, from_c});
+    vis[from_r][from_c] = true;
+
+    int dis = 0;
+    
+    while(!q.empty()) {
+        int sz = q.size();
+        while(sz--) {
+            auto [r, c] = q.front();
+            q.pop();
+
+            if(r == to_r && c == to_c) {
+                return dis;
+            }
+
+            for(int i = 0; i < 4; i++) {
+                int nr = r + dr[i], nc = c + dc[i];
+                if(in_range(nr, nc) && !board[nr][nc].is_wall() && !vis[nr][nc]) {
+                    q.push({nr, nc});
+                    vis[nr][nc] = true;
+                }
+            }
+        }   
+        dis++;
+    }
+
+    return -1;
 }

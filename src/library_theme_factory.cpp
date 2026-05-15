@@ -37,8 +37,10 @@ std::unique_ptr<Item> LibraryThemeFactory::create_artifact() const {
     return std::make_unique<BlackWand>();
 }
 
-std::vector<Enemy> LibraryThemeFactory::create_enemy_roster() const {
-    std::vector<Enemy> res;
-    res.push_back(Enemy("Mage", -1, -1, next_random(20, 30), next_random(2, 6), next_random(45, 55)));
-    return res;
+std::vector<std::function<std::unique_ptr<Enemy>(int, int)>> LibraryThemeFactory::create_enemy_roster() const {
+    return {
+        [](int r, int c) {
+            return std::make_unique<Enemy>("Mage", r, c, next_random(20, 30), next_random(2, 6), next_random(45, 55));
+        }
+    };
 }

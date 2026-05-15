@@ -53,3 +53,7 @@ int ItemModifier::accept_attack(const Player& p,  const Attack& a, const Item& s
 int ItemModifier::accept_defense(const Player& p, const Attack& a, const Item& stats) const {
     return inner->accept_defense(p, a, stats);
 }
+
+int ItemModifier::sound_range() const {
+    return inner->sound_range();
+}

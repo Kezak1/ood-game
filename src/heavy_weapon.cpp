@@ -13,3 +13,7 @@ int HeavyWeapon::accept_attack(const Player& p,  const Attack& a, const Item& st
 int HeavyWeapon::accept_defense(const Player& p, const Attack& a, const Item& stats) const {
     return a.visit_defense(p, *this, stats);
 }
+
+int HeavyWeapon::sound_range() const {
+    return 8;
+}

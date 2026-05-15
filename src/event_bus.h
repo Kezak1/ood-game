@@ -15,5 +15,6 @@ public:
     EventBus& operator=(const EventBus&) = delete;
 
     void subscribe(EventVisitor& visitor);
+    void unsubscribe(EventVisitor& visitor);
     void publish(const Event& event);
 };

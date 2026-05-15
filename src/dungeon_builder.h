@@ -22,7 +22,7 @@ struct PlayerCapabilities {
 
 struct BuildResult {
     std::vector<std::vector<Cell>> board;
-    std::vector<Enemy> enemies;
+    std::vector<std::unique_ptr<Enemy>> enemies;
     std::string begining_msg;
     PlayerCapabilities capabilities;
 };
@@ -30,7 +30,7 @@ struct BuildResult {
 class DungeonBuilder {
     int player_start_pos_r, player_start_pos_c;
     
-    std::vector<Enemy> enemies;
+    std::vector<std::unique_ptr<Enemy>> enemies;
     std::vector<std::vector<Cell>> board;
     PlayerCapabilities capabilities;
 
@@ -54,7 +54,7 @@ private:
     void add_random_weapons(int count);
     void add_random_currencies(int count);
     
-    void add_enemy(Enemy enemy);
+    void add_enemy(std::unique_ptr<Enemy> enemy);
     void add_random_enemies(int count);
     
     void connect_empty();

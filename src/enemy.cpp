@@ -1,11 +1,12 @@
 #include "enemy.h"
 #include "entity.h"
 
-Enemy::Enemy(std::string name, int r, int c, int atk, int armor, int hp) : 
+Enemy::Enemy(std::string name, int r, int c, int atk, int armor, int hp, std::string species) : 
     Entity(name, r, c, hp),
     attack(atk),
     armor(armor),
-    max_hp(hp)
+    max_hp(hp),
+    species(species)
     {}
 
 const std::string& Enemy::get_name() const {
@@ -29,4 +30,18 @@ void Enemy::take_dmg(int dmg) {
         return;
     }
     hp = std::max(0, hp - std::max(0, dmg - armor));
+}
+
+const std::string& Enemy::get_species() const {
+    return species;
+}
+
+void Enemy::weaken() {
+    attack = std::max(0, attack - 3);
+    armor = std::max(0, armor - 1);
+}
+
+void Enemy::strengthen() {
+    attack += 3;
+    armor += 1;
 }

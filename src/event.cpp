@@ -48,7 +48,7 @@ void AttackEvent::accept(EventVisitor& visitor) const {
     visitor.visit(*this);
 }
 
-EnemyDefeatEvent::EnemyDefeatEvent(std::string enemy_name) : enemy_name(enemy_name) {}
+EnemyDefeatEvent::EnemyDefeatEvent(std::string enemy_name, std::string species) : enemy_name(enemy_name), species(species) {}
 
 void EnemyDefeatEvent::accept(EventVisitor& visitor) const {
     visitor.visit(*this);
@@ -63,5 +63,12 @@ void PlayerDefeatEvent::accept(EventVisitor& visitor) const {
 UnknownKeyEvent::UnknownKeyEvent(char key) : key(key) {}
 
 void UnknownKeyEvent::accept(EventVisitor& visitor) const {
+    visitor.visit(*this);
+}
+
+SoundEvent::SoundEvent(int source_r, int source_c, int range, const std::vector<std::vector<Cell>>& board) 
+    : source_r(source_r), source_c(source_c), range(range), board(board) {}
+
+void SoundEvent::accept(EventVisitor& visitor) const {
     visitor.visit(*this);
 }

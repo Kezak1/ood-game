@@ -7,6 +7,7 @@
 
 #include <string>
 #include <memory>
+#include <functional>
 
 class DungeonThemeFactory {
 public:
@@ -16,5 +17,5 @@ public:
     virtual std::unique_ptr<LayoutStrategy> create_layout() const = 0;
     virtual std::vector<std::unique_ptr<Item>> create_item_pool() const = 0;
     virtual std::unique_ptr<Item> create_artifact() const = 0;
-    virtual std::vector<Enemy> create_enemy_roster() const = 0;
+    virtual std::vector<std::function<std::unique_ptr<Enemy>(int r, int c)>> create_enemy_roster() const = 0;
 };

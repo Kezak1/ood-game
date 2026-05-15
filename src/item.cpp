@@ -64,3 +64,7 @@ int Item::accept_attack(const Player& p, const Attack& a, const Item& stats) con
 int Item::accept_defense(const Player& p, const Attack& a, const Item& stats) const {
     return a.visit_defense(p, stats, stats);
 }
+
+int Item::sound_range() const {
+    return 0;
+}

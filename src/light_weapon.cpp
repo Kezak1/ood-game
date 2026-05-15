@@ -13,3 +13,7 @@ int LightWeapon::accept_attack(const Player& p, const Attack& a, const Item& sta
 int LightWeapon::accept_defense(const Player& p, const Attack& a, const Item& stats) const {
     return a.visit_defense(p, *this, stats);
 }
+
+int LightWeapon::sound_range() const {
+    return 2;
+}

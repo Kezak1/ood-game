@@ -13,3 +13,7 @@ int MagicalWeapon::accept_attack(const Player& p, const Attack& a, const Item& s
 int MagicalWeapon::accept_defense(const Player& p, const Attack& a, const Item& stats) const {
     return a.visit_defense(p, *this, stats);
 }
+
+int MagicalWeapon::sound_range() const {
+    return 5;
+}

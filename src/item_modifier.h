@@ -27,4 +27,6 @@ public:
 
     bool on_pick_up(Player& p) const override;
     std::unique_ptr<Item> equip(Player&, std::unique_ptr<Item> self) override;
+
+    int sound_range() const override;
 };
