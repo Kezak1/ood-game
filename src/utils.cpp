@@ -96,7 +96,7 @@ GameConfig load_game_config(const std::filesystem::path& path) {
 
     GameConfig config;
     bool has_player_name = false;
-    bool has_log_file = false;
+    bool has_log_path = false;
 
     std::string line;
     int line_count = 0;
@@ -120,9 +120,9 @@ GameConfig load_game_config(const std::filesystem::path& path) {
         if(key == "player_name") {
             config.player_name = value;
             has_player_name = true;
-        } else if(key == "log_file") {
-            config.log_file = value;
-            has_log_file = true;
+        } else if(key == "log_path") {
+            config.log_path = value;
+            has_log_path = true;
         }
     }
 
@@ -130,14 +130,14 @@ GameConfig load_game_config(const std::filesystem::path& path) {
         throw std::runtime_error("config is missing required value: player_name");
     }
 
-    if(!has_log_file || config.log_file.empty()) {
+    if(!has_log_path || config.log_path.empty()) {
         throw std::runtime_error("config is missing required value: log_file");
     }
 
-    if(config.log_file.is_relative()) {
+    if(config.log_path.is_relative()) {
         auto config_dir = path.parent_path();
         if(!config_dir.empty()) {
-            config.log_file = config_dir / config.log_file;
+            config.log_path = config_dir / config.log_path;
         }
     }
 

@@ -17,17 +17,17 @@ int main(int argc, char* argv[]) {
 
         GameConfig config = load_game_config(config_path);
         
-        FileLogger logger(config.log_file, config.player_name);
+        FileLogger logger(config.log_path, config.player_name);
         LogEventVisitor event_logger(logger);
 
         EventBus::instance().subscribe(event_logger);
 
-        Game g(logger, config.player_name, config.log_file);
+        Game g(logger, config.player_name, logger.get_path());
         g.main_loop();
     } catch(const std::exception& e) {
         std::cerr << "ERROR: " << e.what() << '\n';
         return 1;
     }
-    
+        
     return 0;
 }
