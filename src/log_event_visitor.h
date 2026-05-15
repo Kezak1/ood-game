@@ -1,5 +1,4 @@
-#ifndef LOG_EVENT_VISITOR_H
-#define LOG_EVENT_VISITOR_H
+#pragma once
 
 #include "event.h"
 #include "logger.h"
@@ -21,5 +20,3 @@ public:
     void visit(const PlayerDefeatEvent&) override;
     void visit(const UnknownKeyEvent&) override;
 };
-
-#endif

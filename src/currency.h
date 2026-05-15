@@ -1,5 +1,4 @@
-#ifndef CURRENCY_H
-#define CURRENCY_H
+#pragma once
 
 #include "item.h"
 
@@ -9,5 +8,3 @@ public:
     virtual std::string get_info() const override;
     bool goes_to_inv() const override;
 };
-
-#endif

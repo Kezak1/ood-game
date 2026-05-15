@@ -1,6 +1,8 @@
 #include "dungeon_builder.h"
 
+#include "dungeon_theme_factory.h"
 #include "enemy.h"
+#include "item.h"
 #include "mystic_modifier.h"
 #include "strong_modifier.h"
 #include "unlucky_modifier.h"
@@ -88,16 +90,53 @@ void DungeonBuilder::init_board(bool start_filled) {
     }
 }
 
-BuildResult DungeonBuilder::build(const DungeonTheme& theme) {
+BuildResult DungeonBuilder::build(const DungeonThemeFactory& factory) {
     board[player_start_pos_r][player_start_pos_c].set_wall(false);
 
     DungeonBuilderFacade facade(*this);
-    theme.generate(facade);
+    
+    factory.create_layout()->apply(facade);
 
+    auto a = get_empty_pos();
+
+    auto items = factory.create_item_pool();
+    auto artifact = factory.create_artifact();
+
+    for(int i = 0; i < (int)items.size() + 1; i++) {
+        int idx = next_random(0, (int)a.size() - 1);
+        auto [r, c] = a[idx];
+        
+        if(i == (int)items.size()) {
+            add_item(r, c, std::move(artifact));
+        } else {
+            add_item(r, c, std::move(items[i]));
+        }
+    }
+
+    a = get_no_items_pos();
+
+    auto enemy_roster = factory.create_enemy_roster();
+    if(!enemy_roster.empty()) {
+        int enemy_count = next_random(5, 10);
+        for(int i = 0; i < enemy_count && !a.empty(); i++) {
+            int idx = next_random(0, (int)a.size() - 1);
+            auto [r, c] = a[idx];
+            a.erase(a.begin() + idx);
+
+            int roster_idx = next_random(0, (int)enemy_roster.size() - 1);
+            auto enemy = enemy_roster[roster_idx];
+            
+            enemy.set_r(r);
+            enemy.set_c(c);
+
+            add_enemy(enemy);
+        }
+    }
+    
     BuildResult res {
         .board = std::move(board),
         .enemies = enemies,
-        .begining_msg = theme.intro(),
+        .begining_msg = factory.intro(),
         .capabilities = capabilities,
     };
     return res;
@@ -436,8 +475,8 @@ void DungeonBuilder::connect_empty() {
     }
 }
 
-void DungeonBuilder::add_enemy(std::string name, int r, int c, int attack, int armor, int hp) {
-    enemies.push_back(Enemy(name, r, c, attack, armor, hp));
+void DungeonBuilder::add_enemy(Enemy enemy) {
+    enemies.push_back(enemy);
     capabilities.has_enemies = true;
 }
 
@@ -453,7 +492,7 @@ void DungeonBuilder::add_random_enemies(int count) {
             continue;
         }
 
-        add_enemy("Enemy", r, c, next_random(15, 30), next_random(0, 10), next_random(60, 90));
+        add_enemy(Enemy("Enemy", r, c, next_random(15, 30), next_random(0, 10), next_random(60, 90)));
         a.erase(a.begin() + idx);   
         i++;
     }

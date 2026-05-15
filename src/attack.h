@@ -1,5 +1,4 @@
-#ifndef ATTACK_TYPE
-#define ATTACK_TYPE
+#pragma once
 
 #include "player.h"
 
@@ -21,5 +20,3 @@ public:
     virtual int visit_defense(const Player&, const MagicalWeapon&, const Item&) const = 0;
     virtual int visit_defense(const Player&, const Item&, const Item&) const = 0;
 };
-
-#endif

@@ -1,8 +1,7 @@
-#ifndef DUNGEON_BUILDER_H
-#define DUNGEON_BUILDER_H
+#pragma once
 
 #include "cell.h"
-#include "dungeon_theme.h"
+#include "dungeon_theme_factory.h"
 #include "strong_modifier.h"
 #include "unlucky_modifier.h"
 #include "enemy.h"
@@ -38,7 +37,7 @@ class DungeonBuilder {
     friend class DungeonBuilderFacade;
 public:
     DungeonBuilder(bool start_filled);
-    BuildResult build(const DungeonTheme&);
+    BuildResult build(const DungeonThemeFactory&);
 private:
     void init_board(bool start_filled);
     void modifier_tester_setup();
@@ -55,10 +54,8 @@ private:
     void add_random_weapons(int count);
     void add_random_currencies(int count);
     
-    void add_enemy(std::string name, int r, int c, int attack, int armor, int hp);
+    void add_enemy(Enemy enemy);
     void add_random_enemies(int count);
     
     void connect_empty();
 };
-
-#endif

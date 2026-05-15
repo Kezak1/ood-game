@@ -1,5 +1,4 @@
-#ifndef MYSTIC_MODIFIER_H
-#define MYSTIC_MODIFIER_H
+#pragma once
 
 #include "item_modifier.h"
 
@@ -12,5 +11,3 @@ public:
     
     int get_wis_bonus() const override;
 };
-
-#endif

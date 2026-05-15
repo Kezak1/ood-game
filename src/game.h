@@ -1,5 +1,4 @@
-#ifndef GAME_H
-#define GAME_H
+#pragma once
 
 #include "utils.h"
 #include "cell.h"
@@ -78,5 +77,3 @@ private:
     std::unique_ptr<Attack> choose_battle_attack() const;
     void remove_enemy_from_map(int enemy_idx);    
 };
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef ITEM_MODIFIER_H
-#define ITEM_MODIFIER_H
+#pragma once
 
 #include "item.h"
 
@@ -29,5 +28,3 @@ public:
     bool on_pick_up(Player& p) const override;
     std::unique_ptr<Item> equip(Player&, std::unique_ptr<Item> self) override;
 };
-
-#endif

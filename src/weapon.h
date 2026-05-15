@@ -1,5 +1,4 @@
-#ifndef WEAPON_H
-#define WEAPON_H
+#pragma once
 
 #include "item.h"
 
@@ -12,5 +11,3 @@ public:
     Weapon(int _dmg, std::string s);
     virtual int get_dmg() const override;
 };
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef VIEW_LOG_HANDLER_H
-#define VIEW_LOG_HANDLER_H
+#pragma once
 
 #include "action_handler.h"
 
@@ -8,5 +7,3 @@ public:
     std::optional<bool> handle(Game& game, char key) override;
 };
 
-
-#endif

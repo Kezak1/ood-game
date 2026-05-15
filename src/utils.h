@@ -1,5 +1,4 @@
-#ifndef UTILS_H
-#define UTILS_H
+#pragma once
 
 #include <random>
 #include <iostream>
@@ -56,5 +55,3 @@ struct GameConfig {
 };
 
 GameConfig load_game_config(const std::filesystem::path& path);
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef COIN_H
-#define COIN_H
+#pragma once
 
 #include "currency.h"
 
@@ -8,5 +7,3 @@ public:
     Coin();
     bool on_pick_up(Player& p) const override;
 };
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef EQUIPMENT_HANDLER_H
-#define EQUIPMENT_HANDLER_H
+#pragma once
 
 #include "action_handler.h"
 
@@ -9,5 +8,3 @@ class EquipmentHandler : public ActionHandler {
 public:
     std::optional<bool> handle(Game& game, char key) override;
 };
-
-#endif

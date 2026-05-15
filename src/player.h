@@ -1,5 +1,4 @@
-#ifndef PLAYER_H
-#define PLAYER_H
+#pragma once
 
 #include "entity.h"
 #include "item.h"
@@ -57,5 +56,3 @@ public:
 
     void take_dmg(int dmg);
 };
-
-#endif

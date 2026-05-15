@@ -1,5 +1,4 @@
-#ifndef ACTION_HANDLER_H
-#define ACTION_HANDLER_H
+#pragma once
 
 #include <optional>
 
@@ -11,4 +10,3 @@ public:
     virtual std::optional<bool> handle(Game& game, char key) = 0;
 };
 
-#endif

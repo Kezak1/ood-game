@@ -1,5 +1,4 @@
-#ifndef ITEM_H
-#define ITEM_H
+#pragma once
 
 #include <string>
 #include <memory>   
@@ -35,5 +34,3 @@ public:
     virtual int accept_attack(const Player&, const Attack&, const Item&) const;
     virtual int accept_defense(const Player&, const Attack&, const Item&) const;
 };
-
-#endif

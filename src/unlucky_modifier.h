@@ -1,5 +1,4 @@
-#ifndef UNLUCKY_MODIFIER_H
-#define UNLUCKY_MODIFIER_H
+#pragma once
 
 #include "item_modifier.h"
 
@@ -9,5 +8,3 @@ public:
     
     int get_lck_bonus() const override;
 };
-
-#endif

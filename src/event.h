@@ -1,5 +1,4 @@
-#ifndef EVENT_H
-#define EVENT_H
+#pragma once
 
 #include <string>
 
@@ -106,5 +105,3 @@ struct UnknownKeyEvent : public Event {
     UnknownKeyEvent(char key);
     void accept(EventVisitor&) const override;
 };
-
-#endif

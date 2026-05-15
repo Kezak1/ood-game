@@ -1,5 +1,4 @@
-#ifndef HEAVY_WEAPON_H
-#define HEAVY_WEAPON_H
+#pragma once
 
 #include "weapon.h"
 
@@ -9,5 +8,3 @@ public:
     int accept_attack(const Player& p,  const Attack& a, const Item& stats) const override;
     int accept_defense(const Player& p, const Attack& a, const Item& stats) const override;
 };
-
-#endif

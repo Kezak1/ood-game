@@ -1,5 +1,4 @@
-#ifndef DUNGEON_THEME_TOOLS_H
-#define DUNGEON_THEME_TOOLS_H
+#pragma once
 
 #include <memory>
 #include <vector>
@@ -19,17 +18,6 @@ public:
     
     void add_random_path();
     void add_random_chamber(int len);
-    void add_center_room(int w, int h);
-
-    void add_item(int r, int c, std::unique_ptr<Item> item);
-    void add_random_junks(int count);
-    void add_random_weapons(int count);
-    void add_random_currencies(int count);
-    
-    void add_enemy(std::string name, int r, int c, int attack, int armor, int hp);
-    void add_random_enemies(int count);
-    
+    void add_center_room(int w, int h);    
     void connect_empty();
 };
-
-#endif

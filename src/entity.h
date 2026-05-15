@@ -1,5 +1,4 @@
-#ifndef ENTITY_H
-#define ENTITY_H
+#pragma once
 
 #include <string>
 
@@ -21,5 +20,3 @@ public:
     const int& get_hp() const;
     bool is_dead() const;
 };
-
-#endif

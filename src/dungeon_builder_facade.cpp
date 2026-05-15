@@ -26,30 +26,6 @@ void DungeonBuilderFacade::add_center_room(int w, int h) {
     builder.add_center_room(w, h);
 }
 
-void DungeonBuilderFacade::add_item(int r, int c, std::unique_ptr<Item> item) {
-    builder.add_item(r, c, std::move(item));
-}
-
-void DungeonBuilderFacade::add_random_junks(int count) {
-    builder.add_random_junks(count);
-}
-
-void DungeonBuilderFacade::add_random_weapons(int count) {
-    builder.add_random_weapons(count);
-}
-
-void DungeonBuilderFacade::add_random_currencies(int count) {
-    builder.add_random_currencies(count);
-}
-    
-void DungeonBuilderFacade::add_enemy(std::string name, int r, int c, int attack, int armor, int hp) {
-    builder.add_enemy(name, r, c, attack, armor, hp);
-}
-
-void DungeonBuilderFacade::add_random_enemies(int count) {
-    builder.add_random_enemies(count);
-}
-
 void DungeonBuilderFacade::connect_empty() {
     builder.connect_empty();
 }

@@ -6,16 +6,17 @@
 #include "file_logger.h"
 #include "inventory_handler.h"
 #include "item.h"
+#include "library_theme_factory.h"
 #include "magical_attack.h"
-#include "metal_theme.h"
 #include "normal_attack.h"
 #include "quit_handler.h"
 #include "stealth_attack.h"
 #include "utils.h"
-#include "vault_theme.h"
-#include "library_theme.h"
 #include "event_bus.h"
 #include "view_log_handler.h"
+#include "metal_theme_factory.h"
+#include "library_theme_factory.h"
+#include "vault_theme_factory.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -56,18 +57,18 @@ void Game::init_board() {
 
     switch(input) {
         case 1: {
-            LibraryTheme lt;
+            LibraryThemeFactory lt;
             res = d.build(lt);
             break;
         }
         case 2: {
-            MetalTheme mt;
+            MetalThemeFactory mt;
             res = d.build(mt);
             break;
         }
 
         case 3: {
-            VaultTheme vt;
+            VaultThemeFactory vt;
             res = d.build(vt);
             break;
         }

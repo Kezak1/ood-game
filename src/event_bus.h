@@ -1,5 +1,4 @@
-#ifndef EVENT_BUS_H
-#define EVENT_BUS_H
+#pragma once
 
 #include "event.h"
 
@@ -18,5 +17,3 @@ public:
     void subscribe(EventVisitor& visitor);
     void publish(const Event& event);
 };
-
-#endif

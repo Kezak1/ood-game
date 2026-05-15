@@ -1,5 +1,4 @@
-#ifndef CELL_H
-#define CELL_H
+#pragma once
 
 #include "item.h"
 #include "utils.h"
@@ -28,5 +27,3 @@ public:
     void add_item(std::unique_ptr<Item> item);
     std::unique_ptr<Item> take_item(int idx);
 };
-
-#endif

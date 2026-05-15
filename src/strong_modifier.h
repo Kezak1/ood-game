@@ -1,5 +1,4 @@
-#ifndef STRONG_MODIFIER_H
-#define STRONG_MODIFIER_H
+#pragma once
 
 #include "item_modifier.h"
 
@@ -13,5 +12,3 @@ public:
     int get_dmg() const override;
     std::string get_info() const override;
 };
-
-#endif

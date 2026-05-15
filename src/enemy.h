@@ -1,5 +1,4 @@
-#ifndef ENEMY_H
-#define ENEMY_H
+#pragma once
 
 #include "entity.h"
 
@@ -19,5 +18,3 @@ public:
 
     void take_dmg(int dmg);
 };  
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef BLACK_WAND_H
-#define BLACK_WAND_H
+#pragma once
 
 #include "magical_weapon.h"
 #include <memory>
@@ -10,5 +9,3 @@ public:
     std::string get_info() const override;
     std::unique_ptr<Item> equip(Player&p, std::unique_ptr<Item> self) override;
 };
-
-#endif

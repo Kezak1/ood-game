@@ -1,5 +1,4 @@
-#ifndef STEALTH_ATTACK_H
-#define STEALTH_ATTACK_H
+#pragma once
 
 #include "attack.h"
 
@@ -14,5 +13,3 @@ class StealthAttack : public Attack {
     int visit_defense(const Player&, const MagicalWeapon&, const Item&) const override;
     int visit_defense(const Player&, const Item&, const Item&) const override;
 };
-
-#endif

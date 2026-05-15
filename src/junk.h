@@ -1,5 +1,4 @@
-#ifndef JUNK_H
-#define JUNK_H
+#pragma once
 
 #include "item.h"
 
@@ -9,5 +8,3 @@ public:
     virtual std::string get_info() const override;
     std::unique_ptr<Item> equip(Player& p, std::unique_ptr<Item> self) override;
 };
-
-#endif

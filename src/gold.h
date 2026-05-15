@@ -1,5 +1,4 @@
-#ifndef GOLD_H
-#define GOLD_H
+#pragma once
 
 #include "currency.h"
 
@@ -8,5 +7,3 @@ public:
     Gold();
     bool on_pick_up(Player& p) const override;
 };
-
-#endif

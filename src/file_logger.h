@@ -1,5 +1,4 @@
-#ifndef FILE_LOGGER_H
-#define FILE_LOGGER_H
+#pragma once
 
 #include "logger.h"
 
@@ -18,5 +17,3 @@ public:
 };
 
 std::string format_log_entry(const LogEntry& entry);
-
-#endif

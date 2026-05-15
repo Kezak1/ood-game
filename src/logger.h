@@ -1,5 +1,4 @@
-#ifndef LOGGER_H
-#define LOGGER_H
+#pragma once
 
 #include <chrono>
 #include <filesystem>
@@ -21,4 +20,3 @@ public:
     virtual const std::vector<LogEntry>& all() const = 0;
 };
 
-#endif
