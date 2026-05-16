@@ -28,7 +28,7 @@ rpg game - uni project
     - Wall (`██`)
     - Player (`¶ `)
     - Enemy (` @`)
-    - Item(s) on the ground (` *`)
+    - Item(s) on the ground (`* `)
 2. **Controls:**
     - to move use **WASD** keys
     - to pick up an item that is on the cell the ¶ is on press **E**
