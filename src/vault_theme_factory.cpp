@@ -1,6 +1,7 @@
 #include "vault_theme_factory.h"
 #include "layout_strategy.h"
 #include "lucky_coin_pouch.h"
+#include "skeleton.h"
 #include "vault_layout.h"
 #include "utils.h"
 #include "gold.h"
@@ -37,10 +38,10 @@ std::unique_ptr<Item> VaultThemeFactory::create_artifact() const {
 std::vector<std::function<std::unique_ptr<Enemy>(int, int)>> VaultThemeFactory::create_enemy_roster() const {
     return {
         [](int r, int c) {
-            return std::make_unique<Enemy>("Safe", r, c, 10, 10, 100);
+            return std::make_unique<Skeleton>("Safe", r, c, 10, 10, 100);
         },
         [](int r, int c) {
-            return std::make_unique<Enemy>("Briefcase", r, c, 23, 5, 60);
+            return std::make_unique<Skeleton>("Briefcase", r, c, 23, 5, 60);
         }
     };
 }

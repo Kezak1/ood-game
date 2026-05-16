@@ -84,5 +84,5 @@ void LogEventVisitor::visit(const UnknownKeyEvent& e) {
 }
 
 void LogEventVisitor::visit(const SoundEvent& e) {
-    logger.log(std::format("Sound at ({},{}) range={}", e.source_r, e.source_c, e.range));
+    logger.log(std::format("Sound made at ({}, {}) range={}", e.source_r, e.source_c, e.range));
 }

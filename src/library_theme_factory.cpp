@@ -7,6 +7,7 @@
 #include "strange_idol.h"
 #include "mystic_modifier.h"
 #include "unlucky_modifier.h"
+#include "goblin.h"
 
 #include <memory>
 #include <vector>
@@ -40,7 +41,10 @@ std::unique_ptr<Item> LibraryThemeFactory::create_artifact() const {
 std::vector<std::function<std::unique_ptr<Enemy>(int, int)>> LibraryThemeFactory::create_enemy_roster() const {
     return {
         [](int r, int c) {
-            return std::make_unique<Enemy>("Mage", r, c, next_random(20, 30), next_random(2, 6), next_random(45, 55));
+            return std::make_unique<Goblin>("Mage", r, c, next_random(20, 30), next_random(2, 6), next_random(55, 70));
+        },
+        [](int r, int c) {
+            return std::make_unique<Goblin>("Apprentice", r, c, next_random(10, 18), next_random(1, 3), next_random(45, 55));
         }
     };
 }

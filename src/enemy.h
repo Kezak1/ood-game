@@ -1,6 +1,7 @@
 #pragma once
 
 #include "entity.h"
+#include "logger.h"
 
 #include <string>
 

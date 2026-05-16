@@ -2,6 +2,7 @@
 #include "enemy.h"
 #include "event.h"
 #include "event_bus.h"
+#include "utils.h"
 
 SkeletonListener::SkeletonListener(Skeleton& s) : owner(s) {}
 
