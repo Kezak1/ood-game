@@ -1,5 +1,6 @@
 #include "metal_theme_factory.h"
 #include "enemy.h"
+#include "human.h"
 #include "layout_strategy.h"
 #include "metal_layout.h"
 #include "metal_fragment.h"
@@ -35,16 +36,16 @@ std::unique_ptr<Item> MetalThemeFactory::create_artifact() const {
     return std::make_unique<Blaster>();
 }
 
-std::vector<std::function<std::unique_ptr<Enemy>(int, int)>> MetalThemeFactory::create_enemy_roster() const {
+std::vector<std::function<std::unique_ptr<Enemy>(int, int, Logger&)>> MetalThemeFactory::create_enemy_roster() const {
     return {
-        [](int r, int c) {
-            return std::make_unique<Goblin>("Cleaning Robot", r, c, 20, 5, 50);
+        [](int r, int c, Logger& logger) {
+            return std::make_unique<Human>("Cleaning Robot", r, c, 20, 5, 50, logger);
         },
-        [](int r, int c) {
-            return std::make_unique<Goblin>("Dog Robot", r, c, 20, 5, 50);
+        [](int r, int c, Logger& logger) {
+            return std::make_unique<Goblin>("Dog Robot", r, c, 20, 5, 50, logger);
         },
-        [](int r, int c) {
-            return std::make_unique<Skeleton>("Drone", r, c, 25, 8, 70);
+        [](int r, int c, Logger& logger) {
+            return std::make_unique<Skeleton>("Drone", r, c, 25, 8, 70, logger);
         }
     };
 }

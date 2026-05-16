@@ -38,13 +38,13 @@ std::unique_ptr<Item> LibraryThemeFactory::create_artifact() const {
     return std::make_unique<BlackWand>();
 }
 
-std::vector<std::function<std::unique_ptr<Enemy>(int, int)>> LibraryThemeFactory::create_enemy_roster() const {
+std::vector<std::function<std::unique_ptr<Enemy>(int, int, Logger&)>> LibraryThemeFactory::create_enemy_roster() const {
     return {
-        [](int r, int c) {
-            return std::make_unique<Goblin>("Mage", r, c, next_random(20, 30), next_random(2, 6), next_random(55, 70));
+        [](int r, int c, Logger& logger) {
+            return std::make_unique<Goblin>("Mage", r, c, next_random(20, 30), next_random(2, 6), next_random(55, 70), logger);
         },
-        [](int r, int c) {
-            return std::make_unique<Goblin>("Apprentice", r, c, next_random(10, 18), next_random(1, 3), next_random(45, 55));
+        [](int r, int c, Logger& logger) {
+            return std::make_unique<Goblin>("Apprentice", r, c, next_random(10, 18), next_random(1, 3), next_random(45, 55), logger);
         }
     };
 }

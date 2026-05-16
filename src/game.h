@@ -37,6 +37,7 @@ class Game {
     std::filesystem::path log_file;
 public:
     Game(Logger&, std::string, std::filesystem::path);
+
     void main_loop();
     bool battle();
     void show_full_log_history();
@@ -75,5 +76,7 @@ private:
     bool player_has_equipped_item() const;
     const Item* choose_battle_item() const;
     std::unique_ptr<Attack> choose_battle_attack() const;
-    void remove_enemy_from_map(int enemy_idx);    
+
+    void enemies_take_turn();
+    void kill_enemy(int enemy_idx);    
 };

@@ -35,13 +35,13 @@ std::unique_ptr<Item> VaultThemeFactory::create_artifact() const {
     return std::make_unique<LuckyCoinPouch>();
 }
 
-std::vector<std::function<std::unique_ptr<Enemy>(int, int)>> VaultThemeFactory::create_enemy_roster() const {
+std::vector<std::function<std::unique_ptr<Enemy>(int, int, Logger&)>> VaultThemeFactory::create_enemy_roster() const {
     return {
-        [](int r, int c) {
-            return std::make_unique<Skeleton>("Safe", r, c, 10, 10, 100);
+        [](int r, int c, Logger& logger) {
+            return std::make_unique<Skeleton>("Safe", r, c, 10, 10, 100, logger);
         },
-        [](int r, int c) {
-            return std::make_unique<Skeleton>("Briefcase", r, c, 23, 5, 60);
+        [](int r, int c, Logger& logger) {
+            return std::make_unique<Skeleton>("Briefcase", r, c, 23, 5, 60, logger);
         }
     };
 }

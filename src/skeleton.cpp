@@ -1,30 +1,21 @@
 #include "skeleton.h"
 #include "enemy.h"
+#include "enemy_event_visitor.h"
 #include "event.h"
-#include "event_bus.h"
-#include "utils.h"
+#include "logger.h"
 
-SkeletonListener::SkeletonListener(Skeleton& s) : owner(s) {}
+SkeletonEnemyVisitor::SkeletonEnemyVisitor(Skeleton& s, Logger& logger) 
+    : EnemyEventVisitor(s, logger) {}
 
-void SkeletonListener::visit(const EnemyDefeatEvent& e) {
+void SkeletonEnemyVisitor::visit(const SoundEvent& e) {
+    EnemyEventVisitor::visit(e);
+}
+
+void SkeletonEnemyVisitor::visit(const EnemyDefeatEvent& e) {
     if(e.species == Skeleton::SPECIES) {
         owner.strengthen();
     }
 }
 
-void SkeletonListener::visit(const SoundEvent& e) {
-    int dis = walkable_dis(e.board, e.source_r, e.source_c, owner.get_r(), owner.get_c());
-    if(dis >= 0 && dis <= e.range) {
-        // logging
-    }
-}
-
-
-Skeleton::Skeleton(std::string name, int r, int c, int atk, int armor, int hp)
-    : Enemy(name, r, c, atk, armor, hp, SPECIES), listener(*this) {
-    EventBus::instance().subscribe(listener);
-}
-
-Skeleton::~Skeleton() {
-    EventBus::instance().unsubscribe(listener);
-}
+Skeleton::Skeleton(std::string name, int r, int c, int atk, int armor, int hp, Logger& logger)
+    : Enemy(name, r, c, atk, armor, hp, SPECIES, std::make_unique<SkeletonEnemyVisitor>(*this, logger)) {}

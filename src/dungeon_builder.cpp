@@ -3,6 +3,7 @@
 #include "dungeon_theme_factory.h"
 #include "enemy.h"
 #include "item.h"
+#include "logger.h"
 #include "mystic_modifier.h"
 #include "strong_modifier.h"
 #include "unlucky_modifier.h"
@@ -17,7 +18,7 @@
 #include "gold.h"
 #include "coin.h"
 #include "dungeon_builder_facade.h"
-#include <memory>
+#include "human.h"
 
 /*
 Correct building order:
@@ -91,7 +92,7 @@ void DungeonBuilder::init_board(bool start_filled) {
     }
 }
 
-BuildResult DungeonBuilder::build(const DungeonThemeFactory& factory) {
+BuildResult DungeonBuilder::build(const DungeonThemeFactory& factory, Logger& logger) {
     board[player_start_pos_r][player_start_pos_c].set_wall(false);
 
     DungeonBuilderFacade facade(*this);
@@ -118,16 +119,25 @@ BuildResult DungeonBuilder::build(const DungeonThemeFactory& factory) {
 
     auto enemy_roster = factory.create_enemy_roster();
     if(!enemy_roster.empty()) {
-        int enemy_count = next_random(5, 10);
-        for(int i = 0; i < enemy_count && !a.empty(); i++) {
+        int roster_n = (int)enemy_roster.size();
+        int enemy_count = next_random(roster_n * 2, std::max(12, roster_n * 2));
+
+        std::vector<int> picks;
+        for(int i = 0; i < roster_n; i++) {
+            picks.push_back(i);
+            picks.push_back(i);
+        }
+        while((int)picks.size() < enemy_count) {
+            picks.push_back(next_random(0, roster_n - 1));
+        }
+
+        for(int roster_i : picks) {
+            if(a.empty()) break;
             int idx = next_random(0, (int)a.size() - 1);
             auto [r, c] = a[idx];
             a.erase(a.begin() + idx);
 
-            int roster_idx = next_random(0, (int)enemy_roster.size() - 1);
-            auto enemy = enemy_roster[roster_idx](r, c);
-
-            add_enemy(std::move(enemy));
+            add_enemy(enemy_roster[roster_i](r, c, logger));
         }
     }
     
@@ -478,7 +488,7 @@ void DungeonBuilder::add_enemy(std::unique_ptr<Enemy> enemy) {
     capabilities.has_enemies = true;
 }
 
-void DungeonBuilder::add_random_enemies(int count) {
+void DungeonBuilder::add_random_enemies(int count, Logger& logger) {
     auto a = get_no_items_pos();
 
     for(int i = 0; i < count && !a.empty(); ) {
@@ -490,7 +500,7 @@ void DungeonBuilder::add_random_enemies(int count) {
             continue;
         }
 
-        add_enemy(std::make_unique<Enemy>("Enemy", r, c, next_random(15, 30), next_random(0, 10), next_random(60, 90)));
+        add_enemy(std::make_unique<Human>("Enemy", r, c, next_random(15, 30), next_random(0, 10), next_random(60, 90), logger));
         a.erase(a.begin() + idx);   
         i++;
     }

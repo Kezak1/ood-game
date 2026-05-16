@@ -27,17 +27,6 @@ std::string format_log_entry(const LogEntry& entry) {
     return ss.str();
 }
 
-/*
-std::filesystem::path prepare_log_file(const std::filesystem::path& path) {
-    const auto parent = path.parent_path();
-    if(!parent.empty()) {
-        std::filesystem::create_directories(parent);
-    }
-
-    return path;
-}
-*/
-
 
 std::filesystem::path make_unique_path(const std::filesystem::path& dir, const std::string& player_name) {
     std::filesystem::create_directories(dir);

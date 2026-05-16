@@ -37,7 +37,7 @@ class DungeonBuilder {
     friend class DungeonBuilderFacade;
 public:
     DungeonBuilder(bool start_filled);
-    BuildResult build(const DungeonThemeFactory&);
+    BuildResult build(const DungeonThemeFactory&, Logger&);
 private:
     void init_board(bool start_filled);
     void modifier_tester_setup();
@@ -55,7 +55,7 @@ private:
     void add_random_currencies(int count);
     
     void add_enemy(std::unique_ptr<Enemy> enemy);
-    void add_random_enemies(int count);
+    void add_random_enemies(int count, Logger& logger);
     
     void connect_empty();
 };

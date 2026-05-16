@@ -1,13 +1,24 @@
 #include "enemy.h"
+#include "enemy_event_visitor.h"
 #include "entity.h"
+#include "event_bus.h"
+#include <memory>
 
-Enemy::Enemy(std::string name, int r, int c, int atk, int armor, int hp, std::string species) : 
+Enemy::Enemy(std::string name, int r, int c, int atk, int armor, int hp, std::string species, std::unique_ptr<EnemyEventVisitor> l) : 
     Entity(name, r, c, hp),
     attack(atk),
     armor(armor),
     max_hp(hp),
-    species(species)
-    {}
+    species(species),
+    listener(std::move(l)) {
+    EventBus::instance().subscribe(*listener);
+}
+
+Enemy::~Enemy() {
+    if(listener) {
+        EventBus::instance().unsubscribe(*listener);
+    }
+}
 
 const std::string& Enemy::get_name() const {
     return name;

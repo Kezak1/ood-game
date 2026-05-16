@@ -1,10 +1,12 @@
 #pragma once
 
-#include "enemy.h"
 #include "logger.h"
 #include "null_event_visitor.h"
 
+class Enemy;
+
 class EnemyEventVisitor : public NullEventVisitor {
+protected:
     Enemy& owner;
     Logger& logger;
 public:

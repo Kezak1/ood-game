@@ -58,18 +58,18 @@ void Game::init_board() {
     switch(input) {
         case 1: {
             LibraryThemeFactory lt;
-            res = d.build(lt);
+            res = d.build(lt, logger);
             break;
         }
         case 2: {
             MetalThemeFactory mt;
-            res = d.build(mt);
+            res = d.build(mt, logger);
             break;
         }
 
         case 3: {
             VaultThemeFactory vt;
-            res = d.build(vt);
+            res = d.build(vt, logger);
             break;
         }
 
@@ -134,6 +134,8 @@ void Game::main_loop() {
             std::cerr << "invalid key pressed\n(to continue press any key)";
             getchar();
         }
+        
+        enemies_take_turn();
     
         to_start_cursor();
         render_state();
@@ -203,16 +205,16 @@ void Game::print_board_with_recent_logs() {
             }
             if(r == p.get_r() && c == p.get_c()) {
                 ss << C_PLAYER;
+            } else if(!board[r][c].no_items()) {
+                ss << C_ITEMS;
             } else {
                 ss << C_EMPTY;
             }
 
             if(is_enemy_pos(r, c)) {
                 ss << C_ENEMY;
-            } else if(board[r][c].no_items()) {
-                ss << C_EMPTY;
             } else {
-                ss << C_ITEMS;
+                ss << C_EMPTY;
             }
         }
 
@@ -220,6 +222,9 @@ void Game::print_board_with_recent_logs() {
             ss << "   RECENT LOGS";
         } else if(r <= (int)logs.size()) {
             std::string text = format_log_entry(logs[logs.size() - r]);
+            if((int)text.size() > MAX_LOG_DISPLAY) {
+                text = text.substr(0, MAX_LOG_DISPLAY - 3) + "...";
+            }
             ss << "   \033[K" << text;
         }
 
@@ -235,8 +240,9 @@ void Game::cur_action_info() {
     std::cout << "INFO: ";
     if(is_enemy_pos(p.get_r(), p.get_c())) {
         int idx = player_enemy_map_value();
-        std::cout << std::format("{} - hp({}), attack({}), armor({})\n", enemies[idx]->get_name(), enemies[idx]->get_hp(), enemies[idx]->get_attack(), enemies[idx]->get_arrmor());
-    } else if(items.empty()) {
+        std::cout << std::format("{}({}) - hp({}), attack({}), armor({})\n", enemies[idx]->get_name(), enemies[idx]->get_species(), enemies[idx]->get_hp(), enemies[idx]->get_attack(), enemies[idx]->get_arrmor());
+    }
+    if(items.empty()) {
         std::cout << "standing on empty cell\n";
     } else {
         std::cout << "standing on following items\n";
@@ -484,25 +490,24 @@ void Game::player_try_unequip_weapon() {
             return;
         } else if(input == "left") {
             auto& left = p.get_left_hand();
-            item_name = left->get_name();
             if(!left) {
                 return;
             }
-            
+            item_name = left->get_name();
             p.add_item(p.take_left_hand());
         } else if(input == "right") {
             auto& right = p.get_right_hand();
-            item_name = right->get_name();
             if(!right) {
                 return;
             }
+            item_name = right->get_name();
             p.add_item(p.take_right_hand());
         } else if(input == "both") {
             auto& both = p.get_both_hands();
-            item_name = both->get_name();
             if(!both) {
                 return;
             }
+            item_name = both->get_name();
             p.add_item(p.take_both_hands());
         } else {
             throw custom_exception("invalid input");
@@ -673,10 +678,6 @@ std::unique_ptr<Attack> Game::choose_battle_attack() const {
     throw custom_exception("invalid input");
 }
 
-void Game::remove_enemy_from_map(int enemy_idx) {
-    enemy_map[enemies[enemy_idx]->get_r()][enemies[enemy_idx]->get_c()] = -1;
-}
-
 void continue_press_any_key() {
     hide_cursor();
     set_raw_mode(true);
@@ -732,6 +733,8 @@ bool Game::battle() {
             if(e->is_dead()) {
                 EventBus::instance().publish(EnemyDefeatEvent(e->get_name(), e->get_species()));
                 std::cout << std::format("{} was defeated\n", all_toupper(e->get_name()));
+                kill_enemy(enemy_idx);
+
                 continue_press_any_key();
                 break;
             }
@@ -777,8 +780,7 @@ bool Game::battle() {
         std::cout << "GAME OVER\nLOG FILE: " << log_file.string() << '\n'; 
         return true;
     }
-    
-    remove_enemy_from_map(enemy_idx);
+
     return false;
 }
 
@@ -804,4 +806,52 @@ void Game::show_full_log_history() {
     exit_alt_terminal();
     set_raw_mode(true);
     hide_cursor();
+}
+
+void Game::enemies_take_turn() {
+    for(int i = 0; i < (int)enemies.size(); i++) {
+        auto& e = enemies[i];
+        if(e->is_dead() || next_random(1, 100) <= ENEMY_STAY_CHANGE) {
+            continue;
+        }
+
+        int r = e->get_r(), c = e->get_c();
+
+        std::vector<int> dirs;
+        for(int d = 0; d < 4; d++) {
+            int nr = r + dr[d], nc = c + dc[d];
+
+            if(!in_range(nr, nc) || board[nr][nc].is_wall() || enemy_map[nr][nc] >= 0 || (nr == p.get_r() && nc == p.get_c())) {
+                continue;
+            }
+            dirs.push_back(d);
+        }
+
+        if(dirs.empty()) {
+            continue;
+        }
+
+        int idx = dirs[next_random(0, (int)dirs.size() - 1)];
+        int nr = r + dr[idx], nc = c + dc[idx];
+
+        enemy_map[r][c] = -1;
+        enemy_map[nr][nc] = i;
+        e->set_r(nr);
+        e->set_c(nc);
+    }
+}
+
+
+void Game::kill_enemy(int enemy_idx) {
+    auto& e = enemies[enemy_idx];
+    enemy_map[e->get_r()][e->get_c()] = -1;
+
+    int last = (int)enemies.size() - 1;
+    if(enemy_idx != last) {
+        std::swap(enemies[enemy_idx], enemies[last]);
+        auto& moved = enemies[enemy_idx];
+        enemy_map[moved->get_r()][moved->get_c()] = enemy_idx;
+    }
+
+    enemies.pop_back();
 }
