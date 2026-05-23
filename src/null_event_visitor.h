@@ -16,4 +16,5 @@ public:
     void visit(const PlayerDefeatEvent&) override {};
     void visit(const UnknownKeyEvent&) override {};
     void visit(const SoundEvent&) override {};
+    void visit(const ActionFailedEvent&) override {};
 };

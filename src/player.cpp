@@ -157,7 +157,7 @@ void Player::insert_item(int idx, std::unique_ptr<Item> item, bool restoring) {
     
     if(restoring) {
         if(idx < 1 || idx > (int)inventory.size() + 1) {
-            throw std::out_of_range("idx");
+            throw std::out_of_range("invalid index");
         }
 
         if(idx == (int)inventory.size() + 1) {
@@ -169,14 +169,14 @@ void Player::insert_item(int idx, std::unique_ptr<Item> item, bool restoring) {
     }
     
     if(idx < 1 || idx > (int)inventory.size()) {
-        throw std::out_of_range("idx");
+        throw std::out_of_range("invalid index");
     }
     inventory.insert(inventory.begin() + idx - 1, std::move(item));
 }
 
 std::unique_ptr<Item> Player::take_item(int idx) {
     if(idx < 1 || idx > (int)inventory.size()) {
-        throw std::out_of_range("idx");
+        throw std::out_of_range("invalid index");
     }
     auto res = std::move(inventory[idx - 1]);
     inventory.erase(inventory.begin() + idx - 1);
@@ -185,7 +185,7 @@ std::unique_ptr<Item> Player::take_item(int idx) {
 
 std::string Player::get_item_info(int idx) const {
     if(idx < 1 || idx > (int)inventory.size()) {
-        throw std::out_of_range("idx");
+        throw std::out_of_range("invalid index");
     }
 
     return inventory[idx - 1]->get_info();

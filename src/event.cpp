@@ -72,3 +72,10 @@ SoundEvent::SoundEvent(int source_r, int source_c, int range, const std::vector<
 void SoundEvent::accept(EventVisitor& visitor) const {
     visitor.visit(*this);
 }
+
+ActionFailedEvent::ActionFailedEvent(std::string reason) : reason(reason) {
+}
+
+void ActionFailedEvent::accept(EventVisitor& visitor) const {
+    visitor.visit(*this);
+}

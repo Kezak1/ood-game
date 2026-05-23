@@ -17,6 +17,7 @@ struct EnemyDefeatEvent;
 struct PlayerDefeatEvent;
 struct UnknownKeyEvent;
 struct SoundEvent;
+struct ActionFailedEvent;
 
 class EventVisitor {
 public:
@@ -34,6 +35,7 @@ public:
     virtual void visit(const PlayerDefeatEvent&) = 0;
     virtual void visit(const UnknownKeyEvent&) = 0;
     virtual void visit(const SoundEvent&) = 0;
+    virtual void visit(const ActionFailedEvent&) = 0;
 };
 
 class Event {
@@ -117,5 +119,11 @@ struct SoundEvent : public Event {
     int range;
     const std::vector<std::vector<Cell>>& board;
     SoundEvent(int source_r, int source_c, int range, const std::vector<std::vector<Cell>>& board);
+    void accept(EventVisitor&) const override;
+};
+
+struct ActionFailedEvent : public Event {
+    std::string reason;
+    ActionFailedEvent(std::string reason);
     void accept(EventVisitor&) const override;
 };
