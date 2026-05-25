@@ -22,5 +22,4 @@ public:
     void loop();
 private:
     void init_handlers();
-    BuildResult init_dungeon();
 };
