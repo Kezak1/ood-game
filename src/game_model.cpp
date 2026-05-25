@@ -268,11 +268,11 @@ void GameModel::kill_enemy(int enemy_idx) {
     enemies.pop_back();
 }
 
-bool GameModel::is_enemy_pos(int r, int c) {
+bool GameModel::is_enemy_pos(int r, int c) const {
     return enemy_map[r][c] >= 0;
 }
 
-int GameModel::player_enemy_map_value() {
+int GameModel::player_enemy_map_value() const {
     return enemy_map[p.get_r()][p.get_c()];
 }
 

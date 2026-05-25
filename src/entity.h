@@ -7,8 +7,9 @@ protected:
     std::string name;
     int r, c;
     int hp;
+    const int max_hp;
 public:
-    Entity(std::string name, int r, int c, int hp = 100);
+    Entity(std::string name, int r, int c, int hp = 100, int max_hp = 100);
     
     const std::string& get_name() const;
 
@@ -18,5 +19,6 @@ public:
     void set_c(int col);
 
     const int& get_hp() const;
+    const int& get_max_hp() const;
     bool is_dead() const;
 };

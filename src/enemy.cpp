@@ -5,10 +5,9 @@
 #include <memory>
 
 Enemy::Enemy(std::string name, int r, int c, int atk, int armor, int hp, std::string species, std::unique_ptr<EnemyEventVisitor> l) : 
-    Entity(name, r, c, hp),
+    Entity(name, r, c, hp, hp),
     attack(atk),
     armor(armor),
-    max_hp(hp),
     species(species),
     listener(std::move(l)) {
     EventBus::instance().subscribe(*listener);

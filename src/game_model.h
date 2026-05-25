@@ -38,8 +38,8 @@ public:
     void enemies_take_turn();
     void kill_enemy(int enemy_idx);
 
-    bool is_enemy_pos(int r, int c);
-    int player_enemy_map_value();
+    bool is_enemy_pos(int r, int c) const;
+    int player_enemy_map_value() const;
     bool player_has_equipped_item() const;
     
     Player& player();

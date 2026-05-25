@@ -1,14 +1,16 @@
 #include "view_log_handler.h"
-#include "game.h"
+
+#include "game_model.h"
+#include "view.h"
 
 
-std::optional<bool> ViewLogHandler::handle(Game& game, char key) {
+std::optional<bool> ViewLogHandler::handle(GameModel&, View& view, char key) {
     key = tolower(key);
     if(key != 'j') {
         return std::nullopt;
     }
 
-    game.show_full_log_history();
+    view.show_full_log();
 
     return false;
 }

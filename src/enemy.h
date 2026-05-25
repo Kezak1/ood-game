@@ -10,7 +10,6 @@
 class Enemy : public Entity {
     int attack;
     int armor;
-    int max_hp;
     std::string species;
     std::unique_ptr<EnemyEventVisitor> listener;
 public:

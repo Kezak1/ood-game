@@ -2,11 +2,12 @@
 
 #include <optional>
 
-class Game;
+class GameModel;
+class View;
 
 class ActionHandler {
 public:
     virtual ~ActionHandler() = default;
-    virtual std::optional<bool> handle(Game& game, char key) = 0;
+    virtual std::optional<bool> handle(GameModel& game, View& view, char key) = 0;
 };
 

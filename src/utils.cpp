@@ -1,7 +1,6 @@
 #include "utils.h"
 #include "cell.h"
 
-#include <cctype>
 #include <filesystem>
 #include <fstream>
 #include <format>
@@ -27,53 +26,6 @@ bool in_range(int r, int c) {
     return r >= 0 && c >= 0 && r < ROWS && c < COLS;
 }
 
-void full_clear() {
-    std::cout << "\033[2J\033[H";
-}
-
-void full_clear_from_cursor() {
-    std::cout << "\033[J";
-}
-
-void clear_line_cursor() {
-    std::cout << "\033[2K";
-}
-
-void to_start_cursor() {
-    std::cout << "\033[H";
-}
-
-void hide_cursor() {
-    std::cout << "\033[?25l";
-}
-
-void unhide_cursor() {
-    std::cout << "\033[?25h";
-}
-
-void enter_alt_terminal() {
-    std::cout << "\033[?1049h";
-}
-
-void exit_alt_terminal() {
-    std::cout << "\033[?1049l";
-}
-
-void set_raw_mode(bool enable) {
-    static termios old_t;
-    if(enable) {
-        termios new_t;
-        tcgetattr(STDIN_FILENO, &old_t);
-    
-        new_t = old_t;
-        new_t.c_lflag &= ~(ECHO | ICANON);
-
-        tcsetattr(STDIN_FILENO, TCSANOW, &new_t);
-    } else {
-        tcsetattr(STDIN_FILENO, TCSANOW, &old_t);
-    }
-}
-
 std::string all_toupper(std::string s) {
     for(auto& c : s) {
         c = toupper(c);
@@ -89,7 +41,7 @@ std::string trim(std::string s) {
 
     auto last = s.find_last_not_of(" \t\r\n");
     return s.substr(first, last - first + 1);
-} 
+};
 
 GameConfig load_game_config(const std::filesystem::path& path) {
     std::ifstream input(path);

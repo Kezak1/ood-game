@@ -1,6 +1,6 @@
 #include "entity.h"
 
-Entity::Entity(std::string name, int r, int c, int hp) : name(name), r(r), c(c), hp(hp) {}
+Entity::Entity(std::string name, int r, int c, int hp, int max_hp) : name(name), r(r), c(c), hp(hp), max_hp(max_hp) {}
 
 const std::string& Entity::get_name() const {
     return name;
@@ -24,6 +24,10 @@ void Entity::set_c(int col) {
 
 const int& Entity::get_hp() const {
     return hp;
+}
+
+const int& Entity::get_max_hp() const {
+    return max_hp;
 }
 
 bool Entity::is_dead() const {
