@@ -51,17 +51,22 @@ namespace {
     }
 
     void set_raw_mode(bool enable) {
-        static termios old_t;
-        if(enable) {
-            termios new_t;
-            tcgetattr(STDIN_FILENO, &old_t);
+        static termios t;
+        static termios raw_t;
+        static bool initialized = false;
         
-            new_t = old_t;
-            new_t.c_lflag &= ~(ECHO | ICANON);
-
-            tcsetattr(STDIN_FILENO, TCSANOW, &new_t);
+        if(!initialized) {
+            tcgetattr(STDIN_FILENO, &t);
+            
+            raw_t = t;
+            raw_t.c_lflag &= ~(ECHO | ICANON);
+            initialized = true;
+        }
+        
+        if(enable) {
+            tcsetattr(STDIN_FILENO, TCSANOW, &raw_t);
         } else {
-            tcsetattr(STDIN_FILENO, TCSANOW, &old_t);
+            tcsetattr(STDIN_FILENO, TCSANOW,&t);
         }
     }
 }

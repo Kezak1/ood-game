@@ -3,7 +3,7 @@
 #include "game_model.h"
 #include "view.h"
 
-std::optional<bool> MoveHandler::handle(GameModel& model, View& view, char key) {
+std::optional<bool> MoveHandler::handle(GameModel& model, View&, char key) {
     switch(tolower(key)) {
         case 'w': 
             model.player_move_up();

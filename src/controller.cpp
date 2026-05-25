@@ -16,6 +16,7 @@ Controller::Controller(GameModel& model, View& view, std::filesystem::path log_p
 }   
 
 void Controller::loop() {
+    view.clear();
     view.render_state(model);
 
     while(1) {

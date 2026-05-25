@@ -34,6 +34,7 @@ public:
     
     bool check_battle_start(int enemy_idx);
     RoundResult battle_round(int enemy_idx, const Item& item, const Attack& attack);
+    void player_give_up(int enemy_idx);
 
     void enemies_take_turn();
     void kill_enemy(int enemy_idx);

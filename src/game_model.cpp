@@ -198,7 +198,6 @@ RoundResult GameModel::battle_round(int enemy_idx, const Item& item, const Attac
 
     res.player_dmg_dealt = dealt;
 
-
     if(e->is_dead()) {
         EventBus::instance().publish(EnemyDefeatEvent(e->get_name(), e->get_species()));
         res.enemy_died = true;
@@ -213,12 +212,19 @@ RoundResult GameModel::battle_round(int enemy_idx, const Item& item, const Attac
 
     EventBus::instance().publish(AttackEvent(e->get_name(), "Player", dealt)); 
 
+    res.enemy_dmg_dealt = dealt;
+
     if(p.is_dead()) {
         EventBus::instance().publish(PlayerDefeatEvent(e->get_name()));
         res.player_died = true;
     }
 
     return res;
+}
+
+void GameModel::player_give_up(int enemy_idx) {
+    p.take_dmg(p.get_hp());
+    EventBus::instance().publish(PlayerDefeatEvent(enemies[enemy_idx]->get_name()));
 }
 
 void GameModel::enemies_take_turn() {

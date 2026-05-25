@@ -22,5 +22,5 @@ public:
 
     virtual void show_full_log() = 0;
 
-    virtual void clear();
+    virtual void clear() = 0;
 };

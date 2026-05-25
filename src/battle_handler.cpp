@@ -55,8 +55,6 @@ std::optional<bool> BattleHandler::handle(GameModel& model, View& view, char key
     if(tolower(key) != 'f') {
         return std::nullopt;
     }
-
-    auto& p = model.player();
     
     //battle
     int enemy_idx = model.player_enemy_map_value();
@@ -68,7 +66,7 @@ std::optional<bool> BattleHandler::handle(GameModel& model, View& view, char key
     view.enter_battle_screen();
 
     bool player_won = true;
-    while(!p.is_dead() && !model.get_enemies()[enemy_idx]->is_dead()) {
+    while(!model.player().is_dead() && !model.get_enemies()[enemy_idx]->is_dead()) {
         view.render_battle(model, enemy_idx);
 
         view.tell("PLAYER:");
@@ -77,6 +75,7 @@ std::optional<bool> BattleHandler::handle(GameModel& model, View& view, char key
         if(input == "") {
             input = view.ask("Choose item, enter 'left'/'right'/'both' (or 'give up'): ");
             if(input == "give up") {
+                model.player_give_up(enemy_idx);
                 player_won = false;
                 break;
             }
@@ -91,6 +90,7 @@ std::optional<bool> BattleHandler::handle(GameModel& model, View& view, char key
 
         std::string atk_input = view.ask("Choose attack type, enter 'normal'/'stealth'/'magical' (or 'give up'): ");
         if(atk_input == "give up") {
+            model.player_give_up(enemy_idx);
             player_won = false;
             break;
         }
@@ -127,5 +127,6 @@ std::optional<bool> BattleHandler::handle(GameModel& model, View& view, char key
     }
 
     view.exit_battle_screen();
+    
     return !player_won;
 } 

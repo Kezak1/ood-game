@@ -1,7 +1,7 @@
 #include "game.h"
 #include "game_model.h"
 
-#include <cstdlib>
+#include <stdexcept>
 
 BuildResult Game::init_dungeon(View& view, Logger& logger) {
     std::stringstream ss;
@@ -24,8 +24,7 @@ BuildResult Game::init_dungeon(View& view, Logger& logger) {
         VaultThemeFactory vt;
         res = d.build(vt, logger);
     } else {
-        view.tell("invalid input (exiting)");
-        exit(EXIT_FAILURE);
+        throw std::runtime_error("invalid theme choice");
     }
 
     view.tell(res.begining_msg);
@@ -48,7 +47,6 @@ void Game::run(std::filesystem::path config_path) {
         Controller c(model, view, logger.get_path());
         c.loop();
     } catch(const std::exception& e) {
-        std::cerr << "ERROR: " << e.what() << '\n';
-        exit(EXIT_FAILURE);
+        std::cerr << "ERROR: " << e.what() << std::endl;
     }
 }
