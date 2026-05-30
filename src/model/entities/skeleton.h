@@ -4,7 +4,7 @@
 #include "enemy_event_visitor.h"
 #include "event.h"
 #include "logger.h"
-#include "null_event_visitor.h"
+
 
 class Skeleton;
 

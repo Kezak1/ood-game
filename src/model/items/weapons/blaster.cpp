@@ -2,6 +2,8 @@
 #include "light_weapon.h"
 #include "player.h"
 
+#include <sstream>
+
 Blaster::Blaster() : LightWeapon(20, "blaster") {
 }
 

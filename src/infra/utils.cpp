@@ -7,6 +7,7 @@
 #include <queue>
 #include <stdexcept>
 #include <vector>
+#include <random>
 
 custom_exception::custom_exception(const char* msg) : msg(msg) {}
 

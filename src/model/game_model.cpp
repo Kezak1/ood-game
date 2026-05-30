@@ -2,7 +2,6 @@
 #include "event.h"
 #include "event_bus.h"
 #include "utils.h"
-#include <exception>
 
 GameModel::GameModel(std::string player_name, BuildResult&& res) : 
     p(player_name),

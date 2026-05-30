@@ -1,6 +1,19 @@
 #include "game.h"
-#include "game_model.h"
 
+#include "game_model.h"
+#include "console_view.h"
+#include "controller.h"
+#include "event_bus.h"
+#include "log_event_visitor.h"
+#include "file_logger.h"
+#include "utils.h"
+#include "library_theme_factory.h"
+#include "metal_theme_factory.h"
+#include "vault_theme_factory.h"
+
+#include <exception>
+#include <filesystem>
+#include <iostream>
 #include <stdexcept>
 
 BuildResult Game::init_dungeon(View& view, Logger& logger) {

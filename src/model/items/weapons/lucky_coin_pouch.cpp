@@ -2,6 +2,8 @@
 #include "magical_weapon.h"
 #include "player.h"
 
+#include <sstream>
+
 LuckyCoinPouch::LuckyCoinPouch() : MagicalWeapon(20, "lucky coin pouch") {}
 
 std::string LuckyCoinPouch::get_info() const {

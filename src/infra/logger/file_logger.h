@@ -2,6 +2,9 @@
 
 #include "logger.h"
 
+#include <filesystem>
+#include <fstream>
+
 class FileLogger : public Logger {
     std::vector<LogEntry> entries;
     std::filesystem::path path;

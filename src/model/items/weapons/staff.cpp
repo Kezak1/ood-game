@@ -2,6 +2,8 @@
 #include "attack.h"
 #include "player.h"
 
+#include <sstream>
+
 Staff::Staff() : MagicalWeapon(30, "staff") {
 }
 

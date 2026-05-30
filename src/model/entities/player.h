@@ -2,7 +2,6 @@
 
 #include "entity.h"
 #include "item.h"
-#include "utils.h"
 
 #include <vector>
 #include <memory>

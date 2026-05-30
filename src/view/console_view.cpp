@@ -3,6 +3,7 @@
 #include "game_model.h"
 #include "file_logger.h"
 #include "player.h"
+#include "utils.h"
 
 #include <iostream>
 #include <ostream>

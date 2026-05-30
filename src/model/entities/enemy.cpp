@@ -2,6 +2,7 @@
 #include "enemy_event_visitor.h"
 #include "entity.h"
 #include "event_bus.h"
+
 #include <memory>
 
 Enemy::Enemy(std::string name, int r, int c, int atk, int armor, int hp, std::string species, std::unique_ptr<EnemyEventVisitor> l) : 

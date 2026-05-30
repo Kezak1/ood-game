@@ -2,7 +2,6 @@
 
 #include "enemy_event_visitor.h"
 #include "entity.h"
-#include "logger.h"
 
 #include <memory>
 #include <string>

@@ -1,6 +1,8 @@
 #include "great_sword.h"
 #include "player.h"
 
+#include <sstream>
+
 GreatSword::GreatSword() : HeavyWeapon(25, "great sword") {
 }
 

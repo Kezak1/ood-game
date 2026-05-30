@@ -1,6 +1,8 @@
 #include "dagger.h"
 #include "player.h"
 
+#include <sstream>
+
 Dagger::Dagger() : LightWeapon(15, "dagger") {
 }
 

@@ -1,6 +1,9 @@
 #include "cell.h"
 #include "utils.h"
 
+#include <stdexcept>
+#include <utility>
+
 Cell::Cell() : wall(false), items() {}
 
 Cell::Cell(bool is_wall) : wall(is_wall), items() {}

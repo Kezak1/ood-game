@@ -3,7 +3,7 @@
 #include "enemy.h"
 #include "enemy_event_visitor.h"
 #include "event.h"
-#include "null_event_visitor.h"
+
 
 class Goblin;
 

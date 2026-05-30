@@ -2,6 +2,8 @@
 #include "magical_weapon.h"
 #include "player.h"
 
+#include <sstream>
+
 BlackWand::BlackWand() : MagicalWeapon(40, "black wand") {
 }
 

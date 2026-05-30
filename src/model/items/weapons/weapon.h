@@ -2,8 +2,6 @@
 
 #include "item.h"
 
-#include <sstream>
-
 class Weapon : public Item {
 protected:
     int dmg;

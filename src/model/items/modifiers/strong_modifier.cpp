@@ -1,6 +1,8 @@
 #include "strong_modifier.h"
 #include "item_modifier.h"
 
+#include <format>
+
 StrongModifier::StrongModifier(std::unique_ptr<Item> item) 
     : ItemModifier(std::move(item), "strong") {
 }
