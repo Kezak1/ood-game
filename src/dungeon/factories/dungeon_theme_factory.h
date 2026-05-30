@@ -2,7 +2,6 @@
 
 #include "enemy.h"
 #include "layout_strategy.h"
-#include "item_pool.h"
 #include "item.h"
 #include "logger.h"
 

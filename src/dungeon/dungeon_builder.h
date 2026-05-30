@@ -2,16 +2,10 @@
 
 #include "cell.h"
 #include "dungeon_theme_factory.h"
-#include "strong_modifier.h"
-#include "unlucky_modifier.h"
 #include "enemy.h"
 
 #include <memory>
 #include <vector>
-#include <stack>
-#include <algorithm>
-#include <unordered_set>
-#include <climits>
 
 struct PlayerCapabilities {
     bool can_move = false;

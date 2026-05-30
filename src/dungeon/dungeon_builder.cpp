@@ -15,10 +15,14 @@
 #include "strange_idol.h"
 #include "old_book.h"
 #include "rock.h"
-#include "gold.h"
-#include "coin.h"
 #include "dungeon_builder_facade.h"
+#include "coin.h"
+#include "gold.h"
 #include "human.h"
+
+#include <stack>
+#include <algorithm>
+#include <climits>
 
 /*
 Correct building order:
