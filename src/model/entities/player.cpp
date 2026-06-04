@@ -12,8 +12,8 @@ int throw_three_dices() {
     return sum;
 }
 
-Player::Player(std::string name) : 
-    Entity(name, 1, 1),
+Player::Player(std::string name, int r, int c) : 
+    Entity(name, r, c),
     str(throw_three_dices()),
     dex(throw_three_dices()),
     lck(throw_three_dices()),

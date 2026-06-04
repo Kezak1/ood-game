@@ -1,23 +1,22 @@
 #include "move_handler.h"
 
-#include "game_model.h"
+#include "action_handler.h"
 #include "view.h"
+#include "command.h"
 
-std::optional<bool> MoveHandler::handle(GameModel& model, View&, char key) {
+#include <memory>
+
+HandleResult MoveHandler::handle(const GameModel&, int, View&, char key) {
     switch(tolower(key)) {
         case 'w': 
-            model.player_move_up();
-            return false;
+            return {true, std::make_unique<MoveCommand>("up")};
         case 's':
-            model.player_move_down();
-            return false;
+            return {true, std::make_unique<MoveCommand>("down")};
         case 'a':
-            model.player_move_left();
-            return false;
+            return {true, std::make_unique<MoveCommand>("left")};
         case 'd':
-            model.player_move_right();
-            return false;
+            return {true, std::make_unique<MoveCommand>("right")};
         default:
-            return std::nullopt;
+            return {};
     }
 }

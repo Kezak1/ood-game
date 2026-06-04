@@ -2,9 +2,11 @@
 #include "event.h"
 #include "event_bus.h"
 #include "utils.h"
+#include "player.h"
 
-GameModel::GameModel(std::string player_name, BuildResult&& res) : 
-    p(player_name),
+#include <stdexcept>
+
+GameModel::GameModel(BuildResult&& res) : 
     enemies(std::move(res.enemies)),
     board(std::move(res.board)),
     capabilities(res.capabilities)
@@ -14,40 +16,48 @@ GameModel::GameModel(std::string player_name, BuildResult&& res) :
     for(auto& e : enemies) {
         enemy_map[e->get_r()][e->get_c()] = idx++;
     }
+    player_map.assign(ROWS, std::vector<int>(COLS, -1));
 }
 
-void GameModel::player_move(int dr, int dc, std::string direction) {
-    int nr = p.get_r() + dr;
-    int nc = p.get_c() + dc;
+void GameModel::player_try_move(int player_id, std::string direction) {
+    auto& p = players.at(player_id);
+
+    int i = -1;
+    if(direction == "right") {
+        i = 0;
+    } else if(direction == "left") {
+        i = 1;
+    } else if(direction == "down") {
+        i = 2;
+    } else if(direction == "up") {
+        i = 3;
+    } else {
+        throw std::runtime_error("unknown direction");
+    }
+
+    int nr = p.get_r() + dr[i];
+    int nc = p.get_c() + dc[i];
 
     if(board[nr][nc].is_wall()) {
         EventBus::instance().publish(WallHitEvent(direction));
         return;
     }
+    if(player_map[nr][nc] > 0) {
+        //TO DO some event
+        return;
+    }
 
+    player_map[p.get_r()][p.get_c()] = -1;
     p.set_r(nr);
     p.set_c(nc);
+    player_map[p.get_r()][p.get_c()] = player_id;
 
     EventBus::instance().publish(PlayerMoveEvent(direction));
 }
 
-void GameModel::player_move_up() {
-    player_move(-1, 0, "up");
-}
+void GameModel::player_try_drop_item(int player_id, int idx) {
+    auto& p = players.at(player_id);
 
-void GameModel::player_move_down() {
-    player_move(1, 0, "down");
-}
-
-void GameModel::player_move_left() {
-    player_move(0, -1, "left");
-}
-
-void GameModel::player_move_right() {
-    player_move(0, 1, "right");
-}
-
-void GameModel::player_try_drop_item(int idx) {
     if(p.get_inventory().empty()) {
         return;
     }
@@ -70,7 +80,8 @@ void GameModel::player_try_drop_item(int idx) {
     EventBus::instance().publish(ItemDropEvent(item_name));
 }
 
-void GameModel::player_try_pick_up_item(int idx) {
+void GameModel::player_try_pick_up_item(int player_id, int idx) {
+    auto& p = players.at(player_id);
     auto& cell = board[p.get_r()][p.get_c()];
     auto& items = cell.get_items();
 
@@ -86,7 +97,7 @@ void GameModel::player_try_pick_up_item(int idx) {
             throw std::out_of_range("invalid index");
         }
         if(items[idx - 1]->goes_to_inv() && !p.can_add_item()) {
-            throw custom_exception("inventory is full");
+            throw std::runtime_error("inventory is full");
         }
         auto item = cell.take_item(idx);
         item_name = item->get_name();
@@ -107,7 +118,8 @@ void GameModel::player_try_pick_up_item(int idx) {
     EventBus::instance().publish(ItemPickUpEvent(item_name));
 }
 
-void GameModel::player_try_equip_weapon(int idx) {
+void GameModel::player_try_equip_item(int player_id, int idx) {
+    auto& p = players.at(player_id);
     if(p.get_inventory().empty()) {
         return;
     }
@@ -132,7 +144,8 @@ void GameModel::player_try_equip_weapon(int idx) {
     EventBus::instance().publish(ItemEquipEvent(item_name));
 }
 
-void GameModel::player_try_unequip_weapon(std::string hand) {
+void GameModel::player_try_unequip_item(int player_id, std::string hand) {
+    auto& p = players.at(player_id);
     std::string item_name;
     try {
         if(!p.can_add_item()) {
@@ -171,22 +184,26 @@ void GameModel::player_try_unequip_weapon(std::string hand) {
     EventBus::instance().publish(ItemUnequipEvent(item_name));
 }
 
-bool GameModel::check_battle_start(int enemy_idx) {
+bool GameModel::player_try_start_battle(int player_id) {
+    int enemy_idx = enemy_map_value(player_id);
     if(enemy_idx < 0) {
         return false;
     }
 
-    if(!player_has_equipped_item()) {
+    if(!player_has_equipped_item(player_id)) {
         EventBus::instance().publish(ActionFailedEvent("cannot start battle without equiped item"));
         return false;
     }
 
+    battles[player_id] = enemy_idx;
     EventBus::instance().publish(BattleStartEvent(enemies[enemy_idx]->get_name()));
     return true;
 }
 
-RoundResult GameModel::battle_round(int enemy_idx, const Item& item, const Attack& attack) {
+RoundResult GameModel::battle_round(int player_id, const Item& item, const Attack& attack) {
     RoundResult res{0, 0, false, false};
+    auto& p = players.at(player_id);
+    int enemy_idx = battles.at(player_id);
     auto& e = enemies[enemy_idx];
 
     int prev_hp = e->get_hp();
@@ -200,6 +217,8 @@ RoundResult GameModel::battle_round(int enemy_idx, const Item& item, const Attac
     if(e->is_dead()) {
         EventBus::instance().publish(EnemyDefeatEvent(e->get_name(), e->get_species()));
         res.enemy_died = true;
+        end_battle(player_id);
+        kill_enemy(enemy_idx);
 
         return res;
     }
@@ -216,20 +235,73 @@ RoundResult GameModel::battle_round(int enemy_idx, const Item& item, const Attac
     if(p.is_dead()) {
         EventBus::instance().publish(PlayerDefeatEvent(e->get_name()));
         res.player_died = true;
+        end_battle(player_id);
     }
 
     return res;
 }
 
-void GameModel::player_give_up(int enemy_idx) {
+void GameModel::player_give_up(int player_id) {
+    int enemy_idx = battles.at(player_id);
+    auto& p = players.at(player_id);
     p.take_dmg(p.get_hp());
+    end_battle(player_id);
     EventBus::instance().publish(PlayerDefeatEvent(enemies[enemy_idx]->get_name()));
+}
+
+bool GameModel::is_player_in_battle(int player_id) const {
+    return battles.find(player_id) != battles.end();
+}
+
+bool GameModel::is_enemy_in_batlte(int enemy_idx) const {
+    for(const auto& [p, e] : battles) {
+        if(e == enemy_idx) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+void GameModel::end_battle(int player_id) {
+    battles.erase(player_id);
+}
+
+bool GameModel::add_player(int player_id, std::string name) {
+    if((player_id < 1 || player_id > MAX_PLAYERS) && players.find(player_id) != players.end()) {
+        return false;
+    }
+
+    auto [r, c] = get_player_starting_pos();
+    if(r == -1 && c == -1) {
+        return false;
+    }
+    auto [it, inserted] = players.try_emplace(player_id, name, r, c);
+    if(inserted) {
+        player_map[r][c] = player_id;
+    }
+    
+    return inserted;
+}
+
+bool GameModel::remove_player(int player_id) {
+    auto it = players.find(player_id);
+    if(it == players.end()) {
+        return false;
+    }
+    
+    if(is_player_in_battle(player_id)) {
+        end_battle(player_id);
+    }
+    player_map[it->second.get_r()][it->second.get_c()]   = -1;
+    players.erase(it);
+    return true;
 }
 
 void GameModel::enemies_take_turn() {
     for(int i = 0; i < (int)enemies.size(); i++) {
         auto& e = enemies[i];
-        if(e->is_dead() || next_random(1, 100) <= ENEMY_STAY_CHANGE) {
+        if(e->is_dead() || is_enemy_in_batlte(i) || next_random(1, 100) <= ENEMY_STAY_CHANGE) {
             continue;
         }
 
@@ -239,7 +311,7 @@ void GameModel::enemies_take_turn() {
         for(int d = 0; d < 4; d++) {
             int nr = r + dr[d], nc = c + dc[d];
 
-            if(!in_range(nr, nc) || board[nr][nc].is_wall() || enemy_map[nr][nc] >= 0 || (nr == p.get_r() && nc == p.get_c())) {
+            if(!in_range(nr, nc) || board[nr][nc].is_wall() || enemy_map[nr][nc] >= 0 || (player_map[nr][nc] > 0)) {
                 continue;
             }
             dirs.push_back(d);
@@ -268,6 +340,11 @@ void GameModel::kill_enemy(int enemy_idx) {
         std::swap(enemies[enemy_idx], enemies[last]);
         auto& moved = enemies[enemy_idx];
         enemy_map[moved->get_r()][moved->get_c()] = enemy_idx;
+        for(auto& [pid, ei] : battles) {
+            if(ei == last) {
+                ei = enemy_idx;
+            }
+        }
     }
 
     enemies.pop_back();
@@ -277,19 +354,23 @@ bool GameModel::is_enemy_pos(int r, int c) const {
     return enemy_map[r][c] >= 0;
 }
 
-int GameModel::player_enemy_map_value() const {
-    return enemy_map[p.get_r()][p.get_c()];
+int GameModel::enemy_map_value(int player_id) const {
+    return enemy_map[players.at(player_id).get_r()][players.at(player_id).get_c()];
 }
 
-bool GameModel::player_has_equipped_item() const {
-    return p.get_left_hand() || p.get_right_hand() || p.get_both_hands();
+int GameModel::player_map_value(int r, int c) const {
+    return player_map[r][c];
 }
 
-Player& GameModel::player() {
-    return p;
+bool GameModel::player_has_equipped_item(int player_id) const {
+    return players.at(player_id).get_left_hand() || players.at(player_id).get_right_hand() || players.at(player_id).get_both_hands();
 }
-const Player& GameModel::player() const {
-    return p;
+
+Player& GameModel::player(int player_id) {
+    return players.at(player_id);
+}
+const Player& GameModel::player(int player_id) const {
+    return players.at(player_id);
 }
 
 Cell& GameModel::cell_at(int r, int c) {
@@ -298,6 +379,10 @@ Cell& GameModel::cell_at(int r, int c) {
 
 const Cell& GameModel::cell_at(int r, int c) const {
     return board[r][c];
+}
+
+const Enemy& GameModel::get_battled_enemy(int player_id) const {
+    return *enemies[battles.at(player_id)];
 }
 
 const std::vector<std::vector<Cell>>& GameModel::get_board() const {
@@ -310,4 +395,20 @@ const std::vector<std::unique_ptr<Enemy>>& GameModel::get_enemies() const {
 
 PlayerCapabilities GameModel::get_capabilities() const {
     return capabilities;
+}
+
+std::pair<int, int> GameModel::get_player_starting_pos() {
+    std::vector<std::pair<int, int>> a;
+    for(int i = 1; i < ROWS - 1; i++) {
+        for(int j = 1; j < COLS - 1; j++) {
+            if(!board[i][j].is_wall() && player_map[i][j] == -1) {
+                a.emplace_back(i, j);
+            }
+        }
+    }
+
+    if(a.empty()) {
+        return {-1, -1};
+    }
+    return a[next_random(0, (int)a.size() - 1)];
 }

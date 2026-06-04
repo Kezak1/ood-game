@@ -11,10 +11,11 @@
 #include <unistd.h>
 #include <sstream>
 
+
 namespace {
     inline constexpr auto C_WALL = "█";
     inline constexpr auto C_EMPTY = " ";
-    inline constexpr auto C_PLAYER = "¶";
+    // inline constexpr auto C_PLAYER = "¶";
     inline constexpr auto C_ITEMS = "*";
     inline constexpr auto C_ENEMY = "@";
     inline constexpr int MAX_LOG_DISPLAY = 74;
@@ -70,6 +71,18 @@ namespace {
             tcsetattr(STDIN_FILENO, TCSANOW,&t);
         }
     }
+
+    void enter_battle_screen() {
+        enter_alt_terminal();
+        set_raw_mode(false);
+        unhide_cursor();
+    }
+
+    void exit_battle_screen() {
+        exit_alt_terminal();
+        set_raw_mode(true);
+        hide_cursor();
+    }
 }
 
 ConsoleView::ConsoleView(Logger& l) : logger(l) {
@@ -83,23 +96,47 @@ ConsoleView::~ConsoleView() {
     unhide_cursor();
 }
 
-void ConsoleView::render_state(const GameModel& model) {
-    to_start_cursor();
-    print_player_stats(model.player());
-    print_player_inventory(model.player());
-    print_player_wallet(model.player());
-    print_player_hands(model.player());
-    print_instructions(model.get_capabilities());
-    print_board_with_recent_logs(model);
-    print_action_info(model);
+void ConsoleView::render(const GameModel& model, int id) {
+    bool in_battle = model.is_player_in_battle(id);
+    handle_mode_change(in_battle);
+    if(in_battle) {
+        render_battle(model, id);
+    } else {
+        render_map(model, id);
+    }
 }
 
-void ConsoleView::render_battle(const GameModel& model, int enemy_idx) {
+void ConsoleView::handle_mode_change(bool battle) {
+    if(battle == in_battle_screen) {
+        return;
+    }
+    if(battle) {
+        enter_battle_screen();
+    } else {
+        exit_battle_screen();
+    }
+    in_battle_screen = battle;
+}
+
+void ConsoleView::render_map(const GameModel& model, int id) {
+    to_start_cursor();
+    const Player& me = model.player(id);
+    print_player_stats(me);
+    print_player_inventory(me);
+    print_player_wallet(me);
+    print_player_hands(me);
+    print_instructions(model.get_capabilities());
+    print_board_with_recent_logs(model, id);
+    print_action_info(model, id);
+}
+
+void ConsoleView::render_battle(const GameModel& model, int id) {
     full_clear();
-    print_player_stats(model.player());
-    print_player_hands(model.player());
+    const Player& me = model.player(id);
+    print_player_stats(me);
+    print_player_hands(me);
     std::cout << '\n';
-    print_enemy_hp(model, enemy_idx);
+    print_enemy_hp(model.get_battled_enemy(id));
     print_battlefield();
 }
 
@@ -130,18 +167,6 @@ void ConsoleView::tell(const std::string& msg) {
     std::cout << msg << std::endl;
 }
 
-void ConsoleView::enter_battle_screen() {
-    enter_alt_terminal();
-    set_raw_mode(false);
-    unhide_cursor();
-}
-
-void ConsoleView::exit_battle_screen() {
-    exit_alt_terminal();
-    set_raw_mode(true);
-    hide_cursor();
-}
-
 void ConsoleView::show_full_log() {
     enter_alt_terminal();
     set_raw_mode(false);
@@ -165,16 +190,16 @@ void ConsoleView::clear() {
     full_clear();
 }
 
-void ConsoleView::print_action_info(const GameModel& model) {
-    auto& p = model.player();
+void ConsoleView::print_action_info(const GameModel& model, int id) {
     auto& board = model.get_board();
     auto& enemies = model.get_enemies();
+    auto& p = model.player(id);
 
     full_clear_from_cursor();
     auto& items = board[p.get_r()][p.get_c()].get_items();
     std::cout << "INFO: ";
     if(model.is_enemy_pos(p.get_r(), p.get_c())) {
-        int idx = model.player_enemy_map_value();
+        int idx = model.enemy_map_value(id);
         std::cout << std::format("{}({}) - hp({}), attack({}), armor({})\n", enemies[idx]->get_name(), enemies[idx]->get_species(), enemies[idx]->get_hp(), enemies[idx]->get_attack(), enemies[idx]->get_arrmor());
     }
     if(items.empty()) {
@@ -190,22 +215,27 @@ void ConsoleView::print_action_info(const GameModel& model) {
     }
 }
 
-void ConsoleView::print_board_with_recent_logs(const GameModel& model) {
+void ConsoleView::print_board_with_recent_logs(const GameModel& model, int id) {
     auto& board = model.get_board();
-    auto& p = model.player();
-    
-    std::cout << "\n";
     const auto logs = logger.recent(8);
 
     std::stringstream ss;
+    ss << '\n';
+
     for(int r = 0; r < ROWS; r++) {
         for(int c = 0; c < COLS; c++) {
             if(board[r][c].is_wall()) {
                 ss << C_WALL << C_WALL;
                 continue;
             }
-            if(r == p.get_r() && c == p.get_c()) {
-                ss << C_PLAYER;
+            
+            int player_id = model.player_map_value(r, c);
+            if(player_id > 0) {
+                if(player_id == id) {
+                    ss << "\033[1m" << player_id << "\033[0m";
+                } else {
+                    ss << player_id;
+                }
             } else if(!board[r][c].no_items()) {
                 ss << C_ITEMS;
             } else {
@@ -333,9 +363,8 @@ void ConsoleView::print_battlefield() {
 )";
 }
 
-void ConsoleView::print_enemy_hp(const GameModel& model, int enemy_idx) {
-    auto& e = model.get_enemies()[enemy_idx];
-    std::string out = std::format("{}: HP {:3}/{}\n", all_toupper(e->get_name()), e->get_hp(), e->get_max_hp());
+void ConsoleView::print_enemy_hp(const Enemy& e) {
+    std::string out = std::format("{}: HP {:3}/{}\n", all_toupper(e.get_name()), e.get_hp(), e.get_max_hp());
     clear_line_cursor();
     std::cout << out;
 }

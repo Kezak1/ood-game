@@ -3,7 +3,6 @@
 #include "item_modifier.h"
 
 #include <memory>
-#include <format>
 
 class MysticModifier : public ItemModifier {
 public:

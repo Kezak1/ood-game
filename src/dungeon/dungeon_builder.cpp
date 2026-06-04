@@ -36,8 +36,7 @@ by default player goes to top-left corner
 ofc all points are optional
 */
 
-DungeonBuilder::DungeonBuilder(bool start_filled) 
-    : player_start_pos_r(1), player_start_pos_c(1) {
+DungeonBuilder::DungeonBuilder(bool start_filled) {
     init_board(start_filled);
     /*
     add_random_path();
@@ -97,8 +96,6 @@ void DungeonBuilder::init_board(bool start_filled) {
 }
 
 BuildResult DungeonBuilder::build(const DungeonThemeFactory& factory, Logger& logger) {
-    board[player_start_pos_r][player_start_pos_c].set_wall(false);
-
     DungeonBuilderFacade facade(*this);
     
     factory.create_layout()->apply(facade);
@@ -366,11 +363,6 @@ void DungeonBuilder::add_random_currencies(int count) {
     for(int i = 0; i < count && !a.empty(); i++) {
         int idx = next_random(0, (int)a.size() - 1);
         auto [r, c] = a[idx];
-        
-        if(r == player_start_pos_r && c == player_start_pos_c) {
-            a.erase(a.begin() + idx);
-            continue;
-        }
 
         if(next_random(0, 1)) {
             add_item(r, c, std::make_unique<Coin>());
@@ -442,7 +434,6 @@ void DungeonBuilder::connect_empty() {
         return std::abs(a.first - b.first) + std::abs(a.second - b.second);
     };
 
-    rooms_centers.push_back({player_start_pos_r, player_start_pos_c});
     for(int i = 1; i < ROWS - 1; i++) {
         for(int j = 1; j < COLS - 1; j++) {
             if(!board[i][j].is_wall() && !vis[i][j]) {
@@ -498,11 +489,6 @@ void DungeonBuilder::add_random_enemies(int count, Logger& logger) {
     for(int i = 0; i < count && !a.empty(); ) {
         int idx = next_random(0, (int)a.size() - 1);
         auto [r, c] = a[idx];
-
-        if((r == player_start_pos_r && c == player_start_pos_c)) {
-            a.erase(a.begin() + idx);
-            continue;
-        }
 
         add_enemy(std::make_unique<Human>("Enemy", r, c, next_random(15, 30), next_random(0, 10), next_random(60, 90), logger));
         a.erase(a.begin() + idx);   

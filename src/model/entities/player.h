@@ -12,10 +12,10 @@ class Player : public Entity {
     int gold, coins;
 
     std::vector<std::unique_ptr<Item>> inventory;
-    static constexpr size_t max_inventory_cap = 6; 
+    static constexpr size_t max_inventory_cap = 6;
     std::unique_ptr<Item> left_hand, right_hand, both_hands;  
 public:
-    Player(std::string name);
+    Player(std::string name, int r, int c);
     int get_str() const;
     int get_dex() const;
     int get_lck() const;

@@ -22,8 +22,6 @@ struct BuildResult {
 };
 
 class DungeonBuilder {
-    int player_start_pos_r, player_start_pos_c;
-    
     std::vector<std::unique_ptr<Enemy>> enemies;
     std::vector<std::vector<Cell>> board;
     PlayerCapabilities capabilities;

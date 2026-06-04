@@ -4,6 +4,6 @@
 
 class ViewLogHandler : public ActionHandler {
 public:
-std::optional<bool> handle(GameModel& game, View& view, char key) override;
+HandleResult handle(const GameModel& model, int player_id, View& view, char key) override;
 };
 

@@ -15,6 +15,7 @@ public:
 
 inline constexpr int ROWS = 22;
 inline constexpr int COLS = 42;
+inline constexpr int MAX_PLAYERS = 9;
 
 bool in_range(int r, int c);
 

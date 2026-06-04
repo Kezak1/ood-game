@@ -1,12 +1,13 @@
 #include "quit_handler.h"
 
+#include "action_handler.h"
 #include "game_model.h"
 #include "view.h"
 
-std::optional<bool> QuitHandler::handle(GameModel&, View&, char key) {
+HandleResult QuitHandler::handle(const GameModel&, int, View&, char key) {
     key = tolower(key);
     if(key != 'q') {
-        return std::nullopt;
+        return {};
     }
-    return true;
+    return {true, nullptr, true};
 }

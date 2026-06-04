@@ -56,8 +56,8 @@ void Game::run(std::filesystem::path config_path) {
         EventBus::instance().subscribe(event_logger);
         
         ConsoleView view(logger);
-        GameModel model(config.player_name, init_dungeon(view, logger));
-        Controller c(model, view, logger.get_path());
+        GameModel model(init_dungeon(view, logger));
+        Controller c(model, view, config.player_name, logger.get_path());
         c.loop();
     } catch(const std::exception& e) {
         std::cerr << "ERROR: " << e.what() << std::endl;

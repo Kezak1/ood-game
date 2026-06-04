@@ -60,7 +60,7 @@ void LogEventVisitor::visit(const ItemEquipEvent& e) {
 }
 
 void LogEventVisitor::visit(const ItemUnequipEvent& e) {
-    logger.log("Player unequipped" + e.item_name);
+    logger.log("Player unequipped " + e.item_name);
 }
 
 void LogEventVisitor::visit(const BattleStartEvent& e) {
@@ -88,5 +88,5 @@ void LogEventVisitor::visit(const SoundEvent& e) {
 }
 
 void LogEventVisitor::visit(const ActionFailedEvent& e) {
-    logger.log("ERROR: " + e.reason);
+    logger.log("Error: " + e.reason);
 }

@@ -1,27 +1,14 @@
 #include "battle_handler.h"
+#include "action_handler.h"
+#include "command.h"
 #include "game_model.h"
-#include "utils.h"
 #include "view.h"
-#include "item.h"
-#include "normal_attack.h"
-#include "stealth_attack.h"
-#include "magical_attack.h"
 
-#include <format>
 #include <memory>
 
+/*
 namespace {
-    const Item* choose_battle_item(const Player& p, const std::string& hand) {
-        if(hand == "left") {
-            return p.get_left_hand().get();
-        } else if(hand == "right") {
-            return p.get_right_hand().get();
-        } else if(hand == "both") {
-            return p.get_both_hands().get();
-        }
-        return nullptr;
-    }
-
+    
     std::string auto_choose_hand(const Player& p) {
         if(p.get_both_hands()) {
             return "both";
@@ -34,31 +21,28 @@ namespace {
         }
         return "";
     }
+    
+}
+*/
 
-    std::unique_ptr<Attack> choose_battle_attack(std::string attack_type) {
-        if(attack_type == "normal") {
-            return std::make_unique<NormalAttack>();
-        }
-        if(attack_type == "stealth") {
-            return std::make_unique<StealthAttack>();
-        }
-        if(attack_type == "magical") {
-            return std::make_unique<MagicalAttack>();
-        }
-
-        return nullptr;
+HandleResult BattleHandler::handle(const GameModel&, int, View&, char key) {
+    if(tolower(key) != 'f') {
+        return {};
     }
+    
+    return {true, std::make_unique<BattleStartCommand>()};
 }
 
-
-std::optional<bool> BattleHandler::handle(GameModel& model, View& view, char key) {
+/*
+// to-do Refactoring 
+HandleResult BattleHandler::handle(const GameModel& model, int player_id, View& view, char key) {
     if(tolower(key) != 'f') {
-        return std::nullopt;
+        return {};
     }
     
     //battle
     int enemy_idx = model.player_enemy_map_value();
-    bool ok = model.check_battle_start(enemy_idx);
+    bool ok = model.(enemy_idx);
     if(!ok) {
         return false;
     }
@@ -129,4 +113,5 @@ std::optional<bool> BattleHandler::handle(GameModel& model, View& view, char key
     view.exit_battle_screen();
     
     return !player_won;
-} 
+}
+*/

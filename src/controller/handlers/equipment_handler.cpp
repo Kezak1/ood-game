@@ -1,22 +1,23 @@
 #include "equipment_handler.h"
+#include "action_handler.h"
+#include "command.h"
 #include "event_bus.h"
 #include "event.h"
-#include "game_model.h"
-#include "player.h"
 #include "view.h"
 
 #include <exception>
+#include <memory>
 
-std::optional<bool> EquipmentHandler::handle(GameModel& model, View& view, char key) {
+HandleResult EquipmentHandler::handle(const GameModel& model, int player_id, View& view, char key) {
     switch(tolower(key)) {
         case 'k': {
-            if(model.player().get_inventory().empty()) {
-                return false;
+            if(model.player(player_id).get_inventory().empty()) {
+                return {true};
             }
 
             std::string input = view.ask("Enter index of item from inventory (to cancel write 'cancel'): ");
             if(input == "cancel") {
-                return false;
+                return {true};
             }
 
             int idx = -1;
@@ -24,24 +25,24 @@ std::optional<bool> EquipmentHandler::handle(GameModel& model, View& view, char 
                 idx = std::stoi(input);
             } catch(const std::exception&) {
                 EventBus::instance().publish(ActionFailedEvent("invalid number"));
-                return false;
+                return {true};
             }
 
-            model.player_try_equip_weapon(idx);
-
-            return false;
+            return {true, std::make_unique<EquipCommand>(idx)};
         }
         case 'l': {
+            auto& p = model.player(player_id);
+            if(!p.get_left_hand() && !p.get_right_hand() && !p.get_both_hands()) {
+                return {true};
+            }
             std::string input = view.ask("Enter 'left'/'right'/'both' to unequip (to cancel write 'cancel'): ");
             if(input == "cancel") {
-                return false;
+                return {true};
             }
 
-            model.player_try_unequip_weapon(input);
-
-            return false;
+            return {true, std::make_unique<UnequipCommand>(input)};
         }
         default:
-            return std::nullopt;
+            return {};
     }
 }
