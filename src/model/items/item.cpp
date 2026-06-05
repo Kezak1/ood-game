@@ -5,6 +5,14 @@
 Item::Item(std::string s) : name(s) {
 }
 
+std::string Item::type_label() const {
+    return "";
+}
+
+std::vector<std::string> Item::get_modifiers() const {
+    return {};
+}
+
 std::string Item::get_name() const {
     return name;
 }

@@ -12,7 +12,7 @@ class Enemy : public Entity {
     std::string species;
     std::unique_ptr<EnemyEventVisitor> listener;
 public:
-    Enemy(std::string name, int r, int c, int atk, int armor, int hp, std::string species, std::unique_ptr<EnemyEventVisitor> listener);
+    Enemy(std::string name, int r, int c, int atk, int armor, int hp, std::string species, std::unique_ptr<EnemyEventVisitor> listener, int max_hp = -1);
     virtual ~Enemy();
 
     const std::string& get_name() const; 

@@ -4,6 +4,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 class ItemModifier : public Item {
 protected:
@@ -14,6 +15,11 @@ protected:
     int accept_defense(const Player& p, const Attack& a, const Item& stats) const override;
 public:
     ItemModifier(std::unique_ptr<Item> item, std::string name);
+
+    const Item& get_inner() const;
+
+    std::string type_label() const override;
+    std::vector<std::string> get_modifiers() const override;
 
     std::string get_name() const override;
     std::string get_info() const override;

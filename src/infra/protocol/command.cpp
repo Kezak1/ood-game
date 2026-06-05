@@ -161,7 +161,7 @@ std::unique_ptr<Command> Command::from_json(const json& j) {
     if(type == "equip") {
         return std::make_unique<EquipCommand>(j.at("idx"));
     }
-    if(type == "uneqip") {
+    if(type == "unequip") {
         return std::make_unique<UnequipCommand>(j.at("hand"));
     }
     if(type == "battle_start") {

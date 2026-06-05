@@ -6,6 +6,10 @@
 GreatSword::GreatSword() : HeavyWeapon(25, "great sword") {
 }
 
+std::string GreatSword::type_label() const {
+    return "great_sword";
+}
+
 std::string GreatSword::get_info() const {
     std::stringstream res;
     res << "hold: both, dmg: " << dmg;

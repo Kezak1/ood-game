@@ -4,5 +4,6 @@
 
 class StrangeIdol : public Junk {
 public:
+    std::string type_label() const override;
     StrangeIdol();
 };

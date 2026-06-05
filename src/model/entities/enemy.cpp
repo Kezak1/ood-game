@@ -5,13 +5,16 @@
 
 #include <memory>
 
-Enemy::Enemy(std::string name, int r, int c, int atk, int armor, int hp, std::string species, std::unique_ptr<EnemyEventVisitor> l) : 
-    Entity(name, r, c, hp, hp),
+Enemy::Enemy(std::string name, int r, int c, int atk, int armor, int hp, std::string species, std::unique_ptr<EnemyEventVisitor> l, int max_hp) : 
+    Entity(name, r, c, hp, max_hp < 0 ? hp : max_hp),
     attack(atk),
     armor(armor),
     species(species),
-    listener(std::move(l)) {
-    EventBus::instance().subscribe(*listener);
+    listener(std::move(l)) 
+{
+    if(listener) {
+        EventBus::instance().subscribe(*listener);   
+    }
 }
 
 Enemy::~Enemy() {

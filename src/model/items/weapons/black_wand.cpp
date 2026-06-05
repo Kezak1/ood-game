@@ -7,6 +7,10 @@
 BlackWand::BlackWand() : MagicalWeapon(40, "black wand") {
 }
 
+std::string BlackWand::type_label() const {
+    return "black_wand";
+}
+
 std::string BlackWand::get_info() const {
     std::stringstream res;
     res << "hold: single, dmg: " << dmg;

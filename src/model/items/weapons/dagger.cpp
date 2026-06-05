@@ -6,6 +6,10 @@
 Dagger::Dagger() : LightWeapon(15, "dagger") {
 }
 
+std::string Dagger::type_label() const {
+    return "dagger";
+}
+
 std::string Dagger::get_info() const {
     std::stringstream res;
     res << "hold: single, dmg: " << dmg;

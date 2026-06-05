@@ -1,5 +1,6 @@
 #pragma once
 
+#include "dto.h"
 #include "player.h"
 #include "cell.h"
 #include "enemy.h"
@@ -15,14 +16,14 @@ struct RoundResult;
 class GameModel {
     std::map<int, Player> players;
     std::vector<std::unique_ptr<Enemy>> enemies;
+    std::vector<std::vector<Cell>> board;
+    std::map<int, int> battles;
+    PlayerCapabilities capabilities;
 
     std::vector<std::vector<int>> enemy_map;
     std::vector<std::vector<int>> player_map;
 
-    std::map<int, int> battles;
-    
-    std::vector<std::vector<Cell>> board;
-    PlayerCapabilities capabilities;
+    GameModel(const GameStateDto& dto);
 public:
     GameModel(BuildResult&& res);
 
@@ -58,7 +59,9 @@ public:
 
     const Enemy& get_battled_enemy(int player_id) const;
     const std::vector<std::vector<Cell>>& get_board() const;
+    const std::map<int, Player>& get_players() const;
     const std::vector<std::unique_ptr<Enemy>>& get_enemies() const;
+    const std::map<int, int>& get_battles() const;
     PlayerCapabilities get_capabilities() const;
 private:
     std::pair<int, int> get_player_starting_pos();

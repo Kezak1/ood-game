@@ -7,7 +7,6 @@
 #include <memory>
 
 class Player : public Entity {
-    std::string name;
     int str, dex, lck, agr, wis;
     int gold, coins;
 
@@ -16,6 +15,8 @@ class Player : public Entity {
     std::unique_ptr<Item> left_hand, right_hand, both_hands;  
 public:
     Player(std::string name, int r, int c);
+    Player(std::string name, int r, int c, int hp, int max_hp, int str, int dex, int lck, int agr, int wis);
+
     int get_str() const;
     int get_dex() const;
     int get_lck() const;

@@ -7,6 +7,10 @@
 Staff::Staff() : MagicalWeapon(30, "staff") {
 }
 
+std::string Staff::type_label() const {
+    return "staff";
+}
+
 std::string Staff::get_info() const {
     std::stringstream res;
     res << "hold: single, dmg: " << dmg;

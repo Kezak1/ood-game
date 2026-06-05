@@ -6,6 +6,10 @@
 
 LuckyCoinPouch::LuckyCoinPouch() : MagicalWeapon(20, "lucky coin pouch") {}
 
+std::string LuckyCoinPouch::type_label() const {
+    return "lucky_coin_pouch";
+}
+
 std::string LuckyCoinPouch::get_info() const {
     std::stringstream res;
     res << "hold: single, dmg: " << dmg;

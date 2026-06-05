@@ -7,6 +7,10 @@
 Blaster::Blaster() : LightWeapon(20, "blaster") {
 }
 
+std::string Blaster::type_label() const {
+    return "blaster";
+}
+
 std::string Blaster::get_info() const {
     std::stringstream res;
     res << "hold: single, dmg: " << dmg;

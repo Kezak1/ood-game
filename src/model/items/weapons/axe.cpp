@@ -7,6 +7,10 @@
 Axe::Axe() : HeavyWeapon(20, "axe") {
 }
 
+std::string Axe::type_label() const {
+    return "axe";
+}
+
 std::string Axe::get_info() const {
     std::stringstream res;
     res << "hold: single, dmg: " << dmg;

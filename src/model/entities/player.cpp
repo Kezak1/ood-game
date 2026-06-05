@@ -4,12 +4,14 @@
 
 #include <memory>
 
-int throw_three_dices() {
-    int sum = 0;
-    for(int i = 0; i < 3; i++) {
-        sum += next_random(1, 6);
+namespace  {
+    int throw_three_dices() {
+        int sum = 0;
+        for(int i = 0; i < 3; i++) {
+            sum += next_random(1, 6);
+        }
+        return sum;
     }
-    return sum;
 }
 
 Player::Player(std::string name, int r, int c) : 
@@ -23,8 +25,15 @@ Player::Player(std::string name, int r, int c) :
     coins(0),
     left_hand(nullptr), 
     right_hand(nullptr),
-    both_hands(nullptr) {
-}
+    both_hands(nullptr) {}
+
+Player::Player(std::string name, int r, int c, int hp, int max_hp, int str, int dex, int lck, int agr, int wis) : 
+    Entity(name, r, c, hp, max_hp),
+    str(str), dex(dex), lck(lck), agr(agr), wis(wis),
+    gold(0), coins(0),
+    left_hand(nullptr), 
+    right_hand(nullptr),
+    both_hands(nullptr) {}
 
 int Player::get_str() const {
     return str;

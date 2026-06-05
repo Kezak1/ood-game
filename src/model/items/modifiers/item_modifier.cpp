@@ -1,9 +1,22 @@
 #include "item_modifier.h"
 #include "item.h"
-#include <memory>
 
 ItemModifier::ItemModifier(std::unique_ptr<Item> item, std::string name) 
     : Item(""), inner(std::move(item)), modifier_name(name) {
+}
+
+const Item& ItemModifier::get_inner() const {
+    return *inner;
+}
+
+std::string ItemModifier::type_label() const {
+    return inner->type_label();
+}
+
+std::vector<std::string> ItemModifier::get_modifiers() const {
+    auto m = inner->get_modifiers();
+    m.push_back(modifier_name);
+    return m;
 }
 
 std::string ItemModifier::get_name() const {

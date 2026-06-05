@@ -1,10 +1,118 @@
 #include "game_model.h"
+#include "dto.h"
+#include "dungeon_builder.h"
 #include "event.h"
 #include "event_bus.h"
 #include "utils.h"
 #include "player.h"
 
+#include "item.h"
+#include "dagger.h"
+#include "axe.h"
+#include "blaster.h"
+#include "black_wand.h"
+#include "staff.h"
+#include "great_sword.h"
+#include "lucky_coin_pouch.h"
+#include "coin.h"
+#include "gold.h"
+#include "metal_fragment.h"
+#include "old_book.h"
+#include "rock.h"
+#include "strange_idol.h"
+
+#include "strong_modifier.h"
+#include "mystic_modifier.h"
+#include "unlucky_modifier.h"
+
+#include <memory>
 #include <stdexcept>
+#include <vector>
+
+namespace {
+    std::unique_ptr<Item> make_item(const ItemDto& dto) {
+        std::unique_ptr<Item> item;
+
+        if(dto.type == "dagger") item = std::make_unique<Dagger>();
+        else if(dto.type == "axe") item = std::make_unique<Axe>();
+        else if(dto.type == "blaster") item = std::make_unique<Blaster>();
+        else if(dto.type == "black_wand") item = std::make_unique<BlackWand>();
+        else if(dto.type == "staff") item = std::make_unique<Staff>();
+        else if(dto.type == "great_sword") item = std::make_unique<GreatSword>();
+        else if(dto.type == "lucky_coin_pouch") item = std::make_unique<LuckyCoinPouch>();
+        else if(dto.type == "coin") item = std::make_unique<Coin>();
+        else if(dto.type == "gold") item = std::make_unique<Gold>();
+        else if(dto.type == "metal_fragment") item = std::make_unique<MetalFragment>();
+        else if(dto.type == "old_book") item = std::make_unique<OldBook>();
+        else if(dto.type == "rock") item = std::make_unique<Rock>();
+        else if(dto.type == "strange_idol") item = std::make_unique<StrangeIdol>();
+        else throw std::runtime_error("unknown item type: " + dto.type);
+
+        for(const auto& mod : dto.modifiers) {
+            if(mod == "strong") item = std::make_unique<StrongModifier>(std::move(item));
+            else if(mod == "mystic") item = std::make_unique<MysticModifier>(std::move(item));
+            else if(mod == "unlucky") item = std::make_unique<UnluckyModifier>(std::move(item));
+            else throw std::runtime_error("unknown modifier: " + mod);
+        }
+        return item;
+    }
+
+    std::unique_ptr<Enemy> make_enemy(const EnemyDto& dto) {
+        return std::make_unique<Enemy>(
+            dto.name, dto.r, dto.c, dto.atk, dto.armor, dto.hp, dto.species, nullptr, dto.max_hp
+        );
+    }
+}
+
+GameModel::GameModel(const GameStateDto& dto) : 
+    capabilities{dto.capabilities.can_move, dto.capabilities.has_items, 
+        dto.capabilities.has_currency, dto.capabilities.has_enemies} 
+{
+    for(const auto& r : dto.board) {
+        std::vector<Cell> a;
+        for(const auto& c : r) {
+            std::vector<std::unique_ptr<Item>> items;
+            for(const auto& i : c.items) {
+                items.push_back(make_item(i));
+            }
+            a.emplace_back(c.wall, std::move(items));
+        } 
+        board.push_back(std::move(a));
+    }
+
+    enemy_map.assign(ROWS, std::vector<int>(COLS, -1));
+    int idx = 0;
+    for(const auto& edto : dto.enemies) {
+        enemies.push_back(make_enemy(edto));
+        enemy_map[edto.r][edto.c] = idx++;
+    }
+
+    player_map.assign(ROWS, std::vector<int>(COLS, -1));
+    for(const auto& [id, pdto] : dto.players) {
+        players.emplace(id, Player(pdto.name, pdto.r, pdto.c, pdto.hp, pdto.max_hp, pdto.str, pdto.dex, pdto.lck, pdto.agr, pdto.wis));
+        auto& p = players.at(id);
+        p.set_gold(pdto.gold);
+        p.set_coins(pdto.coins);
+
+        for(const auto& i : pdto.inventory) {
+            p.add_item(make_item(i));
+        }
+
+        if(pdto.left_hand) {
+            p.set_left_hand(make_item(*pdto.left_hand));
+        }
+        if(pdto.right_hand) {
+            p.set_right_hand(make_item(*pdto.right_hand));
+        }
+        if(pdto.both_hands) {
+            p.set_both_hands(make_item(*pdto.both_hands));
+        }
+
+        player_map[pdto.r][pdto.c] = id;
+    }
+
+    battles = dto.battles;
+}
 
 GameModel::GameModel(BuildResult&& res) : 
     enemies(std::move(res.enemies)),
@@ -13,7 +121,7 @@ GameModel::GameModel(BuildResult&& res) :
     {
     enemy_map.assign(ROWS, std::vector<int>(COLS, -1));
     int idx = 0;
-    for(auto& e : enemies) {
+    for(const auto& e : enemies) {
         enemy_map[e->get_r()][e->get_c()] = idx++;
     }
     player_map.assign(ROWS, std::vector<int>(COLS, -1));
@@ -389,8 +497,16 @@ const std::vector<std::vector<Cell>>& GameModel::get_board() const {
     return board;
 }
 
+const std::map<int, Player>& GameModel::get_players() const {
+    return players;
+}
+
 const std::vector<std::unique_ptr<Enemy>>& GameModel::get_enemies() const {
     return enemies;
+}
+
+const std::map<int, int>& GameModel::get_battles() const {
+    return battles;
 }
 
 PlayerCapabilities GameModel::get_capabilities() const {

@@ -1,7 +1,8 @@
 #pragma once
 
 #include <string>
-#include <memory>   
+#include <memory>
+#include <vector>
 
 class Player;
 class Attack;
@@ -14,6 +15,9 @@ public:
     Item(std::string s);
     virtual ~Item() = default;
     
+    virtual std::string type_label() const;
+    virtual std::vector<std::string> get_modifiers() const;
+
     virtual std::string get_name() const;
     virtual std::string get_info() const;
     
