@@ -1,41 +1,39 @@
 #include "game.h"
-#include "tcp_server.h"
 
 #include <cstdlib>
 #include <filesystem>
 #include <iostream>
 
-void tcp_test() {
-    TcpServer server(5555);
-
-    server.on_connect = [&](int fd) {
-        std::cout << "client " << fd << " connected\n";
-        server.send(fd, "welcome " + std::to_string(fd) + "\n");
-    };
-
-    server.on_message = [&](int fd, std::string msg) {
-        std::cout << "[" << fd << "] " << msg << "\n";
-        server.broadcast(std::to_string(fd) + ": " + msg + "\n");
-    };
-
-    server.on_disconnect = [&](int fd) {
-        std::cout << "client " << fd << " disconnected\n";
-    };
-
-    std::cout << "listening\n";
-    server.run();
-    std::cout << "server stopped\n";
+[[noreturn]] void usage(std::string name) {
+    std::cerr << std::format("USAGE: {} <mode> <options>\n", name);
+    std::exit(EXIT_FAILURE);
 }
 
 int main(int argc, char* argv[]) {
-    std::filesystem::path config_path = "config.ini";
-    if(argc > 1) {
-        config_path = argv[1];
-    }
-
     Game g;
-    g.run(config_path);
-    // tcp_test();
+    if(argc >= 2 && std::string(argv[1]) == "--server") {
+        int port = 5555;
+        if(argc >= 3) {
+            port = std::stoi(argv[2]);
+        }
+        
+        g.run_server(port);
+    } else if(argc >= 2 && std::string(argv[1]) == "--client") {
+        std::string ip = "127.0.0.1", port = "5555";
+        if(argc >= 3) {
+            std::string a = argv[2];
+            auto colon = a.find(':');
+            if(colon != std::string::npos) {
+                ip = a.substr(0, colon); 
+                port = a.substr(colon + 1);
+            } else {
+                ip = a;
+            }
+        }
+        g.run_client(ip, port, "config.ini");
+    } else {
+        usage(std::string(argv[0]));
+    }
 
     return EXIT_SUCCESS;
 }

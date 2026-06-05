@@ -22,9 +22,8 @@ class GameModel {
 
     std::vector<std::vector<int>> enemy_map;
     std::vector<std::vector<int>> player_map;
-
-    GameModel(const GameStateDto& dto);
 public:
+    GameModel(const GameStateDto& dto);
     GameModel(BuildResult&& res);
 
     void player_try_move(int player_id, std::string direction);

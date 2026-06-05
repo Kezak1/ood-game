@@ -1,5 +1,7 @@
 #include "metal_theme_factory.h"
+#include "axe.h"
 #include "enemy.h"
+#include "great_sword.h"
 #include "human.h"
 #include "layout_strategy.h"
 #include "metal_layout.h"
@@ -22,11 +24,17 @@ std::unique_ptr<LayoutStrategy> MetalThemeFactory::create_layout() const {
 
 std::vector<std::unique_ptr<Item>> MetalThemeFactory::create_item_pool() const {
     std::vector<std::unique_ptr<Item>> res;
-    for(int i = 0; i < 25; i++) {
+    for(int i = 0; i < 15; i++) {
         res.push_back(std::make_unique<MetalFragment>());
     }
     for(int i = 0; i < 4; i++) {
         res.push_back(std::make_unique<Rock>());
+    }
+    for(int i = 0; i < 5; i++) {
+        res.push_back(std::make_unique<GreatSword>());
+    }
+    for(int i = 0; i < 5; i++) {
+        res.push_back(std::make_unique<Axe>());
     }
 
     return res;

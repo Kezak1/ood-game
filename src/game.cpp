@@ -2,7 +2,6 @@
 
 #include "game_model.h"
 #include "console_view.h"
-#include "controller.h"
 #include "event_bus.h"
 #include "log_event_visitor.h"
 #include "file_logger.h"
@@ -10,6 +9,8 @@
 #include "library_theme_factory.h"
 #include "metal_theme_factory.h"
 #include "vault_theme_factory.h"
+#include "game_server.h"
+#include "client_controller.h"
 
 #include <exception>
 #include <filesystem>
@@ -46,7 +47,7 @@ BuildResult Game::init_dungeon(View& view, Logger& logger) {
     return res;
 }
 
-void Game::run(std::filesystem::path config_path) {
+void Game::run_client(std::string ip, std::string port, std::filesystem::path config_path) {
     try {
         GameConfig config = load_game_config(config_path);
         
@@ -56,9 +57,26 @@ void Game::run(std::filesystem::path config_path) {
         EventBus::instance().subscribe(event_logger);
         
         ConsoleView view(logger);
-        GameModel model(init_dungeon(view, logger));
-        Controller c(model, view, config.player_name, logger.get_path());
+        
+        ClientController c(view, logger, config.player_name, logger.get_path(), ip, port);
         c.loop();
+    } catch(const std::exception& e) {
+        std::cerr << "ERROR: " << e.what() << std::endl;
+    }
+}
+
+void Game::run_server(int port) {
+    try {
+        FileLogger logger("server_logs", "server");
+        LogEventVisitor event_logger(logger);
+
+        EventBus::instance().subscribe(event_logger);
+        
+        ConsoleView view(logger);
+        GameModel model(init_dungeon(view, logger));
+        
+        GameServer sv(model, logger, port);
+        sv.run();
     } catch(const std::exception& e) {
         std::cerr << "ERROR: " << e.what() << std::endl;
     }

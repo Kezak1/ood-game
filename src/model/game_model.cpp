@@ -70,13 +70,14 @@ GameModel::GameModel(const GameStateDto& dto) :
 {
     for(const auto& r : dto.board) {
         std::vector<Cell> a;
-        for(const auto& c : r) {
-            std::vector<std::unique_ptr<Item>> items;
-            for(const auto& i : c.items) {
-                items.push_back(make_item(i));
+        for (const auto& c : r) {
+            Cell cell;
+            cell.set_wall(c.wall);
+            for (const auto& i : c.items) {
+                cell.add_item(make_item(i));
             }
-            a.emplace_back(c.wall, std::move(items));
-        } 
+            a.push_back(std::move(cell));
+        }
         board.push_back(std::move(a));
     }
 
@@ -147,11 +148,11 @@ void GameModel::player_try_move(int player_id, std::string direction) {
     int nc = p.get_c() + dc[i];
 
     if(board[nr][nc].is_wall()) {
-        EventBus::instance().publish(WallHitEvent(direction));
+        EventBus::instance().publish(WallHitEvent(p.get_name(), direction));
         return;
     }
     if(player_map[nr][nc] > 0) {
-        //TO DO some event
+        EventBus::instance().publish(PlayerCollisionEvent(p.get_name()));
         return;
     }
 
@@ -160,7 +161,7 @@ void GameModel::player_try_move(int player_id, std::string direction) {
     p.set_c(nc);
     player_map[p.get_r()][p.get_c()] = player_id;
 
-    EventBus::instance().publish(PlayerMoveEvent(direction));
+    EventBus::instance().publish(PlayerMoveEvent(p.get_name(), direction));
 }
 
 void GameModel::player_try_drop_item(int player_id, int idx) {
@@ -185,7 +186,7 @@ void GameModel::player_try_drop_item(int player_id, int idx) {
         return;
     }
 
-    EventBus::instance().publish(ItemDropEvent(item_name));
+    EventBus::instance().publish(ItemDropEvent(p.get_name(), item_name));
 }
 
 void GameModel::player_try_pick_up_item(int player_id, int idx) {
@@ -223,7 +224,7 @@ void GameModel::player_try_pick_up_item(int player_id, int idx) {
         return;
     }
 
-    EventBus::instance().publish(ItemPickUpEvent(item_name));
+    EventBus::instance().publish(ItemPickUpEvent(p.get_name(), item_name));
 }
 
 void GameModel::player_try_equip_item(int player_id, int idx) {
@@ -249,7 +250,7 @@ void GameModel::player_try_equip_item(int player_id, int idx) {
         return;
     }
 
-    EventBus::instance().publish(ItemEquipEvent(item_name));
+    EventBus::instance().publish(ItemEquipEvent(p.get_name(), item_name));
 }
 
 void GameModel::player_try_unequip_item(int player_id, std::string hand) {
@@ -289,7 +290,7 @@ void GameModel::player_try_unequip_item(int player_id, std::string hand) {
         return;
     }
 
-    EventBus::instance().publish(ItemUnequipEvent(item_name));
+    EventBus::instance().publish(ItemUnequipEvent(p.get_name(), item_name));
 }
 
 bool GameModel::player_try_start_battle(int player_id) {
@@ -304,7 +305,7 @@ bool GameModel::player_try_start_battle(int player_id) {
     }
 
     battles[player_id] = enemy_idx;
-    EventBus::instance().publish(BattleStartEvent(enemies[enemy_idx]->get_name()));
+    EventBus::instance().publish(BattleStartEvent(players.at(player_id).get_name(), enemies[enemy_idx]->get_name()));
     return true;
 }
 
@@ -318,12 +319,12 @@ RoundResult GameModel::battle_round(int player_id, const Item& item, const Attac
     e->take_dmg(item.attack(p, attack));
     int dealt = prev_hp - e->get_hp();
 
-    EventBus::instance().publish(AttackEvent("Player", e->get_name(), dealt));
+    EventBus::instance().publish(AttackEvent(p.get_name(), e->get_name(), dealt));
 
     res.player_dmg_dealt = dealt;
 
     if(e->is_dead()) {
-        EventBus::instance().publish(EnemyDefeatEvent(e->get_name(), e->get_species()));
+        EventBus::instance().publish(EnemyDefeatEvent(p.get_name(), e->get_name(), e->get_species()));
         res.enemy_died = true;
         end_battle(player_id);
         kill_enemy(enemy_idx);
@@ -336,12 +337,12 @@ RoundResult GameModel::battle_round(int player_id, const Item& item, const Attac
     dealt = std::max(1, e->get_attack() - defense / 4);
     p.take_dmg(dealt);
 
-    EventBus::instance().publish(AttackEvent(e->get_name(), "Player", dealt)); 
+    EventBus::instance().publish(AttackEvent(e->get_name(), p.get_name(), dealt)); 
 
     res.enemy_dmg_dealt = dealt;
 
     if(p.is_dead()) {
-        EventBus::instance().publish(PlayerDefeatEvent(e->get_name()));
+        EventBus::instance().publish(PlayerDefeatEvent(p.get_name(), e->get_name()));
         res.player_died = true;
         end_battle(player_id);
     }
@@ -354,7 +355,7 @@ void GameModel::player_give_up(int player_id) {
     auto& p = players.at(player_id);
     p.take_dmg(p.get_hp());
     end_battle(player_id);
-    EventBus::instance().publish(PlayerDefeatEvent(enemies[enemy_idx]->get_name()));
+    EventBus::instance().publish(PlayerDefeatEvent(p.get_name(), enemies[enemy_idx]->get_name()));
 }
 
 bool GameModel::is_player_in_battle(int player_id) const {

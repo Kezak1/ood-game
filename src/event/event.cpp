@@ -1,42 +1,48 @@
 #include "event.h"
 
-PlayerMoveEvent::PlayerMoveEvent(std::string direction) : direction(direction) {}
+PlayerMoveEvent::PlayerMoveEvent(std::string player_name, std::string direction) : player_name(player_name), direction(direction) {}
 
 void PlayerMoveEvent::accept(EventVisitor& visitor) const {
     visitor.visit(*this);
 }
 
-WallHitEvent::WallHitEvent(std::string direction) : direction(direction) {}
+WallHitEvent::WallHitEvent(std::string player_name, std::string direction) : player_name(player_name), direction(direction) {}
 
 void WallHitEvent::accept(EventVisitor& visitor) const {
     visitor.visit(*this);
 }
 
-ItemPickUpEvent::ItemPickUpEvent(std::string item_name) : item_name(item_name) {}
+PlayerCollisionEvent::PlayerCollisionEvent(std::string player_name) : player_name(player_name) {}
+
+void PlayerCollisionEvent::accept(EventVisitor& visitor) const {
+    visitor.visit(*this);
+}
+
+ItemPickUpEvent::ItemPickUpEvent(std::string player_name, std::string item_name) : player_name(player_name), item_name(item_name) {}
 
 void ItemPickUpEvent::accept(EventVisitor& visitor) const {
     visitor.visit(*this);
 }
 
-ItemDropEvent::ItemDropEvent(std::string item_name) : item_name(item_name) {}
+ItemDropEvent::ItemDropEvent(std::string player_name, std::string item_name) : player_name(player_name), item_name(item_name) {}
 
 void ItemDropEvent::accept(EventVisitor& visitor) const {
     visitor.visit(*this);
 }
 
-ItemEquipEvent::ItemEquipEvent(std::string item_name) : item_name(item_name) {}
+ItemEquipEvent::ItemEquipEvent(std::string player_name, std::string item_name) : player_name(player_name), item_name(item_name) {}
 
 void ItemEquipEvent::accept(EventVisitor& visitor) const {
     visitor.visit(*this);
 }
 
-ItemUnequipEvent::ItemUnequipEvent(std::string item_name) : item_name(item_name) {}
+ItemUnequipEvent::ItemUnequipEvent(std::string player_name, std::string item_name) : player_name(player_name), item_name(item_name) {}
 
 void ItemUnequipEvent::accept(EventVisitor& visitor) const {
     visitor.visit(*this);
 }
 
-BattleStartEvent::BattleStartEvent(std::string enemy_name) : enemy_name(enemy_name) {}
+BattleStartEvent::BattleStartEvent(std::string player_name, std::string enemy_name) : player_name(player_name), enemy_name(enemy_name) {}
 
 void BattleStartEvent::accept(EventVisitor& visitor) const {
     visitor.visit(*this);
@@ -48,13 +54,13 @@ void AttackEvent::accept(EventVisitor& visitor) const {
     visitor.visit(*this);
 }
 
-EnemyDefeatEvent::EnemyDefeatEvent(std::string enemy_name, std::string species) : enemy_name(enemy_name), species(species) {}
+EnemyDefeatEvent::EnemyDefeatEvent(std::string player_name, std::string enemy_name, std::string species) : player_name(player_name), enemy_name(enemy_name), species(species) {}
 
 void EnemyDefeatEvent::accept(EventVisitor& visitor) const {
     visitor.visit(*this);
 }
 
-PlayerDefeatEvent::PlayerDefeatEvent(std::string enemy_name) : enemy_name(enemy_name) {}
+PlayerDefeatEvent::PlayerDefeatEvent(std::string player_name, std::string enemy_name) : player_name(player_name), enemy_name(enemy_name) {}
 
 void PlayerDefeatEvent::accept(EventVisitor& visitor) const {
     visitor.visit(*this);

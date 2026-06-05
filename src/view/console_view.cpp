@@ -18,7 +18,7 @@ namespace {
     // inline constexpr auto C_PLAYER = "¶";
     inline constexpr auto C_ITEMS = "*";
     inline constexpr auto C_ENEMY = "@";
-    inline constexpr int MAX_LOG_DISPLAY = 74;
+    inline constexpr int MAX_LOG_DISPLAY = 70;
 
     void full_clear() {
         std::cout << "\033[2J\033[H";

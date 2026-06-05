@@ -8,6 +8,8 @@
 using nlohmann::json;
 
 namespace {
+    inline constexpr int MAX_LOG_LINES = 50;
+
     ItemDto item_to_dto(const Item& item) {
         return { item.type_label() , item.get_modifiers() };
     }
@@ -130,8 +132,10 @@ GameStateDto to_dto(const GameModel& model, const Logger& logger) {
     const auto cap = model.get_capabilities();
     dto.capabilities = {cap.can_move, cap.has_items, cap.has_currency, cap.has_enemies};
     
+    // limits log for limiting size of dto but if player is afk too long, then he will miss some of the logs
     const auto& entries = logger.all();
-    for(int i = 0; i < (int)entries.size(); i++) {
+    int start = std::max(0, (int)entries.size() - MAX_LOG_LINES);
+    for(int i = start; i < (int)entries.size(); i++) {
         dto.log_all.push_back({i, entries[i].msg});
     }
 

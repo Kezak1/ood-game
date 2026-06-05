@@ -7,6 +7,7 @@
 
 struct PlayerMoveEvent;
 struct WallHitEvent;
+struct PlayerCollisionEvent;
 struct ItemPickUpEvent;
 struct ItemDropEvent;
 struct ItemEquipEvent;
@@ -25,6 +26,7 @@ public:
 
     virtual void visit(const PlayerMoveEvent&) = 0;
     virtual void visit(const WallHitEvent&) = 0;
+    virtual void visit(const PlayerCollisionEvent&) = 0;
     virtual void visit(const ItemPickUpEvent&) = 0;
     virtual void visit(const ItemDropEvent&) = 0;
     virtual void visit(const ItemEquipEvent&) = 0;
@@ -45,44 +47,57 @@ public:
 };
 
 struct PlayerMoveEvent : public Event { 
+    std::string player_name;
     std::string direction;
-    PlayerMoveEvent(std::string direction);
+    PlayerMoveEvent(std::string player_name, std::string direction);
     void accept(EventVisitor&) const override;
 };
 
 struct WallHitEvent : public Event {
+    std::string player_name;
     std::string direction;
-    WallHitEvent(std::string direction);
+    WallHitEvent(std::string player_name, std::string direction);
+    void accept(EventVisitor&) const override;
+};
+
+struct PlayerCollisionEvent : public Event {
+    std::string player_name;
+    PlayerCollisionEvent(std::string player_name);
     void accept(EventVisitor&) const override;
 };
 
 struct ItemPickUpEvent : public Event {
+    std::string player_name;
     std::string item_name;
-    ItemPickUpEvent(std::string item_name);
+    ItemPickUpEvent(std::string player_name, std::string item_name);
     void accept(EventVisitor&) const override;
 };
 
 struct ItemDropEvent : public Event {
+    std::string player_name;
     std::string item_name;
-    ItemDropEvent(std::string item_name);
+    ItemDropEvent(std::string player_name, std::string item_name);
     void accept(EventVisitor&) const override;
 };
 
 struct ItemEquipEvent : public Event {
+    std::string player_name;
     std::string item_name;
-    ItemEquipEvent(std::string item_name);
+    ItemEquipEvent(std::string player_name, std::string item_name);
     void accept(EventVisitor&) const override;
 };
 
 struct ItemUnequipEvent : public Event {
+    std::string player_name;
     std::string item_name;
-    ItemUnequipEvent(std::string item_name);
+    ItemUnequipEvent(std::string player_name, std::string item_name);
     void accept(EventVisitor&) const override;
 };
 
 struct BattleStartEvent : public Event {
+    std::string player_name;
     std::string enemy_name;
-    BattleStartEvent(std::string enemy_name);
+    BattleStartEvent(std::string player_name, std::string enemy_name);
     void accept(EventVisitor&) const override;
 };
 
@@ -96,15 +111,17 @@ struct AttackEvent : public Event {
 };
 
 struct EnemyDefeatEvent : public Event {
+    std::string player_name;
     std::string enemy_name;
     std::string species;
-    EnemyDefeatEvent(std::string enemy_name, std::string species);
+    EnemyDefeatEvent(std::string player_name, std::string enemy_name, std::string species);
     void accept(EventVisitor&) const override;
 };
 
 struct PlayerDefeatEvent : public Event {
+    std::string player_name;
     std::string enemy_name;
-    PlayerDefeatEvent(std::string enemy_name);
+    PlayerDefeatEvent(std::string player_name, std::string enemy_name);
     void accept(EventVisitor&) const override;
 };
 

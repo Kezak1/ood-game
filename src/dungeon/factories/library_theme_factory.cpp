@@ -8,6 +8,7 @@
 #include "mystic_modifier.h"
 #include "unlucky_modifier.h"
 #include "goblin.h"
+#include "staff.h"
 
 #include <memory>
 #include <vector>
@@ -25,9 +26,27 @@ std::vector<std::unique_ptr<Item>> LibraryThemeFactory::create_item_pool() const
     int rand = next_random(0, 9);
     for(int i = 0; i < 10; i++) {        
         if(i >= rand) {
-            res.push_back(std::make_unique<MysticModifier>(std::make_unique<OldBook>()));
+            auto item = std::make_unique<OldBook>();
+            if(next_random(0, 1)) {
+                res.push_back(std::move(item));
+            } else {
+                res.push_back(std::make_unique<MysticModifier>(std::move(item)));
+            }
         } else {
-            res.push_back(std::make_unique<UnluckyModifier>(std::make_unique<StrangeIdol>()));
+            auto item = std::make_unique<StrangeIdol>();
+            if(next_random(0, 1)) {
+                res.push_back(std::move(item));
+            } else {
+                res.push_back(std::make_unique<UnluckyModifier>(std::move(item)));
+            }
+        }
+    }
+    for(int i = 0; i < 10; i++) {
+        auto item = std::make_unique<Staff>();
+        if(!next_random(0, 9)) {
+            res.push_back(std::make_unique<MysticModifier>(std::move(item)));
+        } else {
+            res.push_back(std::move(item));
         }
     }
 

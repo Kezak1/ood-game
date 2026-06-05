@@ -1,7 +1,11 @@
 #include "vault_theme_factory.h"
+#include "dagger.h"
+#include "great_sword.h"
 #include "layout_strategy.h"
 #include "lucky_coin_pouch.h"
 #include "skeleton.h"
+#include "strong_modifier.h"
+#include "unlucky_modifier.h"
 #include "vault_layout.h"
 #include "utils.h"
 #include "gold.h"
@@ -27,6 +31,18 @@ std::vector<std::unique_ptr<Item>> VaultThemeFactory::create_item_pool() const {
         } else {
             res.push_back(std::make_unique<Coin>());
         }
+    }
+    for(int i = 0; i < 10; i++) {
+        if(!next_random(0, 4)) {
+            auto item = std::make_unique<Dagger>();
+            if(!next_random(0, 4)) {
+                res.push_back(std::make_unique<StrongModifier>(std::make_unique<UnluckyModifier>(std::move(item))));
+            } else {
+                res.push_back(std::move(item));
+            }
+        } else {
+            res.push_back(std::make_unique<GreatSword>());
+        }    
     }
     return res;
 }

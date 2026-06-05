@@ -4,8 +4,6 @@
 #include <string>
 #include <functional>
 
-struct ClientState;
-
 class TcpServer {
     int listen_fd = -1;
     int epoll_fd = -1;
@@ -32,4 +30,5 @@ private:
     void add_client(int fd);
     void remove_client(int fd);
     void handle_client(int fd);
+    void flush_client(int fd);
 };

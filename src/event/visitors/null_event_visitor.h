@@ -6,6 +6,7 @@ class NullEventVisitor : public EventVisitor {
 public:
     void visit(const PlayerMoveEvent&) override {};
     void visit(const WallHitEvent&) override {};
+    void visit(const PlayerCollisionEvent&) override {};
     void visit(const ItemPickUpEvent&) override {};
     void visit(const ItemDropEvent&) override {};
     void visit(const ItemEquipEvent&) override {};
