@@ -13,20 +13,23 @@ rpg game - uni project
     cmake --build build
     ```
 3. **Run:**
+    
+    to start as server (default port is `5555`)
     ```bash
-    ./build/rpg
+    ./build/rpg --server [port]
     ```
-    or
+    
+    to start as client (default ip:port is `[127.0.0.1:5555]`)
     ```bash
-    ./build/rpg <your_config_file_path>
+    ./build/rpg --client [ip:port]
     ```
 
-    **note:** the game loads `config.ini` as default
+    **note:** the game loads `config.ini`
 
 ## Instruction
 1. **Icons**:
     - Wall (`██`)
-    - Player (`¶ `)
+    - Player ( e.g `3 `)
     - Enemy (` @`)
     - Item(s) on the ground (`* `)
 2. **Controls:**
