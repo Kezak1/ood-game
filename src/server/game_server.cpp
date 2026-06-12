@@ -62,7 +62,6 @@ void GameServer::handle_message(int fd, std::string msg) {
         model.enemies_take_turn();
     } catch(const std::exception& e) {
         std::cerr << "dropped bad message: " << e.what() << '\n';
-        return;
     }
     broadcast_state();
 }

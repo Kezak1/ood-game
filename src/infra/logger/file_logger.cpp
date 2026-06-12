@@ -28,10 +28,10 @@ std::string format_log_entry(const LogEntry& entry) {
 }
 
 
-std::filesystem::path make_unique_path(const std::filesystem::path& dir, const std::string& player_name) {
+std::filesystem::path make_unique_path(const std::filesystem::path& dir, const std::string& name) {
     std::filesystem::create_directories(dir);
     
-    std::string base = player_name + "_" + timestamp_for_file();
+    std::string base = name + "_" + timestamp_for_file();
     std::filesystem::path path = dir / (base + ".log");
     
     int suffix = 1;
@@ -44,11 +44,11 @@ std::filesystem::path make_unique_path(const std::filesystem::path& dir, const s
 }
 
 
-FileLogger::FileLogger(std::filesystem::path dir, std::string player_name) : path(make_unique_path(dir, player_name)), file(path, std::ios::app) {
+FileLogger::FileLogger(std::filesystem::path dir, std::string name) : path(make_unique_path(dir, name)), file(path, std::ios::app) {
     if(!file) {
         throw std::runtime_error(std::format("cannot open log file '{}'", path.string()));
     }
-    log(std::format("Game started - player_name: {}", player_name));
+    log(std::format("hello {}", name));
 }
 
 void FileLogger::log(std::string msg) {

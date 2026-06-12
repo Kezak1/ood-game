@@ -32,6 +32,7 @@ class ClientController {
     bool do_work = true;
 
     std::vector<std::unique_ptr<ActionHandler>> handlers;
+    std::optional<std::string> pending_hand;
 public:
     ~ClientController();
     ClientController(View& view, Logger& logger, std::string player_name, std::filesystem::path log_path, std::string ip, std::string port);
@@ -42,6 +43,6 @@ private:
     void apply_message(const std::string& line);
     void apply_state(const GameStateDto& dto);
     void send_command(const Command& cmd);
-    void await_state();
-    void run_battle();
+    void handle_battle_key(char k);
+    void redraw_battle();
 };

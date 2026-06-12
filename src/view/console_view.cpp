@@ -71,18 +71,6 @@ namespace {
             tcsetattr(STDIN_FILENO, TCSANOW,&t);
         }
     }
-
-    void enter_battle_screen() {
-        enter_alt_terminal();
-        set_raw_mode(false);
-        unhide_cursor();
-    }
-
-    void exit_battle_screen() {
-        exit_alt_terminal();
-        set_raw_mode(true);
-        hide_cursor();
-    }
 }
 
 ConsoleView::ConsoleView(Logger& l) : logger(l) {
@@ -111,9 +99,9 @@ void ConsoleView::handle_mode_change(bool battle) {
         return;
     }
     if(battle) {
-        enter_battle_screen();
+        enter_alt_terminal();
     } else {
-        exit_battle_screen();
+        exit_alt_terminal();
     }
     in_battle_screen = battle;
 }

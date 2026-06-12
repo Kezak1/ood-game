@@ -71,7 +71,7 @@ HandleResult InventoryHandler::handle(const GameModel& model, int player_id, Vie
                 return {true};
             }
             auto idx = get_idx(view, "Enter index which item to pick up (to cancel write 'cancel'): ");
-            if(idx == std::nullopt) {
+            if(!idx) {
                 return {true};
             }
             return {true, std::make_unique<PickUpCommand>(*idx)};
@@ -81,7 +81,7 @@ HandleResult InventoryHandler::handle(const GameModel& model, int player_id, Vie
                 return {true};
             }
             auto idx = get_idx(view, "Enter index of item to drop it from inventory (to cancel write 'cancel'): ");
-            if(idx == std::nullopt) {
+            if(!idx) {
                 return {true};
             }
             return {true, std::make_unique<DropCommand>(*idx)};

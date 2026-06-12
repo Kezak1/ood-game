@@ -91,14 +91,6 @@ void ClientController::loop() {
     
     view.clear();
     while(do_work) {
-        if(model && id >= 0 && model->is_player_in_battle(id)) {
-            run_battle();
-            if(model->player(id).is_dead()) {
-                break;
-            }
-            continue;
-        }
-
         int nfds = epoll_wait(epoll_fd, events, MAX_EVENTS, -1);
         if(nfds < 0) {
             if(errno == EINTR) {
@@ -111,7 +103,7 @@ void ClientController::loop() {
             int fd = events[i].data.fd;
 
             if(fd == tcp_client.get_fd()) {
-                model_dto = std::nullopt;
+                model_dto.reset();
                 if(!tcp_client.read_available()) {
                     do_work = false;
                     break;
@@ -141,6 +133,11 @@ void ClientController::handle_stdin() {
         return;
     }
     char k = std::tolower(view.read_key());
+
+    if(model->is_player_in_battle(id)) {
+        handle_battle_key(k);
+        return;
+    }
     
     HandleResult res;
     
@@ -188,7 +185,7 @@ void ClientController::apply_state(const GameStateDto& dto) {
     }
     model = std::make_unique<GameModel>(dto);
     if(id >= 0) {
-        view.render(*model, id);
+        redraw_battle();
     }
 }
 
@@ -196,43 +193,70 @@ void ClientController::send_command(const Command& cmd) {
     tcp_client.send(cmd.to_json().dump() + "\n");
 }
 
-void ClientController::await_state() {
-    model_dto = std::nullopt;
-    while(!model_dto && do_work) {
-        if(!tcp_client.read_available()) {
-            do_work = false;
+void ClientController::handle_battle_key(char k) {
+    if(k == 'g') {
+        send_command(GiveUpCommand());
+        pending_hand.reset();
+        return;
+    }
+
+    if(!pending_hand) {
+        std::string hand = auto_choose_hand(model->player(id));
+        if(!hand.empty()) {
+            pending_hand = hand;
+        } else {
+            switch(k) {
+                case 'l':
+                    pending_hand = "left";
+                    break;
+                case 'r':
+                    pending_hand = "right";
+                    break;
+                case 'b':
+                    pending_hand = "both";
+                    break;                    
+            }
+            redraw_battle();
             return;
         }
     }
-    if(id >= 0) {
-        apply_state(*model_dto);
-        model_dto = std::nullopt;
+
+    std::string attack;
+    switch(k) {
+        case 'n':
+            attack = "normal";
+            break;
+        case 's':
+            attack = "stealth";
+            break;
+        case 'm':
+            attack = "magical";
+            break;
+        default:
+            redraw_battle();
+            break;
     }
+
+    send_command(BattleRoundCommand(*pending_hand, attack));
+    pending_hand.reset();
 }
 
-void ClientController::run_battle() {
-    while(model->is_player_in_battle(id)) {
-        view.render(*model, id);
+void ClientController::redraw_battle() {
+    if(!model || id < 0) {
+        return;
+    }
 
-        std::string hand = auto_choose_hand(model->player(id));
-        if(hand.empty()) {
-            hand = view.ask("Choose hand 'left'/'right'/'both' (or 'give up'): ");
-            if(hand == "give up") {
-                send_command(GiveUpCommand());
-                await_state();
-                break;
-            }
+    if(!model->is_player_in_battle(id)) {
+        pending_hand.reset();
+    }
+
+    view.render(*model, id);
+    if(model->is_player_in_battle(id)) {
+        if(!pending_hand && auto_choose_hand(model->player(id)).empty()) {
+            view.tell("hand: (l)eft | (r)ight | (b)oth | (g)ive up");
+        } else {
+            view.tell("attack: (n)ormal | (s)tealth | (m)agical | (g)ive up");
         }
-
-        std::string attack = view.ask("Choose attack 'normal'/'stealth'/'magical' (or 'give up'): ");
-        if(attack == "give up") {
-            send_command(GiveUpCommand());
-            await_state();
-            break;
-        }
-
-        send_command(BattleRoundCommand(hand, attack));
-        await_state();
     }
 }
 
